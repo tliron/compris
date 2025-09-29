@@ -47,9 +47,6 @@ pub mod hints;
 /// Iterate key-value pairs.
 pub mod kv;
 
-/// Merging.
-pub mod merge;
-
 /// Normal types.
 pub mod normal;
 

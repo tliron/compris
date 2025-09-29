@@ -1,7 +1,4 @@
-use {
-    super::super::annotate::*,
-    crate::{impl_normal, impl_normal_basic},
-};
+use super::{super::annotate::*, macros::*};
 
 use {
     duplicate::*,
@@ -70,18 +67,22 @@ impl<AnnotatedT> AsRef<[u8]> for Blob<AnnotatedT> {
     }
 }
 
-#[duplicate_item(
-  ToNormalT;
-  [Vec<u8>];
-  [&'static [u8]];
-)]
-impl<AnnotatedT> From<ToNormalT> for Blob<AnnotatedT>
+impl<AnnotatedT> From<&'static [u8]> for Blob<AnnotatedT>
 where
     AnnotatedT: Default,
 {
-    fn from(bytes: ToNormalT) -> Self {
-        let bytes: Bytes = bytes.into();
+    fn from(bytes: &'static [u8]) -> Self {
+        let bytes = Bytes::from_static(bytes);
         Blob::from(bytes)
+    }
+}
+
+impl<AnnotatedT> From<Vec<u8>> for Blob<AnnotatedT>
+where
+    AnnotatedT: Default,
+{
+    fn from(bytes: Vec<u8>) -> Self {
+        Blob::from(Bytes::from(bytes))
     }
 }
 

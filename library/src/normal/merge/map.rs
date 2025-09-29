@@ -1,4 +1,8 @@
-use super::{super::normal::*, error::*, mode::*};
+use super::{
+    super::{map::*, variant::*},
+    error::*,
+    mode::*,
+};
 
 use {kutil::std::error::*, std::fmt};
 

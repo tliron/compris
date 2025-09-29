@@ -1,4 +1,4 @@
-use super::{super::annotate::*, variant::*};
+use super::{super::super::annotate::*, variant::*};
 
 use {
     kutil::cli::depict::*,
@@ -13,33 +13,35 @@ where
         AnnotatedT::can_have_annotations()
     }
 
-    fn get_annotations(&self) -> Option<&Annotations> {
+    // TODO: rename to annotations, annotations_mut
+
+    fn annotations(&self) -> Option<&Annotations> {
         match self {
             Self::Undefined => None,
-            Self::Null(null) => null.get_annotations(),
-            Self::Integer(integer) => integer.get_annotations(),
-            Self::UnsignedInteger(unsigned_integer) => unsigned_integer.get_annotations(),
-            Self::Float(float) => float.get_annotations(),
-            Self::Boolean(boolean) => boolean.get_annotations(),
-            Self::Text(text) => text.get_annotations(),
-            Self::Blob(blob) => blob.get_annotations(),
-            Self::List(list) => list.get_annotations(),
-            Self::Map(map) => map.get_annotations(),
+            Self::Null(null) => null.annotations(),
+            Self::Integer(integer) => integer.annotations(),
+            Self::UnsignedInteger(unsigned_integer) => unsigned_integer.annotations(),
+            Self::Float(float) => float.annotations(),
+            Self::Boolean(boolean) => boolean.annotations(),
+            Self::Text(text) => text.annotations(),
+            Self::Blob(blob) => blob.annotations(),
+            Self::List(list) => list.annotations(),
+            Self::Map(map) => map.annotations(),
         }
     }
 
-    fn get_annotations_mut(&mut self) -> Option<&mut Annotations> {
+    fn annotations_mut(&mut self) -> Option<&mut Annotations> {
         match self {
             Self::Undefined => None,
-            Self::Null(null) => null.get_annotations_mut(),
-            Self::Integer(integer) => integer.get_annotations_mut(),
-            Self::UnsignedInteger(unsigned_integer) => unsigned_integer.get_annotations_mut(),
-            Self::Float(float) => float.get_annotations_mut(),
-            Self::Boolean(boolean) => boolean.get_annotations_mut(),
-            Self::Text(text) => text.get_annotations_mut(),
-            Self::Blob(blob) => blob.get_annotations_mut(),
-            Self::List(list) => list.get_annotations_mut(),
-            Self::Map(map) => map.get_annotations_mut(),
+            Self::Null(null) => null.annotations_mut(),
+            Self::Integer(integer) => integer.annotations_mut(),
+            Self::UnsignedInteger(unsigned_integer) => unsigned_integer.annotations_mut(),
+            Self::Float(float) => float.annotations_mut(),
+            Self::Boolean(boolean) => boolean.annotations_mut(),
+            Self::Text(text) => text.annotations_mut(),
+            Self::Blob(blob) => blob.annotations_mut(),
+            Self::List(list) => list.annotations_mut(),
+            Self::Map(map) => map.annotations_mut(),
         }
     }
 }
@@ -245,7 +247,7 @@ impl<AnnotatedT> Hash for Variant<AnnotatedT> {
 impl<AnnotatedT> fmt::Display for Variant<AnnotatedT> {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Undefined => fmt::Display::fmt("nothing", formatter),
+            Self::Undefined => fmt::Display::fmt("Undefined", formatter),
             Self::Null(null) => fmt::Display::fmt(null, formatter),
             Self::Integer(integer) => fmt::Display::fmt(integer, formatter),
             Self::UnsignedInteger(unsigned_integer) => fmt::Display::fmt(unsigned_integer, formatter),

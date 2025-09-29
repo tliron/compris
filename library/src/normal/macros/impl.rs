@@ -85,7 +85,7 @@ macro_rules! impl_normal_basic (
                 let new_self = $type::from(self.inner);
                 if AnnotatedT::can_have_annotations()
                     && NewAnnotationsT::can_have_annotations()
-                    && let Some(annotations) = self.annotated.get_annotations()
+                    && let Some(annotations) = self.annotated.annotations()
                 {
                     new_self.with_annotations(annotations.clone())
                 } else {
@@ -95,3 +95,6 @@ macro_rules! impl_normal_basic (
         }
     }
 );
+
+#[allow(unused_imports)]
+pub use {impl_normal, impl_normal_basic};
