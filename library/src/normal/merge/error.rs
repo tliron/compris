@@ -1,4 +1,4 @@
-use super::super::normal::*;
+use super::super::variant::*;
 
 use std::{error::*, fmt};
 

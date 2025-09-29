@@ -11,7 +11,7 @@ repository = "https://github.com/tliron/compris"
 documentation = "https://docs.rs/compris"
 authors = ["Tal Liron"]
 
-readme = "../../README.md"
+readme = "../README.md"
 
 categories = [
     "data-structures",
@@ -21,8 +21,8 @@ categories = [
 keywords = ["cps"]
 
 [dependencies]
-anstream = "0.6.20"
-clap = { version = "4.5.48", features = ["derive"] }
+anstream = "0.6.21"
+clap = { version = "4.5.49", features = ["derive"] }
 clap_complete_command = "0.6.1"
 kutil = { version = "=0.0.1", features = ["cli", "clap"] }
 compris = { version = "=0.0.7", features = ["serde"] }

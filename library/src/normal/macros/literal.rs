@@ -67,3 +67,6 @@ macro_rules! normal_vec (
         vec![ $( $crate::normal!( $value ) ),* ]
     );
 );
+
+#[allow(unused_imports)]
+pub use {normal, normal_list, normal_map, normal_vec, with_annotations, without_annotations};

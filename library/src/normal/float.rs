@@ -1,7 +1,4 @@
-use {
-    super::super::annotate::*,
-    crate::{impl_normal, impl_normal_basic},
-};
+use super::{super::annotate::*, macros::*};
 
 use {
     duplicate::*,
@@ -33,7 +30,7 @@ impl<AnnotatedT> Depict for Float<AnnotatedT> {
         context.separate(writer)?;
 
         if context.get_format() == DepictionFormat::Compact {
-            context.theme.write_number(writer, self.inner)
+            write!(writer, "{}", context.theme.number(format!("{:?}", self.inner)))
         } else {
             write!(writer, "{} {}", context.theme.number(self.inner), context.theme.meta("f64"))
         }
@@ -49,15 +46,15 @@ impl<AnnotatedT> fmt::Display for Float<AnnotatedT> {
 // Conversions
 
 #[duplicate_item(
-  ToNormalT;
+  FromT;
   [f64];
   [f32];
 )]
-impl<AnnotatedT> From<ToNormalT> for Float<AnnotatedT>
+impl<AnnotatedT> From<FromT> for Float<AnnotatedT>
 where
     AnnotatedT: Default,
 {
-    fn from(float: ToNormalT) -> Self {
+    fn from(float: FromT) -> Self {
         let float: OrderedFloat<_> = (float as f64).into();
         Self::from(float)
     }

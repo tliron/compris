@@ -1,7 +1,4 @@
-use {
-    super::super::annotate::*,
-    crate::{impl_normal, impl_normal_basic},
-};
+use super::{super::annotate::*, macros::*};
 
 use {
     duplicate::*,
@@ -46,17 +43,17 @@ impl<AnnotatedT> fmt::Display for UnsignedInteger<AnnotatedT> {
 // Conversion
 
 #[duplicate_item(
-  ToNormalT;
+  FromT;
   [u32];
   [u16];
   [u8];
   [usize];
 )]
-impl<AnnotatedT> From<ToNormalT> for UnsignedInteger<AnnotatedT>
+impl<AnnotatedT> From<FromT> for UnsignedInteger<AnnotatedT>
 where
     AnnotatedT: Default,
 {
-    fn from(unsigned_integer: ToNormalT) -> Self {
+    fn from(unsigned_integer: FromT) -> Self {
         Self::from(unsigned_integer as u64)
     }
 }

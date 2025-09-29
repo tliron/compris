@@ -1,12 +1,10 @@
-use {
-    super::{
-        super::{annotate::*, kv::*},
-        depict::*,
-        errors::*,
-        list::*,
-        variant::*,
-    },
-    crate::impl_normal,
+use super::{
+    super::{annotate::*, kv::*},
+    depict::*,
+    errors::*,
+    list::*,
+    macros::*,
+    variant::*,
 };
 
 use {
@@ -39,6 +37,14 @@ impl<AnnotatedT> Map<AnnotatedT> {
         self.inner.get(&key.into())
     }
 
+    /// Get.
+    pub fn into_get_mut<KeyT>(&mut self, key: KeyT) -> Option<&mut Variant<AnnotatedT>>
+    where
+        KeyT: Into<Variant<AnnotatedT>>,
+    {
+        self.inner.get_mut(&key.into())
+    }
+
     /// Insert.
     pub fn into_insert<KeyT, ValueT>(&mut self, key: KeyT, value: ValueT) -> Option<Variant<AnnotatedT>>
     where
@@ -46,6 +52,14 @@ impl<AnnotatedT> Map<AnnotatedT> {
         ValueT: Into<Variant<AnnotatedT>>,
     {
         self.inner.insert(key.into(), value.into())
+    }
+
+    /// Remove.
+    pub fn into_remove<KeyT>(&mut self, key: KeyT) -> Option<Variant<AnnotatedT>>
+    where
+        KeyT: Into<Variant<AnnotatedT>>,
+    {
+        self.inner.remove(&key.into())
     }
 
     /// True if any of the map keys is a collection.
@@ -62,6 +76,14 @@ impl<AnnotatedT> Map<AnnotatedT> {
     pub fn to_key_value_pair(&self) -> Option<(&Variant<AnnotatedT>, &Variant<AnnotatedT>)> {
         match self.inner.len() {
             1 => return self.inner.iter().next(),
+            _ => None,
+        }
+    }
+
+    /// If the map has *only* one key then returns the key-value tuple.
+    pub fn into_key_value_pair(self) -> Option<(Variant<AnnotatedT>, Variant<AnnotatedT>)> {
+        match self.inner.len() {
+            1 => return self.inner.into_iter().next(),
             _ => None,
         }
     }
@@ -86,7 +108,7 @@ impl<AnnotatedT> Map<AnnotatedT> {
             self.into_vector().into_iter().map(|(key, value)| (key.into_annotated(), value.into_annotated())).collect();
         if AnnotatedT::can_have_annotations()
             && NewAnnotationsT::can_have_annotations()
-            && let Some(annotations) = self.annotated.get_annotations()
+            && let Some(annotations) = self.annotated.annotations()
         {
             new_map.with_annotations(annotations.clone())
         } else {
