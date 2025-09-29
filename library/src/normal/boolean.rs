@@ -1,7 +1,4 @@
-use {
-    super::super::annotate::*,
-    crate::{impl_normal, impl_normal_basic},
-};
+use super::{super::annotate::*, macros::*};
 
 use {
     kutil::cli::depict::*,

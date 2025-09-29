@@ -18,23 +18,6 @@ mod variant;
 
 #[allow(unused_imports)]
 pub use {
-    crate::{
-        normal, normal_list, normal_map, normal_vec, traverse, traverse_mut, with_annotations, without_annotations,
-    },
-    blob::*,
-    boolean::*,
-    conversions::*,
-    delegated::*,
-    depict::*,
-    errors::*,
-    float::*,
-    integer::*,
-    iterator::*,
-    list::*,
-    map::*,
-    null::*,
-    text::*,
-    traversal::*,
-    unsigned_integer::*,
-    variant::*,
+    blob::*, boolean::*, conversions::*, delegated::*, depict::*, errors::*, float::*, integer::*, iterator::*,
+    list::*, macros::*, map::*, null::*, text::*, traversal::*, unsigned_integer::*, variant::*,
 };
