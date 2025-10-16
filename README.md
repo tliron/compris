@@ -20,7 +20,7 @@ See [here](https://github.com/tliron/compris/blob/main/CPS.md) for a full descri
 
 Compris is pronounced "com-PREE". The name comes from shortening CompositePrimitiveSchema to ComPriS.
 
-Get started with the [API documentation](https://docs.rs/compris/latest/compris/) and the [examples](https://github.com/tliron/compris/tree/main/crates/library/examples).
+Get started with the [API documentation](https://docs.rs/compris/latest/compris/) and the [examples](https://github.com/tliron/compris/tree/main/library/examples).
 
 J'ai compris!
 
@@ -48,14 +48,14 @@ The normal variant type serves as an equivalent to the "any-type" variables that
 
 Each normal variant can also include "annotations", including the source filename and span in the file (row and column), which can be used for citing textual sources (YAML, JSON, and XML). This allows Compris to provide very detailed error messages for higher-level grammars, IDEs, etc. The annotations feature is enabled via a generic parameter to avoid paying for it when not needed.
 
-[Example](https://github.com/tliron/compris/blob/main/crates/library/examples/parse.rs).
+[Example](https://github.com/tliron/compris/blob/main/library/examples/parse.rs).
 
 Path Traversal
 --------------
 
 Included are ergonomic facilities for accessing nested variants by path and for presenting paths in a human-readable format.
 
-[Example](https://github.com/tliron/compris/blob/main/crates/library/examples/traverse.rs).
+[Example](https://github.com/tliron/compris/blob/main/library/examples/traverse.rs).
 
 Resolving
 ---------
@@ -64,7 +64,7 @@ Compris can convert (we call this "resolve") the normal types to your own custom
 
 The API is simple but extensible, making use of a `#[derive(Resolve)]` procedural macro (with the `derive` feature) that generates the resolving code for your structs and enums while also allowing you to implement your own semantics and validations. This feature is designed to serve as a foundation for sophisticated CPS-based syntax parsers.
 
-[Basic example](https://github.com/tliron/compris/blob/main/crates/library/examples/resolve_basic.rs), [enum example](https://github.com/tliron/compris/blob/main/crates/library/examples/resolve_enum.rs), [advanced example](https://github.com/tliron/compris/blob/main/crates/library/examples/resolve_advanced.rs).
+[Basic example](https://github.com/tliron/compris/blob/main/library/examples/resolve_basic.rs), [enum example](https://github.com/tliron/compris/blob/main/library/examples/resolve_enum.rs), [advanced example](https://github.com/tliron/compris/blob/main/library/examples/resolve_advanced.rs).
 
 > Does the resolve feature sound a bit like Serde deserialization? At its simplest, they both provide the same result (and Compris does support Serde, too; see below). However, resolve is far more straightforward and efficient in that it is designed for CPS. Per type, you only need to implement one function in one trait. Furthermore, it allows for accumulating annotated errors (instead of always failing on the first error, like Serde), as well as configurable handling of nulls and undeclared fields.
 
@@ -79,7 +79,7 @@ Serialization modes are useful for optimizing or fixing your data for limited (o
 
 This general-purpose serialization API can be used with any Rust type that supports Serde's `Serialize` trait, not only Compris normal types. It is thus useful if your program needs to serialize to a range of different formats and you would rather use a single crate with a single API.
 
-[Example](https://github.com/tliron/compris/blob/main/crates/library/examples/serialize.rs).
+[Example](https://github.com/tliron/compris/blob/main/library/examples/serialize.rs).
 
 Serde Deserialization
 ---------------------
@@ -90,7 +90,7 @@ However, there is a twist, as this is internally done in two phases. Compris *fi
 
 For example, if you want to feed a `Deserialize` type with data, but don't want to have to through a representation format and a parser, then you can model the data using Compris normal types. The "resolve" feature (see above) can do this, too, and should generally be more efficient than going through Serde, but if you're using types that already support Serde `Deserialize` then this will "just work".
 
-[Example](https://github.com/tliron/compris/blob/main/crates/library/examples/deserialize.rs).
+[Example](https://github.com/tliron/compris/blob/main/library/examples/deserialize.rs).
 
 CLI Tool
 --------
