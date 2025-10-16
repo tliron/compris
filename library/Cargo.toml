@@ -3,7 +3,7 @@ edition = "2024"
 
 name = "compris"
 description = "Composite Primitive Schema (CPS) for Rust"
-version = "0.0.9"
+version = "0.0.10"
 rust-version = "1.90"
 
 license = "MIT OR Apache-2.0"
@@ -96,5 +96,4 @@ required-features = ["serde", "serde/derive"]
 # https://stackoverflow.com/a/61417700
 [package.metadata.docs.rs]
 all-features = true
-features = ["read-url/async"]
 rustdoc-args = ["--cfg", "docsrs"]

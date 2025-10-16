@@ -3,7 +3,7 @@ edition = "2024"
 
 name = "compris-cli"
 description = "Query and convert Composite Primitive Schema (CPS) formats"
-version = "0.0.9"
+version = "0.0.10"
 rust-version = "1.90"
 
 license = "MIT OR Apache-2.0"
@@ -25,7 +25,7 @@ anstream = "0.6.21"
 clap = { version = "4.5.49", features = ["derive"] }
 clap_complete_command = "0.6.1"
 kutil = { version = "=0.0.2", features = ["cli", "clap"] }
-compris = { version = "=0.0.9", features = ["serde"] }
+compris = { version = "=0.0.10", features = ["serde"] }
 read-url = { version = "=0.0.9", default-features = false, features = [
     "blocking",
 ] }
