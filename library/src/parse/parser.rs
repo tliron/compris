@@ -100,6 +100,7 @@ impl Parser {
     }
 
     /// Parses into a [Variant] according to [Parser::format].
+    #[allow(unused_variables)]
     pub fn parse_reader<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, ParseError>
     where
         ReadT: io::Read,
@@ -133,6 +134,14 @@ impl Parser {
             )))]
             _ => Err(ParseError::UnsupportedFormat(self.format.clone())),
         }
+    }
+
+    /// Parses into a [Variant] according to [Parser::format].
+    pub fn parse_bytes<AnnotatedT>(&self, bytes: &[u8]) -> Result<Variant<AnnotatedT>, ParseError>
+    where
+        AnnotatedT: Annotated + Clone + Default,
+    {
+        self.parse_reader(&mut io::Cursor::new(bytes))
     }
 
     /// Parses into a [Variant] according to [Parser::format].

@@ -23,6 +23,8 @@ pub struct IncompatibleVariantTypeError<AnnotatedT> {
     pub annotated: AnnotatedT,
 }
 
+impl_annotated!(IncompatibleVariantTypeError);
+
 impl<AnnotatedT> IncompatibleVariantTypeError<AnnotatedT> {
     /// Constructor.
     pub fn new(type_name: String, expected_type_names: Vec<String>) -> Self
@@ -43,19 +45,19 @@ impl<AnnotatedT> IncompatibleVariantTypeError<AnnotatedT> {
         )
         .with_annotations_from(variant)
     }
+}
 
-    /// Into different [Annotated] implementation.
-    pub fn into_annotated<NewAnnotationsT>(self) -> IncompatibleVariantTypeError<NewAnnotationsT>
-    where
-        AnnotatedT: Annotated,
-        NewAnnotationsT: Annotated + Default,
-    {
+impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<IncompatibleVariantTypeError<NewAnnotatedT>>
+    for IncompatibleVariantTypeError<AnnotatedT>
+where
+    AnnotatedT: Annotated,
+    NewAnnotatedT: Annotated + Default,
+{
+    fn into_annotated(self) -> IncompatibleVariantTypeError<NewAnnotatedT> {
         IncompatibleVariantTypeError::new(self.type_name, self.expected_type_names)
             .with_annotations_from(&self.annotated)
     }
 }
-
-impl_annotated!(IncompatibleVariantTypeError);
 
 impl<AnnotatedT> Depict for IncompatibleVariantTypeError<AnnotatedT> {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>

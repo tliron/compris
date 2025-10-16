@@ -1,3 +1,5 @@
+use super::{input_format::*, output_format::*};
+
 use {
     clap::{builder::*, *},
     kutil::cli::clap::*,
@@ -7,7 +9,7 @@ use {
 // https://docs.rs/clap/latest/clap/_derive/index.html
 
 //
-// CLI
+// Root
 //
 
 /// Query and convert Composite Primitive Schema (CPS) formats
@@ -19,9 +21,10 @@ use {
     disable_help_flag = true,
     disable_help_subcommand = true,
     disable_version_flag = true,
+    arg_required_else_help = true,
     styles = clap_styles())
 ]
-pub struct CLI {
+pub struct Root {
     #[command(subcommand)]
     pub subcommand: Option<SubCommand>,
 
@@ -62,7 +65,8 @@ pub struct CLI {
     pub output_path: Option<PathBuf>,
 
     /// output format;
-    /// when absent will be set to input format
+    /// when absent will attempt to select according to output file extension;
+    /// otherwise will output a debug depiction
     #[arg(long = "format", short = 'f', verbatim_doc_comment, value_enum)]
     pub output_format: Option<OutputFormat>,
 
@@ -97,49 +101,6 @@ pub struct CLI {
     /// show this help
     #[arg(long, short = 'h', action = ArgAction::Help)]
     pub help: Option<bool>,
-}
-
-//
-// InputFormat
-//
-
-#[derive(Clone, ValueEnum)]
-pub enum InputFormat {
-    YAML,
-    JSON,
-    XJSON,
-    XML,
-    CBOR,
-    #[value(name = "messagepack")]
-    MessagePack,
-}
-
-impl ToString for InputFormat {
-    fn to_string(&self) -> String {
-        self.to_possible_value().expect("to_possible_value").get_name().into()
-    }
-}
-
-//
-// OutputFormat
-//
-
-#[derive(Clone, ValueEnum)]
-pub enum OutputFormat {
-    YAML,
-    JSON,
-    XJSON,
-    XML,
-    CBOR,
-    #[value(name = "messagepack")]
-    MessagePack,
-    Debug,
-}
-
-impl ToString for OutputFormat {
-    fn to_string(&self) -> String {
-        self.to_possible_value().expect("to_possible_value").get_name().into()
-    }
 }
 
 //

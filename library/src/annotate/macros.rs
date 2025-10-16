@@ -1,8 +1,8 @@
 /// Helper macro for implementing [Annotated](super::annotated::Annotated).
 #[macro_export]
-macro_rules! impl_annotated (
+macro_rules! impl_annotated {
     ( $type:ident $(,)? ) => {
-        $crate::impl_annotated!( $type, annotated );
+        $crate::impl_annotated!($type, annotated);
     };
 
     ( $type:ident, $field:ident $(,)? ) => {
@@ -22,14 +22,14 @@ macro_rules! impl_annotated (
                 self.$field.annotations_mut()
             }
         }
-    }
-);
+    };
+}
 
 /// Helper macro for implementing [DynAnnotatedError](super::errors::DynAnnotatedError).
 #[macro_export]
-macro_rules! impl_dyn_annotated_error (
+macro_rules! impl_dyn_annotated_error {
     ( $type:ident $(,)? ) => {
-        $crate::impl_dyn_annotated_error!( $type, annotated );
+        $crate::impl_dyn_annotated_error!($type, annotated);
     };
 
     ( $type:ident, $field:ident $(,)? ) => {
@@ -39,8 +39,7 @@ macro_rules! impl_dyn_annotated_error (
             /// Captured.
             pub fn captured(self) -> $crate::annotate::CapturedAnnotatedError
             where
-                AnnotatedT:
-                    'static
+                AnnotatedT: 'static
                     + $crate::annotate::Annotated
                     + ::std::fmt::Debug
                     + ::std::marker::Send
@@ -50,31 +49,22 @@ macro_rules! impl_dyn_annotated_error (
             }
         }
 
-        impl<AnnotatedT> $crate::annotate::DynAnnotatedError for $type<AnnotatedT>
-        where
-            AnnotatedT:
-                $crate::annotate::Annotated
-                + ::std::fmt::Debug
-                + ::std::marker::Send
-                + ::std::marker::Sync,
+        impl<AnnotatedT> $crate::annotate::DynAnnotatedError for $type<AnnotatedT> where
+            AnnotatedT: $crate::annotate::Annotated + ::std::fmt::Debug + ::std::marker::Send + ::std::marker::Sync
         {
         }
 
         impl<AnnotatedT> Into<$crate::annotate::CapturedAnnotatedError> for $type<AnnotatedT>
         where
             AnnotatedT:
-                'static
-                + $crate::annotate::Annotated
-                + ::std::fmt::Debug
-                + ::std::marker::Send
-                + ::std::marker::Sync,
+                'static + $crate::annotate::Annotated + ::std::fmt::Debug + ::std::marker::Send + ::std::marker::Sync,
         {
             fn into(self) -> $crate::annotate::CapturedAnnotatedError {
                 self.captured()
             }
         }
-    }
-);
+    };
+}
 
 #[allow(unused_imports)]
 pub use {impl_annotated, impl_dyn_annotated_error};

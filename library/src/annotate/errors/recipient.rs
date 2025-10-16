@@ -1,4 +1,4 @@
-use super::super::{annotated::*, annotations::*, r#struct::*};
+use super::super::{annotations::*, r#struct::*, traits::*};
 
 use kutil::std::error::*;
 

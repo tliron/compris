@@ -38,14 +38,4 @@ pub enum MainError {
     Url(#[from] UrlError),
 }
 
-impl RunError for MainError {
-    fn handle(&self) -> (bool, u8) {
-        (
-            false,
-            match self {
-                MainError::Exit(exit) => exit.code,
-                _ => 1,
-            },
-        )
-    }
-}
+handle_exit_error!(MainError, Exit);

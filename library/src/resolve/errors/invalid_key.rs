@@ -17,23 +17,24 @@ pub struct InvalidKeyError<AnnotatedT> {
     pub key: Variant<AnnotatedT>,
 }
 
+impl_annotated!(InvalidKeyError, key);
+
 impl<AnnotatedT> InvalidKeyError<AnnotatedT> {
     /// Constructor.
     pub fn new(key: Variant<AnnotatedT>) -> Self {
         Self { key }
     }
+}
 
-    /// Into different [Annotated] implementation.
-    pub fn into_annotated<NewAnnotationsT>(self) -> InvalidKeyError<NewAnnotationsT>
-    where
-        AnnotatedT: Annotated,
-        NewAnnotationsT: Annotated + Default,
-    {
+impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<InvalidKeyError<NewAnnotatedT>> for InvalidKeyError<AnnotatedT>
+where
+    AnnotatedT: Annotated,
+    NewAnnotatedT: Annotated + Default,
+{
+    fn into_annotated(self) -> InvalidKeyError<NewAnnotatedT> {
         InvalidKeyError::new(self.key.into_annotated())
     }
 }
-
-impl_annotated!(InvalidKeyError, key);
 
 impl<AnnotatedT> Depict for InvalidKeyError<AnnotatedT> {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>

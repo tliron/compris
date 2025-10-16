@@ -1,41 +1,41 @@
-use thiserror::*;
+use {std::fmt, thiserror::*};
 
 //
-// CborError
+// CborWriteError
 //
-
-use std::{fmt, string};
 
 /// CBOR write error.
 #[derive(Debug, Error)]
-pub struct CborWriteError {
-    borc: Option<borc::errors::EncodeError>,
-    custom: string::String,
+pub enum CborWriteError {
+    /// Encode error.
+    EncodeError(borc::errors::EncodeError),
+
+    /// Custom error.
+    Custom(String),
 }
 
 impl fmt::Display for CborWriteError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self.borc {
-            Some(borc) => write!(formatter, "{:?}", borc),
-            None => fmt::Display::fmt(&self.custom, formatter),
+        match self {
+            Self::EncodeError(encode_error) => write!(formatter, "{:?}", encode_error),
+            Self::Custom(custom) => fmt::Display::fmt(&custom, formatter),
         }
     }
 }
 
 impl serde::ser::Error for CborWriteError {
-    fn custom<DisplayableT>(msg: DisplayableT) -> Self
+    fn custom<DisplayableT>(custom: DisplayableT) -> Self
     where
         DisplayableT: fmt::Display,
     {
-        Self { borc: None, custom: format!("{}", msg) }
+        Self::Custom(format!("{}", custom))
     }
 }
 
 // Conversions
 
-#[cfg(feature = "cbor")]
 impl From<borc::errors::EncodeError> for CborWriteError {
     fn from(encode_error: borc::errors::EncodeError) -> Self {
-        Self { borc: Some(encode_error), custom: Default::default() }
+        Self::EncodeError(encode_error)
     }
 }

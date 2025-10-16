@@ -15,7 +15,7 @@ pub fn main() {
         normal_map![(normal_map![("complex_key", "complex_value")], 123456)]
     ];
 
-    // "print_depiction" writes to anstream::stdout
+    // "print_default_depiction" writes to anstream::stdout
 
     utils::heading("print_default_depiction", true);
     variant.print_default_depiction();
@@ -33,20 +33,20 @@ pub fn main() {
     utils::heading("print_plain_depiction", false);
     variant.print_plain_depiction();
 
-    // Also "write_debug" to any io::Write
+    // Also "write_default_depiction" to any io::Write
 
     utils::heading("write_default_depiction", false);
     let mut writer = anstream::stdout();
     variant.write_default_depiction(&mut writer).expect("write_default_depiction");
 
-    // You can also capture the debug output into a string
+    // We can also capture the depiction into a string
 
     let string = variant.to_plain_depiction().expect("to_plain_depiction");
     utils::heading("to_plain_depiction", false);
     println!("{}", string);
 
-    // This was all just to show you that Compris normal types support the Depict trait
+    // This was all just to show you that Compris normal types support the Depict trait!
 
-    // Learn more about it, including how to roll your own Depict, in kutil:
-    // https://github.com/tliron/rust-kutil
+    // Learn more about it, including how to roll your own Depict, in Kutil:
+    // https://github.com/tliron/kutil
 }

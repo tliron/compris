@@ -1,7 +1,7 @@
 mod utils;
 
 use {
-    anstream::println,
+    anstream::{println, stdout},
     compris::{ser::*, *},
     serde::Serialize,
 };
@@ -25,7 +25,7 @@ pub fn main() {
     // Note: "pretty" for CBOR just means adding a newline at the end
 
     utils::heading("CBOR", true);
-    Serializer::new(Format::CBOR).with_base64(true).with_pretty(true).print(&variant).expect("print");
+    Serializer::new(Format::CBOR).with_base64(true).with_pretty(true).write(&variant, &mut stdout()).expect("write");
 
     // While CBOR and MessagePack support 100% of CPS, YAML and JSON do not,
     // and so we need to attach a "serialization mode" to the value, which may make some
@@ -39,29 +39,22 @@ pub fn main() {
     // in order to conform to JSON's requirement that keys be strings
 
     utils::heading("JSON", false);
-    Serializer::new(Format::JSON)
-        .with_pretty(true)
-        .print_modal(&variant, &SerializationMode::for_json())
-        .expect("print");
+    Serializer::new(Format::JSON).with_pretty(true).write_modal(&variant, &mut stdout()).expect("write_modal");
 
     // Serialize to string
 
-    let string =
-        Serializer::new(Format::JSON).stringify_modal(&variant, &SerializationMode::for_json()).expect("print");
+    let string = Serializer::new(Format::JSON).stringify_modal(&variant).expect("stringify_modal");
 
     utils::heading("JSON stringify", false);
     println!("{}", string);
 
-    // Below, Format::XJSON functions as just an alias for Format::JSON
+    // Below, Format::XJSON functions like Format::JSON
     // The actual difference is in the serialization mode
-    // In the case of XJSON, the "compromise" is that the resulting JSON may include type hints
+    // In the case of XJSON, the compromise is that the resulting JSON may include type hints
     // It's still true JSON, but readers would need to know what to do with the hints
 
     utils::heading("XJSON", false);
-    Serializer::new(Format::XJSON)
-        .with_pretty(true)
-        .print_modal(&variant, &SerializationMode::for_xjson())
-        .expect("print");
+    Serializer::new(Format::XJSON).with_pretty(true).write_modal(&variant, &mut stdout()).expect("write_modal");
 
     // Finally, let's just prove that the Compris serializer can serialize anything, not
     // just normal types
@@ -72,5 +65,5 @@ pub fn main() {
     let user = User { name: "Tal".into(), enabled: true };
 
     utils::heading("YAML", false);
-    Serializer::new(Format::YAML).with_pretty(true).print(&user).expect("print");
+    Serializer::new(Format::YAML).with_pretty(true).write(&user, &mut stdout()).expect("write");
 }

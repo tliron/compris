@@ -1,20 +1,14 @@
 mod annotate;
-mod annotated;
 mod annotations;
+mod containers;
 mod depict;
-mod dyn_annotated;
 mod errors;
-mod label;
-mod location;
 mod macros;
 mod maybe;
-mod span;
 mod r#struct;
-mod with;
-mod without;
+mod traits;
 
 #[allow(unused_imports)]
 pub use {
-    annotate::*, annotated::*, annotations::*, depict::*, dyn_annotated::*, errors::*, label::*, location::*,
-    macros::*, maybe::*, span::*, r#struct::*, with::*, without::*,
+    annotate::*, annotations::*, containers::*, depict::*, errors::*, macros::*, maybe::*, r#struct::*, traits::*,
 };

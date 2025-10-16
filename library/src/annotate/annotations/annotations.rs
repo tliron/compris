@@ -1,4 +1,4 @@
-use super::{super::path::*, label::*, span::*};
+use super::{super::super::path::*, label::*, span::*};
 
 use {
     kutil::{cli::depict::*, std::immutable::*},

@@ -17,23 +17,25 @@ pub struct MissingRequiredKeyError<AnnotatedT> {
     pub key: Variant<AnnotatedT>,
 }
 
+impl_annotated!(MissingRequiredKeyError, key);
+
 impl<AnnotatedT> MissingRequiredKeyError<AnnotatedT> {
     /// Constructor.
     pub fn new(key: Variant<AnnotatedT>) -> Self {
         Self { key }
     }
+}
 
-    /// Into different [Annotated] implementation.
-    pub fn into_annotated<NewAnnotationsT>(self) -> MissingRequiredKeyError<NewAnnotationsT>
-    where
-        AnnotatedT: Annotated,
-        NewAnnotationsT: Annotated + Default,
-    {
+impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<MissingRequiredKeyError<NewAnnotatedT>>
+    for MissingRequiredKeyError<AnnotatedT>
+where
+    AnnotatedT: Annotated,
+    NewAnnotatedT: Annotated + Default,
+{
+    fn into_annotated(self) -> MissingRequiredKeyError<NewAnnotatedT> {
         MissingRequiredKeyError::new(self.key.into_annotated())
     }
 }
-
-impl_annotated!(MissingRequiredKeyError, key);
 
 impl<AnnotatedT> Depict for MissingRequiredKeyError<AnnotatedT> {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>

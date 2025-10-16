@@ -1,32 +1,36 @@
 /// Cast to a [Variant](super::super::Variant) with
 /// [Annotations](super::super::super::annotate::Annotations).
 #[macro_export]
-macro_rules! with_annotations (
+macro_rules! with_annotations {
     () => ( $crate::normal::Variant::Nothing<$crate::annotate::WithAnnotations> );
 
     ( $value:expr $(,)? ) => ( ($value) as $crate::normal::Variant<$crate::annotate::WithAnnotations> );
-);
+}
 
 /// Cast to a [Variant](super::super::Variant) without
 /// [Annotations](super::super::super::annotate::Annotations).
 #[macro_export]
-macro_rules! without_annotations (
+macro_rules! without_annotations {
     () => ( $crate::normal::Variant::Nothing<$crate::annotate::WithoutAnnotations> );
 
     ( $value:expr $(,)? ) => ( ($value) as $crate::normal::Variant<$crate::annotate::WithoutAnnotations> );
-);
+}
 
 /// Creates a [Variant](super::super::Variant) from a bare primitive expression.
 #[macro_export]
-macro_rules! normal (
-    () => ( $crate::normal::Variant::Nothing );
+macro_rules! normal {
+    () => {
+        $crate::normal::Variant::Nothing
+    };
 
-    ( $value:expr $(,)? ) => ( $crate::normal::Variant::from($value) );
-);
+    ( $value:expr $(,)? ) => {
+        $crate::normal::Variant::from($value)
+    };
+}
 
 /// Creates a [Variant::List](super::super::Variant::List) from a sequence of bare primitive expressions.
 #[macro_export]
-macro_rules! normal_list (
+macro_rules! normal_list {
     () => (
         $crate::normal::Variant::List(
             $crate::normal::List::default()
@@ -40,11 +44,11 @@ macro_rules! normal_list (
             )
         )
     );
-);
+}
 
 /// Creates a [Variant::Map](super::super::Variant::Map) from a sequence of key-value tuples.
 #[macro_export]
-macro_rules! normal_map (
+macro_rules! normal_map {
     () => (
         $crate::normal::Variant::Map(
             $crate::normal::Map::default()
@@ -58,15 +62,15 @@ macro_rules! normal_map (
             )
         )
     );
-);
+}
 
 /// Creates a [Vec]<[Variant](super::super::Variant)> from a sequence of bare primitive expressions.
 #[macro_export]
-macro_rules! normal_vec (
+macro_rules! normal_vec {
     ( $( $value:expr ),* $(,)? ) => (
         vec![ $( $crate::normal!( $value ) ),* ]
     );
-);
+}
 
 #[allow(unused_imports)]
 pub use {normal, normal_list, normal_map, normal_vec, with_annotations, without_annotations};

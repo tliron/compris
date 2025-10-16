@@ -1,4 +1,4 @@
-use super::{super::path::*, annotations::*, label::*, maybe::*, span::*, r#struct::*};
+use super::super::{super::path::*, annotations::*, maybe::*, r#struct::*};
 
 use kutil::std::immutable::*;
 

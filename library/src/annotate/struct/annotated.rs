@@ -1,13 +1,4 @@
-use super::annotations::*;
-
-use kutil::std::{collections::*, immutable::*};
-
-//
-// StructAnnotations
-//
-
-/// Struct [Annotations].
-pub type StructAnnotations = FastHashMap<ByteString, Annotations>;
+use super::super::annotations::*;
 
 //
 // AnnotatedStruct

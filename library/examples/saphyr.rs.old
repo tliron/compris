@@ -1,0 +1,18 @@
+// https://github.com/bourumir-wyngs/serde-saphyr/issues/7
+
+use {serde_saphyr::*, std::collections::*};
+
+pub fn main() {
+    let mut map1 = HashMap::new();
+    map1.insert("key1", "value1");
+    let mut map2 = HashMap::new();
+    map2.insert("key2", map1);
+    let mut map3 = HashMap::new();
+    map3.insert("key3", map2);
+    let mut map4 = HashMap::new();
+    map4.insert("key4", map3);
+
+    let mut string = String::default();
+    to_writer(&mut string, &map4).unwrap();
+    print!("{}", string);
+}

@@ -30,7 +30,7 @@ pub enum SerializeError {
     /// YAML.
     #[cfg(feature = "yaml")]
     #[error("YAML: {0}")]
-    YAML(#[from] serde_yml::Error),
+    YAML(#[from] serde_norway::Error),
 
     /// JSON.
     #[cfg(feature = "json")]

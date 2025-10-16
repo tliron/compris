@@ -1,4 +1,4 @@
-use super::super::dyn_annotated::*;
+use super::super::traits::*;
 
 use {kutil::cli::depict::*, std::error::*};
 

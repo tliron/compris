@@ -10,6 +10,8 @@ use kutil::std::error::*;
 pub trait Resolve<ResolvedT, AnnotatedT>: Sized {
     /// Resolve one type into another.
     ///
+    /// A lot like [TryFrom], except that we can accumulate potentially annotated errors.
+    ///
     /// Errors can be reported as usual by [Err] *but also* by the [ErrorRecipient]. Callers should
     /// thus check that `errors` is empty even when the function returns [Ok].
     ///
@@ -19,6 +21,8 @@ pub trait Resolve<ResolvedT, AnnotatedT>: Sized {
         ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>;
 
     /// Resolve one type into another.
+    ///
+    /// A lot like [TryFrom], except that we can accumulate potentially annotated errors.
     ///
     /// Unlike [resolve](Resolve::resolve) will fail on the first encountered error and will return
     /// [ResolveError::Missing] instead of [None].

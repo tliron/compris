@@ -11,11 +11,13 @@ impl Serializer {
     ) -> Result<(), SerializeError>
     where
         WriteT: io::Write,
-        SerializableT: Serialize + ?Sized,
+        SerializableT: Serialize,
     {
-        // TODO: Broken for complex keys
-        let config = serde_yml::ser::SerializerConfig { tag_unit_variants: true };
-        let mut serializer = serde_yml::Serializer::new_with_config(writer, config);
+        // TODO: serde_yml is broken for complex keys
+        let mut serializer = serde_norway::Serializer::new(writer);
         Ok(value.serialize(&mut serializer)?)
+
+        // Ok(serde_saphyr::to_writer(&mut writer.as_fmt_write(), value)
+        //     .map_err(|error| SerializeError::YAML(error.to_string()))?)
     }
 }

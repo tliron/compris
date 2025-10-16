@@ -298,42 +298,6 @@ impl<AnnotatedT> Variant<AnnotatedT> {
         }
     }
 
-    /// Remove all [Annotations] recursively.
-    pub fn without_annotations(self) -> Variant<WithoutAnnotations> {
-        match self {
-            Self::Undefined => Variant::Undefined,
-            Self::Null(null) => Variant::Null(null.without_annotations()),
-            Self::Integer(integer) => Variant::Integer(integer.without_annotations()),
-            Self::UnsignedInteger(unsigned_integer) => Variant::UnsignedInteger(unsigned_integer.without_annotations()),
-            Self::Float(float) => Variant::Float(float.without_annotations()),
-            Self::Boolean(boolean) => Variant::Boolean(boolean.without_annotations()),
-            Self::Text(text) => Variant::Text(text.without_annotations()),
-            Self::Blob(blob) => Variant::Blob(blob.without_annotations()),
-            Self::List(list) => Variant::List(list.without_annotations()),
-            Self::Map(map) => Variant::Map(map.without_annotations()),
-        }
-    }
-
-    /// Into different [Annotated] implementation.
-    pub fn into_annotated<NewAnnotationsT>(self) -> Variant<NewAnnotationsT>
-    where
-        AnnotatedT: Annotated,
-        NewAnnotationsT: Annotated + Default,
-    {
-        match self {
-            Self::Undefined => Variant::Undefined,
-            Self::Null(null) => Variant::Null(null.into_annotated()),
-            Self::Integer(integer) => Variant::Integer(integer.into_annotated()),
-            Self::UnsignedInteger(unsigned_integer) => Variant::UnsignedInteger(unsigned_integer.into_annotated()),
-            Self::Float(float) => Variant::Float(float.into_annotated()),
-            Self::Boolean(boolean) => Variant::Boolean(boolean.into_annotated()),
-            Self::Text(text) => Variant::Text(text.into_annotated()),
-            Self::Blob(blob) => Variant::Blob(blob.into_annotated()),
-            Self::List(list) => Variant::List(list.into_annotated()),
-            Self::Map(map) => Variant::Map(map.into_annotated()),
-        }
-    }
-
     /// Add source and [PathRepresentation] to all [Annotations] recursively.
     pub fn fully_annotated(mut self, source: &Option<ByteString>) -> Self
     where

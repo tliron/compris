@@ -19,6 +19,8 @@ pub struct AnnotatedMessageError<AnnotatedT> {
     pub annotated: AnnotatedT,
 }
 
+impl_dyn_annotated_error!(AnnotatedMessageError);
+
 impl<AnnotatedT> AnnotatedMessageError<AnnotatedT> {
     /// Constructor.
     pub fn new(message: String) -> Self
@@ -28,8 +30,6 @@ impl<AnnotatedT> AnnotatedMessageError<AnnotatedT> {
         Self { message, annotated: Default::default() }
     }
 }
-
-impl_dyn_annotated_error!(AnnotatedMessageError);
 
 impl<AnnotatedT> Depict for AnnotatedMessageError<AnnotatedT> {
     fn depict<WriteT>(&self, writer: &mut WriteT, _context: &DepictionContext) -> io::Result<()>

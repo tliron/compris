@@ -46,6 +46,44 @@ where
     }
 }
 
+impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<Variant<NewAnnotatedT>> for Variant<AnnotatedT>
+where
+    AnnotatedT: Annotated,
+    NewAnnotatedT: Annotated + Default,
+{
+    fn into_annotated(self) -> Variant<NewAnnotatedT> {
+        match self {
+            Self::Undefined => Variant::Undefined,
+            Self::Null(null) => Variant::Null(null.into_annotated()),
+            Self::Integer(integer) => Variant::Integer(integer.into_annotated()),
+            Self::UnsignedInteger(unsigned_integer) => Variant::UnsignedInteger(unsigned_integer.into_annotated()),
+            Self::Float(float) => Variant::Float(float.into_annotated()),
+            Self::Boolean(boolean) => Variant::Boolean(boolean.into_annotated()),
+            Self::Text(text) => Variant::Text(text.into_annotated()),
+            Self::Blob(blob) => Variant::Blob(blob.into_annotated()),
+            Self::List(list) => Variant::List(list.into_annotated()),
+            Self::Map(map) => Variant::Map(map.into_annotated()),
+        }
+    }
+}
+
+impl<AnnotatedT> RemoveAnnotations<Variant<WithoutAnnotations>> for Variant<AnnotatedT> {
+    fn remove_annotations(self) -> Variant<WithoutAnnotations> {
+        match self {
+            Self::Undefined => Variant::Undefined,
+            Self::Null(null) => Variant::Null(null.remove_annotations()),
+            Self::Integer(integer) => Variant::Integer(integer.remove_annotations()),
+            Self::UnsignedInteger(unsigned_integer) => Variant::UnsignedInteger(unsigned_integer.remove_annotations()),
+            Self::Float(float) => Variant::Float(float.remove_annotations()),
+            Self::Boolean(boolean) => Variant::Boolean(boolean.remove_annotations()),
+            Self::Text(text) => Variant::Text(text.remove_annotations()),
+            Self::Blob(blob) => Variant::Blob(blob.remove_annotations()),
+            Self::List(list) => Variant::List(list.remove_annotations()),
+            Self::Map(map) => Variant::Map(map.remove_annotations()),
+        }
+    }
+}
+
 impl<AnnotatedT> Depict for Variant<AnnotatedT> {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>
     where

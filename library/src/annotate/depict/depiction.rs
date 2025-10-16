@@ -1,4 +1,4 @@
-use super::{super::annotated::*, mode::*};
+use super::{super::traits::*, mode::*};
 
 use {
     kutil::cli::depict::*,
@@ -56,6 +56,7 @@ where
                 }
             }
         } else {
+            context.separate(writer)?;
             self.inner.depict(writer, context)?;
         }
 
