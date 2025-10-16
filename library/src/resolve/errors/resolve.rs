@@ -4,7 +4,7 @@ use super::{
     missing_required_key::*,
 };
 
-use {kutil::cli::depict::*, std::fmt, thiserror::*};
+use {depiction::*, std::fmt, thiserror::*};
 
 //
 // ResolveError
@@ -50,13 +50,12 @@ pub enum ResolveError<AnnotatedT> {
     Other(CapturedAnnotatedError),
 }
 
-impl<AnnotatedT> ResolveError<AnnotatedT> {
-    /// Into different [Annotated] implementation.
-    pub fn into_annotated<NewAnnotationsT>(self) -> ResolveError<NewAnnotationsT>
-    where
-        AnnotatedT: Annotated + Default,
-        NewAnnotationsT: Annotated + Default,
-    {
+impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<ResolveError<NewAnnotatedT>> for ResolveError<AnnotatedT>
+where
+    AnnotatedT: Annotated,
+    NewAnnotatedT: Annotated + Default,
+{
+    fn into_annotated(self) -> ResolveError<NewAnnotatedT> {
         match self {
             Self::Missing => ResolveError::Missing.into(),
             Self::IncompatibleVariantType(incompatible_variant_type) => {

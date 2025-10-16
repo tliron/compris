@@ -8,15 +8,15 @@ use {kutil::std::error::*, std::io};
 
 impl Parser {
     /// Resolve the parsed [Variant] into another type.
-    pub fn resolve<ResolvedT, ReadT, AnnotatedT, ErrorRecipientT>(
+    pub fn resolve<ResolvedT, ReadT, AnnotatedT, ErrorReceiverT>(
         &self,
         reader: &mut ReadT,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<ResolvedT, AnnotatedT>
     where
         ReadT: io::Read,
         AnnotatedT: Annotated + Clone + Default,
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
         Variant<AnnotatedT>: Resolve<ResolvedT, AnnotatedT>,
     {
         let variant = self.parse_reader(reader).expect("parse");
@@ -24,14 +24,14 @@ impl Parser {
     }
 
     /// Resolve the parsed [Variant] into another type.
-    pub fn resolve_string<ResolvedT, AnnotatedT, ErrorRecipientT>(
+    pub fn resolve_string<ResolvedT, AnnotatedT, ErrorReceiverT>(
         &self,
         string: &str,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<ResolvedT, AnnotatedT>
     where
         AnnotatedT: Annotated + Clone + Default,
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
         Variant<AnnotatedT>: Resolve<ResolvedT, AnnotatedT>,
     {
         let variant = self.parse_string(string).expect("parse");
@@ -41,7 +41,7 @@ impl Parser {
     /// Resolve the parsed [Variant] into another type while failing on the first encountered
     /// error.
     ///
-    /// Uses [FailFastErrorRecipient].
+    /// Uses [FailFastErrorReceiver].
     pub fn resolve_fail_fast<ResolvedT, ReadT, AnnotatedT>(
         &self,
         reader: &mut ReadT,
@@ -51,18 +51,18 @@ impl Parser {
         AnnotatedT: Annotated + Clone + Default,
         Variant<AnnotatedT>: Resolve<ResolvedT, AnnotatedT>,
     {
-        self.resolve(reader, &mut FailFastErrorRecipient)
+        self.resolve(reader, &mut FailFastErrorReceiver)
     }
 
     /// Resolve the parsed [Variant] into another type while failing on the first encountered
     /// error.
     ///
-    /// Uses [FailFastErrorRecipient].
+    /// Uses [FailFastErrorReceiver].
     pub fn resolve_string_fail_fast<ResolvedT, AnnotatedT>(&self, string: &str) -> ResolveResult<ResolvedT, AnnotatedT>
     where
         AnnotatedT: Annotated + Clone + Default,
         Variant<AnnotatedT>: Resolve<ResolvedT, AnnotatedT>,
     {
-        self.resolve_string(string, &mut FailFastErrorRecipient)
+        self.resolve_string(string, &mut FailFastErrorReceiver)
     }
 }

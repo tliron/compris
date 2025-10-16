@@ -11,12 +11,12 @@ where
     ResolvedAnnotationsT: Annotated + Default,
     AnnotatedT: Annotated + Clone,
 {
-    fn resolve_with_errors<ErrorRecipientT>(
+    fn resolve_with_errors<ErrorReceiverT>(
         self,
-        _errors: &mut ErrorRecipientT,
+        _errors: &mut ErrorReceiverT,
     ) -> ResolveResult<Variant<ResolvedAnnotationsT>, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         Ok(Some(self.into_annotated()))
     }

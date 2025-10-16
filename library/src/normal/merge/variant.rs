@@ -8,15 +8,15 @@ impl<AnnotatedT> Variant<AnnotatedT> {
     /// This function only affects lists and maps.
     ///
     /// The merging behavior depends on the [MergeMode].
-    pub fn merge_with_errors<'own, ErrorRecipientT>(
+    pub fn merge_with_errors<'own, ErrorReceiverT>(
         &mut self,
         other: &'own Self,
         merge_mode: &MergeMode,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> Result<bool, MergeError<'own, AnnotatedT>>
     where
         AnnotatedT: Clone,
-        ErrorRecipientT: ErrorRecipient<MergeError<'own, AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<MergeError<'own, AnnotatedT>>,
     {
         match (self, other) {
             (Self::List(list), Self::List(other_list)) => list.merge_with_errors(other_list, merge_mode, errors),
@@ -39,7 +39,7 @@ impl<AnnotatedT> Variant<AnnotatedT> {
     where
         AnnotatedT: Clone,
     {
-        self.merge_with_errors(other, merge_mode, &mut FailFastErrorRecipient)
+        self.merge_with_errors(other, merge_mode, &mut FailFastErrorReceiver)
     }
 
     /// Merge another [Variant] into this value. Return true if any change happened.

@@ -28,8 +28,7 @@ For more information and usage examples see the
 J'ai compris!
 */
 
-mod cli;
-mod convert;
+mod commands;
 mod errors;
 mod run;
 

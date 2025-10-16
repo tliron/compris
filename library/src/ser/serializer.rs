@@ -5,11 +5,7 @@ use super::{
     mode::*,
 };
 
-use {
-    kutil::std::immutable::*,
-    serde::*,
-    std::{fs::*, io, path},
-};
+use {kutil::std::immutable::*, serde::*, std::io};
 
 const STRINGIFY_BUFFER_CAPACITY: usize = 1024;
 
@@ -97,7 +93,9 @@ impl Serializer {
     }
 
     /// Serializes the provided value to the writer according to [Serializer::format](Serializer).
-    pub fn write_modal<WriteT, AnnotatedT>(
+    ///
+    /// Uses the provided [SerializationMode].
+    pub fn write_with_mode<WriteT, AnnotatedT>(
         &self,
         value: &Variant<AnnotatedT>,
         mode: &SerializationMode,
@@ -111,62 +109,33 @@ impl Serializer {
         self.write(&value, writer)
     }
 
-    /// Serializes the provided value to the file according to [Serializer::format](Serializer).
-    pub fn write_to_file<SerializableT, PathT>(&self, value: &SerializableT, path: PathT) -> Result<(), SerializeError>
-    where
-        SerializableT: Serialize,
-        PathT: AsRef<path::Path>,
-    {
-        self.write(value, &mut io::BufWriter::new(File::create(path)?))
-    }
-
-    /// Serializes the provided value to the file according to [Serializer::format](Serializer).
-    pub fn write_to_file_modal<AnnotatedT>(
+    /// Serializes the provided value to the writer according to [Serializer::format](Serializer).
+    ///
+    /// Will use a [SerializationMode] if one is available for the format.
+    pub fn write_modal<WriteT, AnnotatedT>(
         &self,
         value: &Variant<AnnotatedT>,
-        mode: &SerializationMode,
-        path: &path::Path,
+        writer: &mut WriteT,
     ) -> Result<(), SerializeError>
     where
+        WriteT: io::Write,
         AnnotatedT: Annotated + Clone + Default,
     {
-        let value = value.modal(mode, self);
-        self.write_to_file(&value, path)
-    }
-
-    /// Serializes the provided value to [stdout](io::stdout) according to [Serializer::format](Serializer).
-    pub fn print<SerializableT>(&self, value: &SerializableT) -> Result<(), SerializeError>
-    where
-        SerializableT: Serialize,
-    {
-        self.write(value, &mut io::stdout())
-    }
-
-    /// Serializes the provided value to [stdout](io::stdout) according to [Serializer::format](Serializer).
-    pub fn print_modal<AnnotatedT>(
-        &self,
-        value: &Variant<AnnotatedT>,
-        mode: &SerializationMode,
-    ) -> Result<(), SerializeError>
-    where
-        AnnotatedT: Annotated + Clone + Default,
-    {
-        let value = value.modal(mode, self);
-        self.print(&value)
+        match SerializationMode::for_format(&self.format) {
+            Some(serialization_mode) => self.write_with_mode(value, &serialization_mode, writer),
+            None => self.write(value, writer),
+        }
     }
 
     /// Convenience function to serialize to a string.
     ///
-    /// See [Serializer::write].
+    /// Binary formats will always use Base64.
     pub fn stringify<SerializableT>(&self, value: &SerializableT) -> Result<ByteString, SerializeError>
     where
         SerializableT: Serialize,
     {
-        let serializer =
-            Serializer::new(self.format.clone()).with_pretty(self.pretty).with_indent(self.indent).with_base64(true);
-
         let mut writer = Vec::with_capacity(STRINGIFY_BUFFER_CAPACITY);
-        match serializer.write(value, &mut writer) {
+        match self.clone().with_base64(true).write(value, &mut writer) {
             Ok(_) => Ok(ByteString::try_from(writer)?),
             Err(error) => Err(error),
         }
@@ -174,8 +143,10 @@ impl Serializer {
 
     /// Convenience function to serialize to a string.
     ///
-    /// See [Serializer::write].
-    pub fn stringify_modal<AnnotatedT>(
+    /// Binary formats will always use Base64.
+    ///
+    /// Uses the provided [SerializationMode].
+    pub fn stringify_with_mode<AnnotatedT>(
         &self,
         value: &Variant<AnnotatedT>,
         mode: &SerializationMode,
@@ -185,6 +156,21 @@ impl Serializer {
     {
         let value = value.modal(mode, self);
         self.stringify(&value)
+    }
+
+    /// Convenience function to serialize to a string.
+    ///
+    /// Binary formats will always use Base64.
+    ///
+    /// Will use a [SerializationMode] if one is available for the format.
+    pub fn stringify_modal<AnnotatedT>(&self, value: &Variant<AnnotatedT>) -> Result<ByteString, SerializeError>
+    where
+        AnnotatedT: Annotated + Clone + Default,
+    {
+        match SerializationMode::for_format(&self.format) {
+            Some(serialization_mode) => self.stringify_with_mode(value, &serialization_mode),
+            None => self.stringify(value),
+        }
     }
 
     // Utils

@@ -1,10 +1,8 @@
 use super::{super::normal::*, path::*, segment::*};
 
 use {
-    kutil::{
-        cli::depict::*,
-        std::{iter::*, immutable::*},
-    },
+    depiction::*,
+    kutil::std::{immutable::*, iter::*},
     std::{
         fmt::{self, Write},
         io,

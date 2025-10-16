@@ -1,7 +1,8 @@
-use super::{super::annotated::*, depiction::*, mode::*};
+use super::{super::traits::*, depiction::*, mode::*};
 
 use {
-    kutil::{cli::depict::*, std::iter::*},
+    depiction::*,
+    kutil::std::iter::*,
     std::{cmp::*, collections::*, error::*, io},
 };
 
@@ -76,6 +77,8 @@ where
             })
         });
 
+        let child_context = &context.child().increase_indentation();
+
         for ((source, list), first) in IterateWithFirst::new(table) {
             context.separate_or_indent(writer, first && self.heading.is_none())?;
 
@@ -86,8 +89,8 @@ where
 
             for item in list {
                 context.indent_into(writer, utils::DEPICT_INTO_LIST_ITEM)?;
-                let child_context = context.clone().with_separator(true).increase_indentation();
-                AnnotatedDepiction::new(item, self.mode).depict(writer, &child_context)?;
+                write!(writer, " ")?;
+                AnnotatedDepiction::new(item, self.mode).depict(writer, child_context)?;
             }
         }
 

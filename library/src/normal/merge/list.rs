@@ -6,15 +6,15 @@ impl<AnnotatedT> List<AnnotatedT> {
     /// Merge another list into this list. Return true if any change happened.
     ///
     /// The merging behavior depends on the [MergeMode].
-    pub fn merge_with_errors<'own, ErrorRecipientT>(
+    pub fn merge_with_errors<'own, ErrorReceiverT>(
         &mut self,
         other: &'own Self,
         merge_mode: &MergeMode,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> Result<bool, MergeError<'own, AnnotatedT>>
     where
         AnnotatedT: Clone,
-        ErrorRecipientT: ErrorRecipient<MergeError<'own, AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<MergeError<'own, AnnotatedT>>,
     {
         match merge_mode.list {
             ListMergeMode::Append => {
@@ -75,7 +75,7 @@ impl<AnnotatedT> List<AnnotatedT> {
     where
         AnnotatedT: Clone,
     {
-        self.merge_with_errors(other, merge_mode, &mut FailFastErrorRecipient)
+        self.merge_with_errors(other, merge_mode, &mut FailFastErrorReceiver)
     }
 
     /// Merge another list into this list. Return true if any change happened.

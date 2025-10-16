@@ -55,7 +55,7 @@ impl StructGenerator {
             }
         } else {
             quote! {
-                ::kutil::std::error::ErrorRecipient::give_error(
+                ::kutil::std::error::ErrorReceiver::give_error(
                     errors,
                     ::compris::normal::IncompatibleVariantTypeError::new_from(
                         &self,

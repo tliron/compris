@@ -44,13 +44,13 @@ where
 
 impl<'own, AnnotatedT> ResolvingVariantIterator<vec::IntoIter<Variant<AnnotatedT>>, AnnotatedT> {
     /// Constructor.
-    pub fn new_from<ErrorRecipientT>(
+    pub fn new_from<ErrorReceiverT>(
         variant: Variant<AnnotatedT>,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<Self, AnnotatedT>
     where
         AnnotatedT: Annotated + Clone + Default,
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         match variant {
             Variant::List(list) => return Ok(Some(Self::new_for(list))),
@@ -68,9 +68,9 @@ where
     Variant<AnnotatedT>: Resolve<ResolvedT, AnnotatedT>,
     InnerT: Iterator<Item = Variant<AnnotatedT>>,
 {
-    fn resolve_next<ErrorRecipientT>(&mut self, errors: &mut ErrorRecipientT) -> ResolveResult<ResolvedT, AnnotatedT>
+    fn resolve_next<ErrorReceiverT>(&mut self, errors: &mut ErrorReceiverT) -> ResolveResult<ResolvedT, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         Ok(match self.inner.next() {
             Some(next) => next.resolve_with_errors(errors)?,

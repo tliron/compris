@@ -10,15 +10,15 @@ use {
 };
 
 /// Resolve a [Variant] into a [FromStr].
-pub fn resolve_from_str<FromStrT, AnnotatedT, ErrorRecipientT>(
+pub fn resolve_from_str<FromStrT, AnnotatedT, ErrorReceiverT>(
     variant: Variant<AnnotatedT>,
-    errors: &mut ErrorRecipientT,
+    errors: &mut ErrorReceiverT,
 ) -> ResolveResult<FromStrT, AnnotatedT>
 where
     FromStrT: FromStr,
     FromStrT::Err: fmt::Display,
     AnnotatedT: Annotated + Clone + Default,
-    ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+    ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
 {
     Ok(match variant {
         Variant::Text(text) => match text.inner.parse() {
@@ -47,12 +47,12 @@ macro_rules! impl_resolve_from_str {
         where
             AnnotatedT: $crate::annotate::Annotated + ::std::clone::Clone + ::std::default::Default,
         {
-            fn resolve_with_errors<ErrorRecipientT>(
+            fn resolve_with_errors<ErrorReceiverT>(
                 self,
-                errors: &mut ErrorRecipientT,
+                errors: &mut ErrorReceiverT,
             ) -> $crate::resolve::ResolveResult<$type, AnnotatedT>
             where
-                ErrorRecipientT: ::kutil::std::error::ErrorRecipient<$crate::resolve::ResolveError<AnnotatedT>>,
+                ErrorReceiverT: ::kutil::std::error::ErrorReceiver<$crate::resolve::ResolveError<AnnotatedT>>,
             {
                 $crate::resolve::resolve_from_str(self, errors)
             }
@@ -88,12 +88,12 @@ where
     InnerT::Err: fmt::Display,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorRecipientT>(
+    fn resolve_with_errors<ErrorReceiverT>(
         self,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<ResolveFromStr<InnerT>, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         resolve_from_str(self, errors).map(|resolved| resolved.map(ResolveFromStr::new))
     }

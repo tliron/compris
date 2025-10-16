@@ -9,12 +9,12 @@ impl<FirstT, SecondT, AnnotatedT> Resolve<(FirstT, SecondT), AnnotatedT> for (Va
 where
     Variant<AnnotatedT>: Resolve<FirstT, AnnotatedT> + Resolve<SecondT, AnnotatedT>,
 {
-    fn resolve_with_errors<ErrorRecipientT>(
+    fn resolve_with_errors<ErrorReceiverT>(
         self,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<(FirstT, SecondT), AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         let first = self.0.resolve_with_errors(errors)?;
         let second = self.1.resolve_with_errors(errors)?;

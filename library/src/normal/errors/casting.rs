@@ -1,7 +1,7 @@
 use super::super::{super::annotate::*, variant::*};
 
 use {
-    kutil::cli::depict::*,
+    depiction::*,
     std::{fmt, io},
     thiserror::*,
 };
@@ -20,23 +20,24 @@ pub struct CastingError<AnnotatedT> {
     pub type_name: String,
 }
 
+impl_annotated!(CastingError, variant);
+
 impl<AnnotatedT> CastingError<AnnotatedT> {
     /// Constructor.
     pub fn new(variant: Variant<AnnotatedT>, type_name: String) -> Self {
         Self { variant, type_name }
     }
+}
 
-    /// Into different [Annotated] implementation.
-    pub fn into_annotated<NewAnnotationsT>(self) -> CastingError<NewAnnotationsT>
-    where
-        AnnotatedT: Annotated,
-        NewAnnotationsT: Annotated + Default,
-    {
+impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<CastingError<NewAnnotatedT>> for CastingError<AnnotatedT>
+where
+    AnnotatedT: Annotated,
+    NewAnnotatedT: Annotated + Default,
+{
+    fn into_annotated(self) -> CastingError<NewAnnotatedT> {
         CastingError::new(self.variant.into_annotated(), self.type_name)
     }
 }
-
-impl_annotated!(CastingError, variant);
 
 impl<AnnotatedT> Depict for CastingError<AnnotatedT> {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>

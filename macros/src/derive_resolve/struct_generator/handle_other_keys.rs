@@ -30,7 +30,7 @@ impl StructGenerator {
             None => quote! {
                 for (key, _) in map.inner {
                     if !declared_keys.contains(&key) {
-                        ::kutil::std::error::ErrorRecipient::give_error(
+                        ::kutil::std::error::ErrorReceiver::give_error(
                             errors,
                             ::compris::resolve::InvalidKeyError::new(key.clone()).into(),
                         )?;

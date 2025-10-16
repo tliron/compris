@@ -1,7 +1,8 @@
 use super::{super::normal::*, node::*, representation::*, segment::*};
 
 use {
-    kutil::{cli::depict::*, std::iter::*},
+    depiction::*,
+    kutil::std::iter::*,
     std::{
         fmt::{self, Write},
         io, ptr,

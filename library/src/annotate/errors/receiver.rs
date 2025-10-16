@@ -1,14 +1,14 @@
-use super::super::{annotated::*, annotations::*, r#struct::*};
+use super::super::{annotations::*, r#struct::*, traits::*};
 
 use kutil::std::error::*;
 
 //
-// ErrorRecipientWithFallbackAnnotations
+// ErrorReceiverWithFallbackAnnotations
 //
 
-/// An [ErrorRecipient] wrapper that adds an [Annotations] to errors that don't already have
+/// An [ErrorReceiver] wrapper that adds an [Annotations] to errors that don't already have
 /// [Annotations].
-pub struct ErrorRecipientWithFallbackAnnotations<'own, InnerT> {
+pub struct ErrorReceiverWithFallbackAnnotations<'own, InnerT> {
     /// Inner.
     pub inner: &'own mut InnerT,
 
@@ -16,17 +16,17 @@ pub struct ErrorRecipientWithFallbackAnnotations<'own, InnerT> {
     pub fallback_annotations: Option<&'own Annotations>,
 }
 
-impl<'own, InnerT> ErrorRecipientWithFallbackAnnotations<'own, InnerT> {
+impl<'own, InnerT> ErrorReceiverWithFallbackAnnotations<'own, InnerT> {
     /// Constructor.
     pub fn new(inner: &'own mut InnerT, fallback_annotations: Option<&'own Annotations>) -> Self {
         Self { inner, fallback_annotations }
     }
 }
 
-impl<'own, ErrorT, InnerT> ErrorRecipient<ErrorT> for ErrorRecipientWithFallbackAnnotations<'own, InnerT>
+impl<'own, ErrorT, InnerT> ErrorReceiver<ErrorT> for ErrorReceiverWithFallbackAnnotations<'own, InnerT>
 where
     ErrorT: Annotated,
-    InnerT: ErrorRecipient<ErrorT>,
+    InnerT: ErrorReceiver<ErrorT>,
 {
     fn give_error(&mut self, error: ErrorT) -> Result<(), ErrorT> {
         if !error.has_annotations()
@@ -49,25 +49,25 @@ pub trait WithFallbackAnnotations<'own, ErrorT, InnerT> {
     fn with_fallback_annotations(
         &'own mut self,
         annotations: Option<&'own Annotations>,
-    ) -> ErrorRecipientWithFallbackAnnotations<'own, InnerT>;
+    ) -> ErrorReceiverWithFallbackAnnotations<'own, InnerT>;
 
     /// With fallback annotations from field.
     fn with_fallback_annotations_from_field<StructT>(
         &'own mut self,
         r#struct: &'own StructT,
         name: &str,
-    ) -> ErrorRecipientWithFallbackAnnotations<'own, InnerT>
+    ) -> ErrorReceiverWithFallbackAnnotations<'own, InnerT>
     where
         StructT: AnnotatedStruct,
     {
-        self.with_fallback_annotations(r#struct.field_annotations(name))
+        self.with_fallback_annotations(r#struct.field_or_struct_annotations(name))
     }
 
     /// With fallback annotations from struct.
     fn with_fallback_annotations_from_struct<StructT>(
         &'own mut self,
         r#struct: &'own StructT,
-    ) -> ErrorRecipientWithFallbackAnnotations<'own, InnerT>
+    ) -> ErrorReceiverWithFallbackAnnotations<'own, InnerT>
     where
         StructT: AnnotatedStruct,
     {
@@ -75,15 +75,30 @@ pub trait WithFallbackAnnotations<'own, ErrorT, InnerT> {
     }
 }
 
-impl<'own, ErrorT, ErrorRecipientT> WithFallbackAnnotations<'own, ErrorT, ErrorRecipientT> for ErrorRecipientT
+impl<'own, ErrorT, ErrorReceiverT> WithFallbackAnnotations<'own, ErrorT, ErrorReceiverT> for ErrorReceiverT
 where
     ErrorT: Annotated,
-    ErrorRecipientT: ErrorRecipient<ErrorT>,
+    ErrorReceiverT: ErrorReceiver<ErrorT>,
 {
     fn with_fallback_annotations(
         &'own mut self,
         annotations: Option<&'own Annotations>,
-    ) -> ErrorRecipientWithFallbackAnnotations<'own, ErrorRecipientT> {
-        ErrorRecipientWithFallbackAnnotations::new(self, annotations)
+    ) -> ErrorReceiverWithFallbackAnnotations<'own, ErrorReceiverT> {
+        ErrorReceiverWithFallbackAnnotations::new(self, annotations)
     }
 }
+
+/// Wrap errors with fallback [Annotations] from field.
+#[macro_export]
+macro_rules! errors_with_fallback_annotations_from_field {
+    ( $new_errors:ident, $errors:expr, $self:expr, $field:expr, $( $code:tt )* ) => {
+        {
+            let annotations = $self.field_or_struct_annotations($field).cloned();
+            let $new_errors = &mut $errors.with_fallback_annotations(annotations.as_ref());
+            $( $code )*
+        }
+    };
+}
+
+#[allow(unused_imports)]
+pub use errors_with_fallback_annotations_from_field;

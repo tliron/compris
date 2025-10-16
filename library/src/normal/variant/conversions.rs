@@ -34,32 +34,32 @@ impl<AnnotatedT> From<NormalT<AnnotatedT>> for Variant<AnnotatedT> {
 // Common types -> Variant
 
 #[duplicate_item(
-  ToNormalT          FromT;
-  [Null]             [()];
-  [Integer]          [i64];
-  [Integer]          [i32];
-  [Integer]          [i16];
-  [Integer]          [i8];
-  [Integer]          [isize];
-  [UnsignedInteger]  [u64];
-  [UnsignedInteger]  [u32];
-  [UnsignedInteger]  [u16];
-  [UnsignedInteger]  [u8];
-  [UnsignedInteger]  [usize];
-  [Float]            [f64];
-  [Float]            [f32];
-  [Float]            [OrderedFloat<f64>];
-  [Boolean]          [bool];
-  [Text]             [ByteString];
-  [Text]             [String];
-  [Text]             [Cow<'_, str>];
-  [Text]             [&'static str];
-  [Blob]             [Bytes];
-  [Blob]             [Vec<u8>];
-  [Blob]             [Cow<'_, [u8]>];
-  [Blob]             [&'static [u8]];
-  [List]             [Vec<Variant<AnnotatedT>>];
-  [Map]              [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
+  ToNormalT         FromT;
+  [Null]            [()];
+  [Integer]         [i64];
+  [Integer]         [i32];
+  [Integer]         [i16];
+  [Integer]         [i8];
+  [Integer]         [isize];
+  [UnsignedInteger] [u64];
+  [UnsignedInteger] [u32];
+  [UnsignedInteger] [u16];
+  [UnsignedInteger] [u8];
+  [UnsignedInteger] [usize];
+  [Float]           [f64];
+  [Float]           [f32];
+  [Float]           [OrderedFloat<f64>];
+  [Boolean]         [bool];
+  [Text]            [ByteString];
+  [Text]            [String];
+  [Text]            [Cow<'_, str>];
+  [Text]            [&'static str];
+  [Blob]            [Bytes];
+  [Blob]            [Vec<u8>];
+  [Blob]            [Cow<'_, [u8]>];
+  [Blob]            [&'static [u8]];
+  [List]            [Vec<Variant<AnnotatedT>>];
+  [Map]             [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
 )]
 impl<AnnotatedT> From<FromT> for Variant<AnnotatedT>
 where
@@ -108,16 +108,16 @@ where
 // Variant -> inner types
 
 #[duplicate_item(
-  FromNormalT        name                  ToT;
-  [Integer]          ["integer"]           [i64];
-  [UnsignedInteger]  ["unsigned integer"]  [u64];
-  [Float]            ["float"]             [OrderedFloat<f64>];
-  [Float]            ["float"]             [f64];
-  [Boolean]          ["boolean"]           [bool];
-  [Text]             ["text"]              [String];
-  [Text]             ["text"]              [ByteString];
-  [List]             ["list"]              [Vec<Variant<AnnotatedT>>];
-  [Map]              ["Map"]               [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
+  FromNormalT       name                 ToT;
+  [Integer]         ["integer"]          [i64];
+  [UnsignedInteger] ["unsigned integer"] [u64];
+  [Float]           ["float"]            [OrderedFloat<f64>];
+  [Float]           ["float"]            [f64];
+  [Boolean]         ["boolean"]          [bool];
+  [Text]            ["text"]             [String];
+  [Text]            ["text"]             [ByteString];
+  [List]            ["list"]             [Vec<Variant<AnnotatedT>>];
+  [Map]             ["Map"]              [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
 )]
 #[allow(unused_variables)]
 impl<AnnotatedT> TryFrom<Variant<AnnotatedT>> for ToT
@@ -166,18 +166,18 @@ where
 // Variant -> alternative numbers
 
 #[duplicate_item(
-    NumberT  name;
-    [i128]   ["128-bit integer"];
-    [i32]    ["32-bit integer"];
-    [i16]    ["16-bit integer"];
-    [i8]     ["8-bit integer"];
-    [isize]  ["system integer"];
-    [u128]   ["128-bit unsigned integer"];
-    [u32]    ["32-bit unsigned integer"];
-    [u16]    ["16-bit unsigned integer"];
-    [u8]     ["8-bit unsigned integer"];
-    [usize]  ["system unsigned integer"];
-    [f32]    ["32-bit float"];
+    NumberT name;
+    [i128]  ["128-bit integer"];
+    [i32]   ["32-bit integer"];
+    [i16]   ["16-bit integer"];
+    [i8]    ["8-bit integer"];
+    [isize] ["system integer"];
+    [u128]  ["128-bit unsigned integer"];
+    [u32]   ["32-bit unsigned integer"];
+    [u16]   ["16-bit unsigned integer"];
+    [u8]    ["8-bit unsigned integer"];
+    [usize] ["system unsigned integer"];
+    [f32]   ["32-bit float"];
   )]
 impl<AnnotatedT> TryFrom<Variant<AnnotatedT>> for NumberT
 where
@@ -209,14 +209,14 @@ where
 // &Variant -> inner types (via cloning or copying)
 
 #[duplicate_item(
-  FromNormalT  name         ToT                                                   normal_value;
-  [Null]       ["null"]     [()]                                                  [()];
-  [Float]      ["float"]    [OrderedFloat<f64>]                                   [normal.inner.into()];
-  [Boolean]    ["boolean"]  [bool]                                                [normal.inner];
-  [Text]       ["text"]     [String]                                              [normal.inner.clone().into()];
-  [Text]       ["text"]     [ByteString]                                          [normal.inner.clone()];
-  [List]       ["list"]     [Vec<Variant<AnnotatedT>>]                            [normal.inner.clone()];
-  [Map]        ["Map"]      [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>]  [normal.inner.clone()];
+  FromNormalT name        ToT                                                  normal_value;
+  [Null]      ["null"]    [()]                                                 [()];
+  [Float]     ["float"]   [OrderedFloat<f64>]                                  [normal.inner.into()];
+  [Boolean]   ["boolean"] [bool]                                               [normal.inner];
+  [Text]      ["text"]    [String]                                             [normal.inner.clone().into()];
+  [Text]      ["text"]    [ByteString]                                         [normal.inner.clone()];
+  [List]      ["list"]    [Vec<Variant<AnnotatedT>>]                           [normal.inner.clone()];
+  [Map]       ["Map"]     [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>] [normal.inner.clone()];
 )]
 #[allow(unused_variables)]
 impl<AnnotatedT> TryFrom<&Variant<AnnotatedT>> for ToT
@@ -251,11 +251,11 @@ where
 // &Variant -> inner references
 
 #[duplicate_item(
-    FromNormalT  name       ToT;
-    [Text]       ["text"]   [str];
-    [Blob]       ["blob"]   [[u8]];
-    [List]       ["list"]   [Vec<Variant<AnnotatedT>>];
-    [Map]        ["map"]    [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
+    FromNormalT name     ToT;
+    [Text]      ["text"] [str];
+    [Blob]      ["blob"] [[u8]];
+    [List]      ["list"] [Vec<Variant<AnnotatedT>>];
+    [Map]       ["map"]  [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
   )]
 impl<'own, AnnotatedT> TryFrom<&'own Variant<AnnotatedT>> for &'own ToT
 where
@@ -274,21 +274,21 @@ where
 // &Variant -> numbers
 
 #[duplicate_item(
-    NumberT  name;
-    [i128]   ["128-bit integer"];
-    [i64]    ["64-bit integer"];
-    [i32]    ["32-bit integer"];
-    [i16]    ["16-bit integer"];
-    [i8]     ["8-bit integer"];
-    [isize]  ["system integer"];
-    [u128]   ["128-bit unsigned integer"];
-    [u64]    ["64-bit unsigned integer"];
-    [u32]    ["32-bit unsigned integer"];
-    [u16]    ["16-bit unsigned integer"];
-    [u8]     ["8-bit unsigned integer"];
-    [usize]  ["system unsigned integer"];
-    [f64]    ["64-bit float"];
-    [f32]    ["32-bit float"];
+    NumberT name;
+    [i128]  ["128-bit integer"];
+    [i64]   ["64-bit integer"];
+    [i32]   ["32-bit integer"];
+    [i16]   ["16-bit integer"];
+    [i8]    ["8-bit integer"];
+    [isize] ["system integer"];
+    [u128]  ["128-bit unsigned integer"];
+    [u64]   ["64-bit unsigned integer"];
+    [u32]   ["32-bit unsigned integer"];
+    [u16]   ["16-bit unsigned integer"];
+    [u8]    ["8-bit unsigned integer"];
+    [usize] ["system unsigned integer"];
+    [f64]   ["64-bit float"];
+    [f32]   ["32-bit float"];
   )]
 impl<AnnotatedT> TryFrom<&Variant<AnnotatedT>> for NumberT
 where

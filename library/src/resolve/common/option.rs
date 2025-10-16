@@ -9,12 +9,12 @@ impl<OptionalT, AnnotatedT> Resolve<Option<OptionalT>, AnnotatedT> for Variant<A
 where
     Variant<AnnotatedT>: Resolve<OptionalT, AnnotatedT>,
 {
-    fn resolve_with_errors<ErrorRecipientT>(
+    fn resolve_with_errors<ErrorReceiverT>(
         self,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<Option<OptionalT>, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         Ok(Some(self.resolve_with_errors(errors)?))
     }

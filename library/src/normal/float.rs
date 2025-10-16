@@ -1,8 +1,8 @@
 use super::{super::annotate::*, macros::*};
 
 use {
+    depiction::*,
     duplicate::*,
-    kutil::cli::depict::*,
     ordered_float::*,
     std::{fmt, io},
 };

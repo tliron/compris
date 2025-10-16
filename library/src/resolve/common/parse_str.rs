@@ -38,12 +38,12 @@ where
     ParseStrT: ParseStr<InnerT>,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorRecipientT>(
+    fn resolve_with_errors<ErrorReceiverT>(
         self,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<ResolveParseStr<InnerT, ParseStrT>, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         resolve_from_str(self, errors)
     }

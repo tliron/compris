@@ -3,7 +3,7 @@ mod utils;
 use {
     anstream::println,
     compris::{normal::*, parse::*, path::*, *},
-    kutil::cli::depict::*,
+    depiction::*,
 };
 
 pub fn main() {

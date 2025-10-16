@@ -1,8 +1,8 @@
 use super::super::super::r#struct::*;
 
-use {kutil::cli::depict::*, std::io};
+use {depiction::*, std::io};
 
-/// Source and span tag for a [Depict](kutil::cli::depict::Depict).
+/// Source and span tag for a [Depict](depiction::Depict).
 pub fn source_and_span<AnnotatedFieldsT, WriteT>(
     annotated_fields: &AnnotatedFieldsT,
     field_name: &str,

@@ -11,12 +11,12 @@ where
     AnnotatedT: Annotated + Default,
     Variant<AnnotatedT>: Resolve<InnerT, AnnotatedT>,
 {
-    fn resolve_with_errors<ErrorRecipientT>(
+    fn resolve_with_errors<ErrorReceiverT>(
         self,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<Annotate<InnerT, AnnotatedT>, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         let annotations = self.annotations().cloned();
         Ok(self.resolve_with_errors(errors)?.map(|inner| {

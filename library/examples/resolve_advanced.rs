@@ -3,7 +3,7 @@ mod utils;
 use {
     anstream::{print, println},
     compris::{annotate::*, normal::*, parse::*, resolve::*, *},
-    kutil::cli::depict::*,
+    depiction::*,
     std::{collections::*, fmt},
 };
 

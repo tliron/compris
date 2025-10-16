@@ -1,7 +1,7 @@
 use super::location::*;
 
 use {
-    kutil::cli::depict::*,
+    depiction::*,
     std::{fmt, io},
 };
 

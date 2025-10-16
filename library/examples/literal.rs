@@ -1,6 +1,6 @@
 mod utils;
 
-use {compris::normal::*, kutil::cli::depict::*};
+use {compris::normal::*, depiction::*};
 
 pub fn main() {
     // Use "normal!" with a single bare primitive expression

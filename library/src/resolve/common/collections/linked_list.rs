@@ -17,12 +17,12 @@ where
     Variant<AnnotatedT>: Resolve<ItemT, AnnotatedT>,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorRecipientT>(
+    fn resolve_with_errors<ErrorReceiverT>(
         self,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<LinkedList<ItemT>, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         let mut resolved = LinkedList::default();
 

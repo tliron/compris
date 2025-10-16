@@ -19,12 +19,12 @@ where
     Variant<AnnotatedT>: Resolve<KeyT, AnnotatedT> + Resolve<ValueT, AnnotatedT>,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorRecipientT>(
+    fn resolve_with_errors<ErrorReceiverT>(
         self,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<BTreeMap<KeyT, ValueT>, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         let mut resolved = BTreeMap::default();
 

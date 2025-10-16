@@ -3,7 +3,7 @@ mod utils;
 use {
     anstream::println,
     compris::{annotate::*, parse::*, resolve::*, *},
-    kutil::cli::depict::*,
+    depiction::*,
 };
 
 // Note that #[derive(Resolve)] requires an implementation of the Default trait,

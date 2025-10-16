@@ -43,6 +43,10 @@ impl StructGenerator {
                     fn field_annotations(&self, name: &str) -> Option<&Annotations> {
                         self.#annotations_field_name.get(name)
                     }
+
+                    fn field_annotations_mut(&mut self, name: &str) -> Option<&mut Annotations> {
+                        self.#annotations_field_name.get_mut(name)
+                    }
                 }
             })
         } else {

@@ -10,9 +10,9 @@ use {
 };
 
 /// Resolve a [Variant] into a [TryFrom] via an intermediate.
-pub fn resolve_try_from<TryFromT, IntermediateT, AnnotatedT, ErrorRecipientT>(
+pub fn resolve_try_from<TryFromT, IntermediateT, AnnotatedT, ErrorReceiverT>(
     variant: Variant<AnnotatedT>,
-    errors: &mut ErrorRecipientT,
+    errors: &mut ErrorReceiverT,
 ) -> ResolveResult<TryFromT, AnnotatedT>
 where
     Variant<AnnotatedT>: TryInto<IntermediateT>,
@@ -20,7 +20,7 @@ where
     TryFromT: TryFrom<IntermediateT>,
     TryFromT::Error: fmt::Display,
     AnnotatedT: Annotated + Clone + Default,
-    ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+    ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
 {
     let maybe_annotations = variant.maybe_annotations();
 
@@ -79,12 +79,12 @@ where
     InnerT::Error: fmt::Display,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorRecipientT>(
+    fn resolve_with_errors<ErrorReceiverT>(
         self,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<ResolveTryFrom<InnerT, IntermediateT>, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         resolve_try_from(self, errors).map(|resolved| resolved.map(ResolveTryFrom::new))
     }

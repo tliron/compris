@@ -1,4 +1,4 @@
-use super::{annotated::*, annotations::*};
+use super::{super::annotations::*, annotated::*};
 
 //
 // DynAnnotated

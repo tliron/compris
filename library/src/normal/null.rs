@@ -1,7 +1,7 @@
 use super::super::annotate::*;
 
 use {
-    kutil::cli::depict::*,
+    depiction::*,
     std::{cmp::*, fmt, hash::*, io},
 };
 
@@ -18,20 +18,16 @@ pub struct Null<AnnotatedT> {
     pub annotated: AnnotatedT,
 }
 
-impl<AnnotatedT> Null<AnnotatedT> {
-    /// Remove all [Annotations].
-    pub fn without_annotations(self) -> Null<WithoutAnnotations> {
-        Default::default()
-    }
+impl_annotated!(Null);
 
-    /// Into different [Annotated] implementation.
-    pub fn into_annotated<NewAnnotationsT>(self) -> Null<NewAnnotationsT>
-    where
-        AnnotatedT: Annotated,
-        NewAnnotationsT: Annotated + Default,
-    {
+impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<Null<NewAnnotatedT>> for Null<AnnotatedT>
+where
+    AnnotatedT: Annotated,
+    NewAnnotatedT: Annotated + Default,
+{
+    fn into_annotated(self) -> Null<NewAnnotatedT> {
         if AnnotatedT::can_have_annotations()
-            && NewAnnotationsT::can_have_annotations()
+            && NewAnnotatedT::can_have_annotations()
             && let Some(annotations) = self.annotated.annotations()
         {
             Null::default().with_annotations(annotations.clone())
@@ -41,7 +37,11 @@ impl<AnnotatedT> Null<AnnotatedT> {
     }
 }
 
-impl_annotated!(Null);
+impl<AnnotatedT> RemoveAnnotations<Null<WithoutAnnotations>> for Null<AnnotatedT> {
+    fn remove_annotations(self) -> Null<WithoutAnnotations> {
+        Default::default()
+    }
+}
 
 impl<AnnotatedT> Depict for Null<AnnotatedT> {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>

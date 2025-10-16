@@ -1,4 +1,4 @@
-use super::{annotated::*, annotations::*};
+use super::{annotations::*, traits::*};
 
 use std::{hash::*, marker::*};
 

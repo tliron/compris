@@ -3,7 +3,7 @@ use super::{
     variant::*,
 };
 
-use {kutil::cli::depict::*, std::io};
+use {depiction::*, std::io};
 
 //
 // AnnotatedDepictList

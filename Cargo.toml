@@ -2,10 +2,6 @@
 resolver = "3"
 members = ["library", "macros", "cli"]
 
-[patch.crates-io]
-compris = { path = "library" }
-compris-macros = { path = "macros" }
-
 [profile.release]
 strip = "debuginfo"
 lto = true

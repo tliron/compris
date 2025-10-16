@@ -1,7 +1,7 @@
-use super::{annotated::*, annotations::*};
+use super::{annotations::*, traits::*};
 
 use {
-    kutil::cli::depict::*,
+    depiction::*,
     std::{cmp::*, fmt, hash::*, io},
 };
 

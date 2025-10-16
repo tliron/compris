@@ -1,7 +1,7 @@
 use super::{super::annotate::*, macros::*};
 
 use {
-    kutil::cli::depict::*,
+    depiction::*,
     std::{fmt, io},
 };
 

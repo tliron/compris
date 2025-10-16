@@ -32,7 +32,7 @@ impl StructGenerator {
         let handle_required = if field.attribute.required {
             quote! {
                 else {
-                    ::kutil::std::error::ErrorRecipient::give_error(
+                    ::kutil::std::error::ErrorReceiver::give_error(
                         errors,
                         ::compris::annotate::Annotated::with_annotations_from(
                             ::compris::resolve::MissingRequiredKeyError::new(key.into()).into(),

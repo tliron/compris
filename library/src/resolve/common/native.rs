@@ -34,9 +34,9 @@ impl<AnnotatedT> Resolve<ResolvedT, AnnotatedT> for Variant<AnnotatedT>
 where
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorRecipientT>(self, errors: &mut ErrorRecipientT) -> ResolveResult<ResolvedT, AnnotatedT>
+    fn resolve_with_errors<ErrorReceiverT>(self, errors: &mut ErrorReceiverT) -> ResolveResult<ResolvedT, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         let maybe_annotations = self.maybe_annotations();
 
@@ -59,14 +59,14 @@ where
 //     ErrorT: ResolveError,
 //     &'own Self: TryInto<ResolvedT, Error = IncompatibleValueTypeError>,
 // {
-//     fn resolve_for<ErrorRecipientT>(
+//     fn resolve_for<ErrorReceiverT>(
 //         &self,
 //         _context: Option<&ContextT>,
 //         _ancestor: Option<&Value>,
-//         _errors: &mut ErrorRecipientT,
+//         _errors: &mut ErrorReceiverT,
 //     ) -> ResolveResult<ResolvedT, ErrorT>
 //     where
-//         ErrorRecipientT: ErrorRecipient<ErrorT>,
+//         ErrorReceiverT: ErrorReceiver<ErrorT>,
 //     {
 //         Ok(match self.try_into() { // ouch, lifetimes!!!!!!!
 //             Ok(resolved) => Some(resolved),

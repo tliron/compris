@@ -1,7 +1,7 @@
 use super::super::super::annotate::*;
 
 use {
-    kutil::cli::depict::*,
+    depiction::*,
     std::{fmt, io},
     thiserror::*,
 };
@@ -23,6 +23,8 @@ pub struct MalformedError<AnnotatedT> {
     pub annotated: AnnotatedT,
 }
 
+impl_annotated!(MalformedError);
+
 impl<AnnotatedT> MalformedError<AnnotatedT> {
     /// Constructor.
     pub fn new(type_name: String, reason: String) -> Self
@@ -31,18 +33,17 @@ impl<AnnotatedT> MalformedError<AnnotatedT> {
     {
         Self { type_name, reason, annotated: Default::default() }
     }
+}
 
-    /// Into different [Annotated] implementation.
-    pub fn into_annotated<NewAnnotationsT>(self) -> MalformedError<NewAnnotationsT>
-    where
-        AnnotatedT: Annotated,
-        NewAnnotationsT: Annotated + Default,
-    {
+impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<MalformedError<NewAnnotatedT>> for MalformedError<AnnotatedT>
+where
+    AnnotatedT: Annotated,
+    NewAnnotatedT: Annotated + Default,
+{
+    fn into_annotated(self) -> MalformedError<NewAnnotatedT> {
         MalformedError::new(self.type_name, self.reason).with_annotations_from(&self.annotated)
     }
 }
-
-impl_annotated!(MalformedError);
 
 impl<AnnotatedT> Depict for MalformedError<AnnotatedT> {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>

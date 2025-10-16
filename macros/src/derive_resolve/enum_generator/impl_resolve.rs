@@ -31,10 +31,10 @@ impl EnumGenerator {
                 for ::compris::normal::Variant<#annotated_parameter>
                 #where_clause
             {
-                fn resolve_with_errors<ErrorRecipientT>(self, errors: &mut ErrorRecipientT) ->
+                fn resolve_with_errors<ErrorReceiverT>(self, errors: &mut ErrorReceiverT) ->
                     ::compris::resolve::ResolveResult<#enum_name #type_generics, #annotated_parameter>
-                    where ErrorRecipientT:
-                        ::kutil::std::error::ErrorRecipient<::compris::resolve::ResolveError<#annotated_parameter>>
+                    where ErrorReceiverT:
+                        ::kutil::std::error::ErrorReceiver<::compris::resolve::ResolveError<#annotated_parameter>>
                 {
                     let maybe_annotations = ::compris::annotate::Annotated::maybe_annotations(&self);
                     let type_name = self.type_name();
@@ -48,7 +48,7 @@ impl EnumGenerator {
                                     #(#segments)*
 
                                     key => {
-                                        ::kutil::std::error::ErrorRecipient::give_error(
+                                        ::kutil::std::error::ErrorReceiver::give_error(
                                             errors,
                                             ::compris::annotate::Annotated::with_annotations_from(
                                                 ::compris::normal::MalformedError::new(
@@ -63,7 +63,7 @@ impl EnumGenerator {
                                 }
 
                                 _ => {
-                                    ::kutil::std::error::ErrorRecipient::give_error(
+                                    ::kutil::std::error::ErrorReceiver::give_error(
                                         errors,
                                         ::compris::annotate::Annotated::with_annotations_from(
                                             ::compris::normal::IncompatibleVariantTypeError::new(
@@ -78,7 +78,7 @@ impl EnumGenerator {
                             }
 
                             ::std::option::Option::None => {
-                                ::kutil::std::error::ErrorRecipient::give_error(
+                                ::kutil::std::error::ErrorReceiver::give_error(
                                     errors,
                                     ::compris::annotate::Annotated::with_annotations_from(
                                         ::compris::normal::MalformedError::new(

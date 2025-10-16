@@ -8,7 +8,8 @@ use super::{
 };
 
 use {
-    kutil::{cli::depict::*, std::iter::*},
+    depiction::*,
+    kutil::std::iter::*,
     std::{
         collections::*,
         fmt::{self, Write},
@@ -93,21 +94,22 @@ impl<AnnotatedT> Map<AnnotatedT> {
         take(&mut self.inner).into_iter().collect()
     }
 
-    /// Removes all [Annotations] recursively.
-    pub fn without_annotations(self) -> Map<WithoutAnnotations> {
-        self.inner.into_iter().map(|(key, value)| (key.without_annotations(), value.without_annotations())).collect()
+    /// [Depict] with [Annotations].
+    pub fn annotated_depict(&self, mode: AnnotatedDepictionMode) -> AnnotatedDepictMap<'_, AnnotatedT> {
+        AnnotatedDepictMap::new(self, mode)
     }
+}
 
-    /// Into different [Annotated] implementation.
-    pub fn into_annotated<NewAnnotationsT>(mut self) -> Map<NewAnnotationsT>
-    where
-        AnnotatedT: Annotated,
-        NewAnnotationsT: Annotated + Default,
-    {
-        let new_map: Map<NewAnnotationsT> =
+impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<Map<NewAnnotatedT>> for Map<AnnotatedT>
+where
+    AnnotatedT: Annotated,
+    NewAnnotatedT: Annotated + Default,
+{
+    fn into_annotated(mut self) -> Map<NewAnnotatedT> {
+        let new_map: Map<NewAnnotatedT> =
             self.into_vector().into_iter().map(|(key, value)| (key.into_annotated(), value.into_annotated())).collect();
         if AnnotatedT::can_have_annotations()
-            && NewAnnotationsT::can_have_annotations()
+            && NewAnnotatedT::can_have_annotations()
             && let Some(annotations) = self.annotated.annotations()
         {
             new_map.with_annotations(annotations.clone())
@@ -115,10 +117,11 @@ impl<AnnotatedT> Map<AnnotatedT> {
             new_map
         }
     }
+}
 
-    /// [Depict] with [Annotations].
-    pub fn annotated_depict(&self, mode: AnnotatedDepictionMode) -> AnnotatedDepictMap<'_, AnnotatedT> {
-        AnnotatedDepictMap::new(self, mode)
+impl<AnnotatedT> RemoveAnnotations<Map<WithoutAnnotations>> for Map<AnnotatedT> {
+    fn remove_annotations(self) -> Map<WithoutAnnotations> {
+        self.inner.into_iter().map(|(key, value)| (key.remove_annotations(), value.remove_annotations())).collect()
     }
 }
 
@@ -154,6 +157,8 @@ impl<AnnotatedT> fmt::Display for Map<AnnotatedT> {
         formatter.write_char('}')
     }
 }
+
+// Iterators
 
 impl<AnnotatedT> IntoIterator for Map<AnnotatedT> {
     type Item = (Variant<AnnotatedT>, Variant<AnnotatedT>);

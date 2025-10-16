@@ -32,13 +32,13 @@ impl<'own, AnnotatedT> ResolvingKeyValuePairIterator<'own, AnnotatedT> {
     }
 
     /// Constructor.
-    pub fn new_from<ErrorRecipientT>(
+    pub fn new_from<ErrorReceiverT>(
         variant: Variant<AnnotatedT>,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<Self, AnnotatedT>
     where
         AnnotatedT: 'own + Annotated + Clone + Default,
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         if variant.is_collection() {
             let iterator = variant.into_key_value_iterator().expect("map or list");
@@ -57,12 +57,9 @@ where
     Variant<AnnotatedT>: Resolve<ValueT, AnnotatedT>,
     AnnotatedT: Annotated + Default,
 {
-    fn resolve_next<ErrorRecipientT>(
-        &mut self,
-        errors: &mut ErrorRecipientT,
-    ) -> ResolveResult<(KeyT, ValueT), AnnotatedT>
+    fn resolve_next<ErrorReceiverT>(&mut self, errors: &mut ErrorReceiverT) -> ResolveResult<(KeyT, ValueT), AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         // Repeat until we get a non-error
         loop {

@@ -1,8 +1,8 @@
 use super::super::super::{annotations::*, r#struct::*};
 
-use {kutil::cli::depict::*, std::io};
+use {depiction::*, std::io};
 
-/// Location tag for [Depict](kutil::cli::depict::Depict).
+/// Location tag for [Depict](depiction::Depict).
 pub fn span<AnnotatedFieldsT, WriteT>(
     annotated_fields: &AnnotatedFieldsT,
     field_name: &str,

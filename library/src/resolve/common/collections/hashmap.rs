@@ -21,12 +21,12 @@ where
     AnnotatedT: 'static + Annotated + Clone + Default,
     BuildHasherT: BuildHasher + Default,
 {
-    fn resolve_with_errors<ErrorRecipientT>(
+    fn resolve_with_errors<ErrorReceiverT>(
         self,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> ResolveResult<HashMap<KeyT, ValueT, BuildHasherT>, AnnotatedT>
     where
-        ErrorRecipientT: ErrorRecipient<ResolveError<AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
     {
         let mut resolved = HashMap::default();
 

@@ -1,4 +1,4 @@
-use super::{super::path::*, annotations::*, label::*, maybe::*, span::*, r#struct::*};
+use super::super::{super::path::*, annotations::*, maybe::*, r#struct::*};
 
 use kutil::std::immutable::*;
 
@@ -82,11 +82,7 @@ where
         AnnotatedFieldsT: AnnotatedStruct,
     {
         if Self::can_have_annotations() {
-            if let Some(annotations) = source.field_annotations(name)
-                && let Some(self_annotations) = self.annotations_mut()
-            {
-                *self_annotations = annotations.clone();
-            } else if let Some(annotations) = source.struct_annotations()
+            if let Some(annotations) = source.field_or_struct_annotations(name)
                 && let Some(self_annotations) = self.annotations_mut()
             {
                 *self_annotations = annotations.clone();

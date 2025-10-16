@@ -8,7 +8,7 @@
 /// [Into]<[Variant](super::super::Variant)>, which includes all the supported primitive
 /// types.
 #[macro_export]
-macro_rules! traverse(
+macro_rules! traverse {
     ( $value:expr $(,)? ) => ( ::std::option::Option::<&$crate::normal::Variant>::Some(&$value) );
 
     ( $value:expr, $key:expr $(,)? ) => ( $value.into_get($key) );
@@ -19,7 +19,7 @@ macro_rules! traverse(
             ::std::option::Option::None => ::std::option::Option::None,
         }
     );
-);
+}
 
 /// Traverse a value by calling [Variant::get_mut](super::super::Variant::get_mut)
 /// recursively.
@@ -32,7 +32,7 @@ macro_rules! traverse(
 /// [Into]<[Variant](super::super::Variant)>, which includes all the supported primitive
 /// types.
 #[macro_export]
-macro_rules! traverse_mut(
+macro_rules! traverse_mut {
     ( $value:expr $(,)? ) => ( ::std::option::Option::<&mut $crate::normal::Variant>::Some($value) );
 
     ( $value:expr, $key:expr $(,)? ) => ( $value.into_get_mut($key) );
@@ -43,7 +43,7 @@ macro_rules! traverse_mut(
             ::std::option::Option::None => ::std::option::Option::None,
         }
     );
-);
+}
 
 #[allow(unused_imports)]
 pub use {traverse, traverse_mut};

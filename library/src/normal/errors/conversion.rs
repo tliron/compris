@@ -1,6 +1,6 @@
 use super::{super::super::annotate::*, casting::*, incompatible_variant_type::*};
 
-use {kutil::cli::depict::*, thiserror::*};
+use {depiction::*, thiserror::*};
 
 //
 // ConversionError
@@ -21,13 +21,12 @@ pub enum ConversionError<AnnotatedT> {
     Casting(#[from] CastingError<AnnotatedT>),
 }
 
-impl<AnnotatedT> ConversionError<AnnotatedT> {
-    /// Into different [Annotated] implementation.
-    pub fn into_annotated<NewAnnotationsT>(self) -> ConversionError<NewAnnotationsT>
-    where
-        AnnotatedT: Annotated + Default,
-        NewAnnotationsT: Annotated + Default,
-    {
+impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<ConversionError<NewAnnotatedT>> for ConversionError<AnnotatedT>
+where
+    AnnotatedT: Annotated,
+    NewAnnotatedT: Annotated + Default,
+{
+    fn into_annotated(self) -> ConversionError<NewAnnotatedT> {
         match self {
             Self::IncompatibleVariantType(incompatible_variant_type) => {
                 incompatible_variant_type.into_annotated().into()

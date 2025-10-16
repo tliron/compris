@@ -1,8 +1,9 @@
 use super::{super::annotate::*, macros::*};
 
 use {
+    depiction::*,
     duplicate::*,
-    kutil::{cli::depict::*, std::immutable::*},
+    kutil::std::immutable::*,
     std::{borrow::*, fmt, io},
 };
 

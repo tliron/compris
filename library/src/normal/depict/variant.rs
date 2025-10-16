@@ -1,6 +1,6 @@
 use super::super::{super::annotate::*, variant::*};
 
-use {kutil::cli::depict::*, std::io};
+use {depiction::*, std::io};
 
 //
 // AnnotatedDepictVariant

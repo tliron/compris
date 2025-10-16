@@ -10,16 +10,16 @@ impl<AnnotatedT> Map<AnnotatedT> {
     /// Merge another map into this map. Return true if any change happened.
     ///
     /// The merging behavior depends on the [MergeMode].
-    pub fn merge_with_errors<'own, ErrorRecipientT>(
+    pub fn merge_with_errors<'own, ErrorReceiverT>(
         &mut self,
         other: &'own Self,
         merge_mode: &MergeMode,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> Result<bool, MergeError<'own, AnnotatedT>>
     where
         Self: 'own,
         AnnotatedT: Clone,
-        ErrorRecipientT: ErrorRecipient<MergeError<'own, AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<MergeError<'own, AnnotatedT>>,
     {
         let mut changed = false;
 
@@ -44,7 +44,7 @@ impl<AnnotatedT> Map<AnnotatedT> {
     where
         AnnotatedT: Clone,
     {
-        self.merge_with_errors(other, merge_mode, &mut FailFastErrorRecipient)
+        self.merge_with_errors(other, merge_mode, &mut FailFastErrorReceiver)
     }
 
     /// Merge another map into this map. Return true if any change happened.
@@ -58,16 +58,16 @@ impl<AnnotatedT> Map<AnnotatedT> {
         self.merge_with_mode(other, &Default::default()).expect("merge_with_mode")
     }
 
-    fn merge_key<'own, ErrorRecipientT>(
+    fn merge_key<'own, ErrorReceiverT>(
         &mut self,
         other_key: &'own Variant<AnnotatedT>,
         other_value: &'own Variant<AnnotatedT>,
         merge_mode: &MergeMode,
-        errors: &mut ErrorRecipientT,
+        errors: &mut ErrorReceiverT,
     ) -> Result<bool, MergeError<'own, AnnotatedT>>
     where
         AnnotatedT: Clone,
-        ErrorRecipientT: ErrorRecipient<MergeError<'own, AnnotatedT>>,
+        ErrorReceiverT: ErrorReceiver<MergeError<'own, AnnotatedT>>,
     {
         match self.inner.get_mut(other_key) {
             Some(value) => {

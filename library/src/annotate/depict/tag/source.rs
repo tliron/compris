@@ -1,8 +1,8 @@
 use super::super::super::{DEPICT_ANNOTATIONS_PREFIX, r#struct::*};
 
-use {kutil::cli::depict::*, std::io};
+use {depiction::*, std::io};
 
-/// Source tag for a [Depict](kutil::cli::depict::Depict).
+/// Source tag for a [Depict](Depict).
 pub fn source<AnnotatedFieldsT, WriteT>(
     annotated_fields: &AnnotatedFieldsT,
     field_name: &str,

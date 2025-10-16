@@ -1,10 +1,7 @@
-resolve self instead of &self?
+https://preserves.dev/
 
 YAML ser
 ========
-
-Currently using serde_yml
-Unsound and broken for complex keys :(
 
 What about Saphyr serde?
 
