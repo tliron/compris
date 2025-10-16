@@ -36,14 +36,14 @@ impl SerializationMode {
 
     /// Default serialization mode for YAML.
     ///
-    /// * [BytesSerializationMode::StringifyBase64]
+    /// * [BlobSerializationMode::StringifyBase64]
     pub fn for_yaml() -> Self {
         Self { blob: BlobSerializationMode::StringifyBase64(None), ..Default::default() }
     }
 
     /// Default serialization mode for JSON.
     ///
-    /// * [BytesSerializationMode::StringifyBase64]
+    /// * [BlobSerializationMode::StringifyBase64]
     /// * [MapSerializationMode::SerializeKeysIfNonText]
     pub fn for_json() -> Self {
         Self {
@@ -57,7 +57,7 @@ impl SerializationMode {
     ///
     /// * [IntegerSerializationMode::Stringify] with a hint
     /// * [UnsignedIntegerSerializationMode::Stringify] with a hint
-    /// * [BytesSerializationMode::StringifyBase64] with a hint
+    /// * [BlobSerializationMode::StringifyBase64] with a hint
     /// * [MapSerializationMode::AsSeqIfNonTextKey] with a hint
     pub fn for_xjson() -> Self {
         let hints = Hints::xjson();

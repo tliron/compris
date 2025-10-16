@@ -403,7 +403,7 @@ checksum = "b05b61dc5112cbb17e4b6cd61790d9845d13888356391624cbe7e41efeac1e75"
 
 [[package]]
 name = "compris"
-version = "0.0.7"
+version = "0.0.9"
 dependencies = [
  "anstream",
  "base64",
@@ -428,7 +428,7 @@ dependencies = [
 
 [[package]]
 name = "compris-cli"
-version = "0.0.7"
+version = "0.0.9"
 dependencies = [
  "anstream",
  "clap",
@@ -442,7 +442,7 @@ dependencies = [
 
 [[package]]
 name = "compris-macros"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "deluxe",
  "proc-macro2",
@@ -1169,9 +1169,7 @@ dependencies = [
 
 [[package]]
 name = "kutil"
-version = "0.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91a742852132e38b30e286f9a987b207da44bd857ae0002cae9b76f13e5b66b3"
+version = "0.0.2"
 dependencies = [
  "anstream",
  "anstyle",
@@ -1201,9 +1199,7 @@ dependencies = [
 
 [[package]]
 name = "kutil-cli-macros"
-version = "0.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b05793d12ce1ba18c047bdd78bf9fc1f084d0680555aea38942655edba5f46e"
+version = "0.0.7"
 dependencies = [
  "deluxe",
  "proc-macro2",
@@ -1213,9 +1209,7 @@ dependencies = [
 
 [[package]]
 name = "kutil-std-macros"
-version = "0.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ed9257241a8e4608f1cb8366a79c1a65bba5f95a08a31c1341d154743a5a045"
+version = "0.0.3"
 dependencies = [
  "deluxe",
  "proc-macro2",
@@ -1727,9 +1721,7 @@ dependencies = [
 
 [[package]]
 name = "read-url"
-version = "0.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b2c60173507b346d3de996579fc8e449120d1a76b0d3a0cda672962abad52e6"
+version = "0.0.9"
 dependencies = [
  "futures",
  "kutil",

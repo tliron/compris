@@ -142,7 +142,7 @@ impl Serializer {
         self.write(value, &mut io::stdout())
     }
 
-    /// Serializes the provided value to [stdout] according to [Serializer::format](Serializer).
+    /// Serializes the provided value to [stdout](io::stdout) according to [Serializer::format](Serializer).
     pub fn print_modal<AnnotatedT>(
         &self,
         value: &Variant<AnnotatedT>,

@@ -76,7 +76,7 @@ where
         self
     }
 
-    /// Clone [Annotations] from another [AnnotatedFields].
+    /// Clone [Annotations] from another [AnnotatedStruct].
     fn with_annotations_from_field<AnnotatedFieldsT>(mut self, source: &AnnotatedFieldsT, name: &str) -> Self
     where
         AnnotatedFieldsT: AnnotatedStruct,

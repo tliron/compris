@@ -9,7 +9,7 @@ use {
 // AnnotatedMessageError
 //
 
-/// [Annotated] [Error] with [String] message.
+/// [Annotated](super::super::Annotated) [Error] with [String] message.
 #[derive(Debug)]
 pub struct AnnotatedMessageError<AnnotatedT> {
     /// Message.

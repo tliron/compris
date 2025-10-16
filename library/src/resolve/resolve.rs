@@ -21,7 +21,7 @@ pub trait Resolve<ResolvedT, AnnotatedT>: Sized {
     /// Resolve one type into another.
     ///
     /// Unlike [resolve](Resolve::resolve) will fail on the first encountered error and will return
-    /// [ResolveError::None] instead of [None].
+    /// [ResolveError::Missing] instead of [None].
     ///
     /// If you want all the errors use [resolve](Resolve::resolve) instead.
     fn resolve(self) -> Result<ResolvedT, ResolveError<AnnotatedT>> {

@@ -1,5 +1,5 @@
-/// Cast to a [Variant](super::super::normal::Variant) with
-/// [Annotations](super::super::annotate::Annotations).
+/// Cast to a [Variant](super::super::Variant) with
+/// [Annotations](super::super::super::annotate::Annotations).
 #[macro_export]
 macro_rules! with_annotations (
     () => ( $crate::normal::Variant::Nothing<$crate::annotate::WithAnnotations> );
@@ -7,8 +7,8 @@ macro_rules! with_annotations (
     ( $value:expr $(,)? ) => ( ($value) as $crate::normal::Variant<$crate::annotate::WithAnnotations> );
 );
 
-/// Cast to a [Variant](super::super::normal::Variant) without
-/// [Annotations](super::super::annotate::Annotations).
+/// Cast to a [Variant](super::super::Variant) without
+/// [Annotations](super::super::super::annotate::Annotations).
 #[macro_export]
 macro_rules! without_annotations (
     () => ( $crate::normal::Variant::Nothing<$crate::annotate::WithoutAnnotations> );
@@ -16,7 +16,7 @@ macro_rules! without_annotations (
     ( $value:expr $(,)? ) => ( ($value) as $crate::normal::Variant<$crate::annotate::WithoutAnnotations> );
 );
 
-/// Creates a [Variant](super::super::normal::Variant) from a bare primitive expression.
+/// Creates a [Variant](super::super::Variant) from a bare primitive expression.
 #[macro_export]
 macro_rules! normal (
     () => ( $crate::normal::Variant::Nothing );
@@ -24,7 +24,7 @@ macro_rules! normal (
     ( $value:expr $(,)? ) => ( $crate::normal::Variant::from($value) );
 );
 
-/// Creates a [Variant::List](super::super::normal::Variant::List) from a sequence of bare primitive expressions.
+/// Creates a [Variant::List](super::super::Variant::List) from a sequence of bare primitive expressions.
 #[macro_export]
 macro_rules! normal_list (
     () => (
@@ -42,7 +42,7 @@ macro_rules! normal_list (
     );
 );
 
-/// Creates a [Variant::Map](super::super::normal::Variant::Map) from a sequence of key-value tuples.
+/// Creates a [Variant::Map](super::super::Variant::Map) from a sequence of key-value tuples.
 #[macro_export]
 macro_rules! normal_map (
     () => (
@@ -60,7 +60,7 @@ macro_rules! normal_map (
     );
 );
 
-/// Creates a [Vec]<[Variant](super::super::normal::Variant)> from a sequence of bare primitive expressions.
+/// Creates a [Vec]<[Variant](super::super::Variant)> from a sequence of bare primitive expressions.
 #[macro_export]
 macro_rules! normal_vec (
     ( $( $value:expr ),* $(,)? ) => (

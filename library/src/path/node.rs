@@ -4,7 +4,7 @@ use super::{super::normal::*, segment::*};
 // PathNode
 //
 
-/// [Path] node.
+/// [Path](super::Path) node.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct PathNode<'own, AnnotatedT> {
     /// Variant.

@@ -3,7 +3,7 @@ edition = "2024"
 
 name = "compris"
 description = "Composite Primitive Schema (CPS) for Rust"
-version = "0.0.7"
+version = "0.0.9"
 rust-version = "1.90"
 
 license = "MIT OR Apache-2.0"
@@ -25,9 +25,9 @@ anstream = "0.6.21"
 base64 = "0.22.1"
 base64-simd = "0.8.0"
 borc = { optional = true, version = "0.6.0" }
-compris-macros = { optional = true, version = "=0.0.4" }
+compris-macros = { optional = true, version = "=0.0.5" }
 duplicate = "2.0.0"
-kutil = { version = "=0.0.1", features = ["std", "cli", "derive", "fast_collections", "immutable"] }
+kutil = { version = "=0.0.2", features = ["std", "cli", "derive", "fast_collections", "immutable"] }
 num-traits = "0.2.19"
 ordered-float = "5.1.0"
 rmp = { optional = true, version = "0.8" }
@@ -96,4 +96,5 @@ required-features = ["serde", "serde/derive"]
 # https://stackoverflow.com/a/61417700
 [package.metadata.docs.rs]
 all-features = true
+features = ["read-url/async"]
 rustdoc-args = ["--cfg", "docsrs"]
