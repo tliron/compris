@@ -1,13 +1,13 @@
 use super::errors::*;
 
-use kutil::std::error::*;
+use problemo::{common::*, *};
 
 //
 // Resolve
 //
 
 /// Resolve one type into another.
-pub trait Resolve<ResolvedT, AnnotatedT>: Sized {
+pub trait Resolve<ResolvedT>: Sized {
     /// Resolve one type into another.
     ///
     /// A lot like [TryFrom], except that we can accumulate potentially annotated errors.
@@ -16,19 +16,19 @@ pub trait Resolve<ResolvedT, AnnotatedT>: Sized {
     /// thus check that `errors` is empty even when the function returns [Ok].
     ///
     /// The function may return [Some] partially resolved result even if there are errors.
-    fn resolve_with_errors<ErrorReceiverT>(self, errors: &mut ErrorReceiverT) -> ResolveResult<ResolvedT, AnnotatedT>
+    fn resolve_with_problems<ProblemReceiverT>(self, errors: &mut ProblemReceiverT) -> ResolveResult<ResolvedT>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>;
+        ProblemReceiverT: ProblemReceiver;
 
     /// Resolve one type into another.
     ///
     /// A lot like [TryFrom], except that we can accumulate potentially annotated errors.
     ///
     /// Unlike [resolve](Resolve::resolve) will fail on the first encountered error and will return
-    /// [ResolveError::Missing] instead of [None].
+    /// a [NoneError] problem instead of [None].
     ///
     /// If you want all the errors use [resolve](Resolve::resolve) instead.
-    fn resolve(self) -> Result<ResolvedT, ResolveError<AnnotatedT>> {
-        self.resolve_with_errors(&mut FailFastErrorReceiver)?.ok_or(ResolveError::Missing)
+    fn resolve(self) -> Result<ResolvedT, Problem> {
+        self.resolve_with_problems(&mut FailFast)?.ok_or(NoneError::new("resolved").into())
     }
 }

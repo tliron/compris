@@ -7,22 +7,22 @@ use {depiction::*, std::io};
 //
 
 /// [Depict] wrapper for a [Variant] with [Annotations].
-pub struct AnnotatedDepictVariant<'own, AnnotatedT> {
+pub struct AnnotatedDepictVariant<'this, AnnotatedT> {
     /// Inner.
-    pub inner: &'own Variant<AnnotatedT>,
+    pub inner: &'this Variant<AnnotatedT>,
 
     /// Mode.
     pub mode: AnnotatedDepictionMode,
 }
 
-impl<'own, AnnotatedT> AnnotatedDepictVariant<'own, AnnotatedT> {
+impl<'this, AnnotatedT> AnnotatedDepictVariant<'this, AnnotatedT> {
     /// Constructor.
-    pub fn new(inner: &'own Variant<AnnotatedT>, mode: AnnotatedDepictionMode) -> Self {
+    pub fn new(inner: &'this Variant<AnnotatedT>, mode: AnnotatedDepictionMode) -> Self {
         Self { inner, mode }
     }
 }
 
-impl<'own, AnnotatedT> Depict for AnnotatedDepictVariant<'own, AnnotatedT>
+impl<'this, AnnotatedT> Depict for AnnotatedDepictVariant<'this, AnnotatedT>
 where
     AnnotatedT: Annotated,
 {

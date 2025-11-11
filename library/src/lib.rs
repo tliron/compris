@@ -23,6 +23,8 @@ saying "let's just store it as JSON", say "let's just store it as CPS", and use 
 the representation. It will allow you and your users to select from all supported formats at
 runtime.
 
+See [here](https://github.com/tliron/compris/blob/main/CPS.md) for a full description of CPS.
+
 Compris is pronounced "com-PREE". The name comes from shortening CompositePrimitiveSchema to
 ComPriS.
 
@@ -40,6 +42,9 @@ pub mod annotate;
 /// General-purpose serde deserialization using normal types as the intermediary.
 #[cfg(feature = "serde")]
 pub mod de;
+
+/// Errors.
+pub mod errors;
 
 /// Hints for extending representation formats (such as XJSON).
 pub mod hints;

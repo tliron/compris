@@ -1,11 +1,15 @@
 use super::{
     super::{annotate::*, normal::*, *},
-    errors::*,
     modal::*,
     mode::*,
 };
 
-use {kutil::std::immutable::*, serde::*, std::io};
+use {
+    kutil::std::immutable::*,
+    problemo::{common::*, *},
+    serde::*,
+    std::io,
+};
 
 const STRINGIFY_BUFFER_CAPACITY: usize = 1024;
 
@@ -60,7 +64,7 @@ impl Serializer {
     }
 
     /// Serializes the provided value to the writer according to [Serializer::format](Serializer).
-    pub fn write<WriteT, SerializableT>(&self, value: &SerializableT, writer: &mut WriteT) -> Result<(), SerializeError>
+    pub fn write<WriteT, SerializableT>(&self, value: &SerializableT, writer: &mut WriteT) -> Result<(), Problem>
     where
         WriteT: io::Write,
         SerializableT: Serialize,
@@ -88,7 +92,10 @@ impl Serializer {
                 feature = "json",
                 feature = "xml",
             )))]
-            _ => Err(SerializeError::UnsupportedFormat(self.format.clone())),
+            format => {
+                use super::errors::*;
+                Err(UnsupportedError::new("serialization format").into_serialize_problem(format))
+            }
         }
     }
 
@@ -100,7 +107,7 @@ impl Serializer {
         value: &Variant<AnnotatedT>,
         mode: &SerializationMode,
         writer: &mut WriteT,
-    ) -> Result<(), SerializeError>
+    ) -> Result<(), Problem>
     where
         WriteT: io::Write,
         AnnotatedT: Annotated + Clone + Default,
@@ -116,7 +123,7 @@ impl Serializer {
         &self,
         value: &Variant<AnnotatedT>,
         writer: &mut WriteT,
-    ) -> Result<(), SerializeError>
+    ) -> Result<(), Problem>
     where
         WriteT: io::Write,
         AnnotatedT: Annotated + Clone + Default,
@@ -130,13 +137,13 @@ impl Serializer {
     /// Convenience function to serialize to a string.
     ///
     /// Binary formats will always use Base64.
-    pub fn stringify<SerializableT>(&self, value: &SerializableT) -> Result<ByteString, SerializeError>
+    pub fn stringify<SerializableT>(&self, value: &SerializableT) -> Result<ByteString, Problem>
     where
         SerializableT: Serialize,
     {
         let mut writer = Vec::with_capacity(STRINGIFY_BUFFER_CAPACITY);
         match self.clone().with_base64(true).write(value, &mut writer) {
-            Ok(_) => Ok(ByteString::try_from(writer)?),
+            Ok(_) => ByteString::try_from(writer).via(LowLevelError),
             Err(error) => Err(error),
         }
     }
@@ -150,7 +157,7 @@ impl Serializer {
         &self,
         value: &Variant<AnnotatedT>,
         mode: &SerializationMode,
-    ) -> Result<ByteString, SerializeError>
+    ) -> Result<ByteString, Problem>
     where
         AnnotatedT: Annotated + Clone + Default,
     {
@@ -163,7 +170,7 @@ impl Serializer {
     /// Binary formats will always use Base64.
     ///
     /// Will use a [SerializationMode] if one is available for the format.
-    pub fn stringify_modal<AnnotatedT>(&self, value: &Variant<AnnotatedT>) -> Result<ByteString, SerializeError>
+    pub fn stringify_modal<AnnotatedT>(&self, value: &Variant<AnnotatedT>) -> Result<ByteString, Problem>
     where
         AnnotatedT: Annotated + Clone + Default,
     {
@@ -176,11 +183,11 @@ impl Serializer {
     // Utils
 
     #[allow(dead_code)]
-    pub(crate) fn write_newline<WriteT>(writer: &mut WriteT) -> Result<(), SerializeError>
+    pub(crate) fn write_newline<WriteT>(writer: &mut WriteT) -> Result<(), Problem>
     where
         WriteT: io::Write,
     {
-        writer.write(b"\n")?;
+        writer.write(b"\n").via(LowLevelError)?;
         Ok(())
     }
 

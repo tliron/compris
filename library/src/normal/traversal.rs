@@ -24,7 +24,7 @@ where
 /// [Traversal] using references.
 ///
 /// Can be converted into a [Traversal] using [to_traversal].
-pub type RefTraversal<'own, AnnotatedT> = Vec<&'own Variant<AnnotatedT>>;
+pub type RefTraversal<'this, AnnotatedT> = Vec<&'this Variant<AnnotatedT>>;
 
 /// Convert to a [RefTraversal].
 ///

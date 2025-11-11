@@ -2,53 +2,40 @@ use super::super::super::{annotate::*, normal::*};
 
 use {
     depiction::*,
+    derive_more::*,
     std::{fmt, io},
-    thiserror::*,
 };
 
 //
 // MissingRequiredKeyError
 //
 
-/// Missing required key.
+/// Missing required key error.
 #[derive(Debug, Error)]
-pub struct MissingRequiredKeyError<AnnotatedT> {
+pub struct MissingRequiredKeyError {
     /// Key.
-    pub key: Variant<AnnotatedT>,
+    pub key: Variant<WithoutAnnotations>,
 }
 
-impl_annotated!(MissingRequiredKeyError, key);
-
-impl<AnnotatedT> MissingRequiredKeyError<AnnotatedT> {
+impl MissingRequiredKeyError {
     /// Constructor.
-    pub fn new(key: Variant<AnnotatedT>) -> Self {
-        Self { key }
+    pub fn new<AnnotatedT>(key: Variant<AnnotatedT>) -> Self {
+        Self { key: key.remove_annotations() }
     }
 }
 
-impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<MissingRequiredKeyError<NewAnnotatedT>>
-    for MissingRequiredKeyError<AnnotatedT>
-where
-    AnnotatedT: Annotated,
-    NewAnnotatedT: Annotated + Default,
-{
-    fn into_annotated(self) -> MissingRequiredKeyError<NewAnnotatedT> {
-        MissingRequiredKeyError::new(self.key.into_annotated())
+impl fmt::Display for MissingRequiredKeyError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "{:?}", self.key.to_string())
     }
 }
 
-impl<AnnotatedT> Depict for MissingRequiredKeyError<AnnotatedT> {
+impl Depict for MissingRequiredKeyError {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>
     where
         WriteT: io::Write,
     {
         let key = format!("{:?}", self.key.to_string());
         write!(writer, "missing required key: {}", context.theme.error(key))
-    }
-}
-
-impl<AnnotatedT> fmt::Display for MissingRequiredKeyError<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(formatter, "{:?}", self.key.to_string())
     }
 }

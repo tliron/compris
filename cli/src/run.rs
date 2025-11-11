@@ -1,8 +1,8 @@
-use super::{commands::*, errors::*};
+use super::commands::*;
 
-use {clap::*, kutil::cli::log::*};
+use {clap::*, kutil::cli::log::*, problemo::*};
 
-pub fn run() -> Result<(), MainError> {
+pub fn run() -> Result<(), Problem> {
     let root = Root::parse();
 
     if !root.quiet {

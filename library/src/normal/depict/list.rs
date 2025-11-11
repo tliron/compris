@@ -10,22 +10,22 @@ use {depiction::*, std::io};
 //
 
 /// [Depict] wrapper for a [List] with [Annotations].
-pub struct AnnotatedDepictList<'own, AnnotatedT> {
+pub struct AnnotatedDepictList<'this, AnnotatedT> {
     /// Inner.
-    pub inner: &'own List<AnnotatedT>,
+    pub inner: &'this List<AnnotatedT>,
 
     /// Mode.
     pub mode: AnnotatedDepictionMode,
 }
 
-impl<'own, AnnotatedT> AnnotatedDepictList<'own, AnnotatedT> {
+impl<'this, AnnotatedT> AnnotatedDepictList<'this, AnnotatedT> {
     /// Constructor.
-    pub fn new(inner: &'own List<AnnotatedT>, mode: AnnotatedDepictionMode) -> Self {
+    pub fn new(inner: &'this List<AnnotatedT>, mode: AnnotatedDepictionMode) -> Self {
         Self { inner, mode }
     }
 }
 
-impl<'own, AnnotatedT> Depict for AnnotatedDepictList<'own, AnnotatedT>
+impl<'this, AnnotatedT> Depict for AnnotatedDepictList<'this, AnnotatedT>
 where
     AnnotatedT: Annotated,
 {

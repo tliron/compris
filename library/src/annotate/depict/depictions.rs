@@ -11,13 +11,13 @@ use {
 //
 
 /// A [Depict] wrapper for an [Iterator] of [Annotated] [Depict].
-pub struct AnnotatedDepictions<'own, InnerT, ItemT>
+pub struct AnnotatedDepictions<'this, InnerT, ItemT>
 where
-    &'own InnerT: IntoIterator<Item = &'own ItemT>,
-    ItemT: 'own,
+    &'this InnerT: IntoIterator<Item = &'this ItemT>,
+    ItemT: 'this,
 {
     /// Inner.
-    pub inner: &'own InnerT,
+    pub inner: &'this InnerT,
 
     /// Mode.
     pub mode: AnnotatedDepictionMode,
@@ -26,21 +26,21 @@ where
     pub heading: Option<String>,
 }
 
-impl<'own, InnerT, ItemT> AnnotatedDepictions<'own, InnerT, ItemT>
+impl<'this, InnerT, ItemT> AnnotatedDepictions<'this, InnerT, ItemT>
 where
-    &'own InnerT: IntoIterator<Item = &'own ItemT>,
-    ItemT: 'own,
+    &'this InnerT: IntoIterator<Item = &'this ItemT>,
+    ItemT: 'this,
 {
     /// Constructor.
-    pub fn new(inner: &'own InnerT, mode: AnnotatedDepictionMode, heading: Option<String>) -> Self {
+    pub fn new(inner: &'this InnerT, mode: AnnotatedDepictionMode, heading: Option<String>) -> Self {
         Self { inner, mode, heading }
     }
 }
 
-impl<'own, InnerT, ItemT> Depict for AnnotatedDepictions<'own, InnerT, ItemT>
+impl<'this, InnerT, ItemT> Depict for AnnotatedDepictions<'this, InnerT, ItemT>
 where
-    &'own InnerT: IntoIterator<Item = &'own ItemT>,
-    ItemT: 'own + Annotated + Depict,
+    &'this InnerT: IntoIterator<Item = &'this ItemT>,
+    ItemT: 'this + Annotated + Depict,
 {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>
     where
@@ -103,23 +103,23 @@ where
 //
 
 /// To [AnnotatedDepictions].
-pub trait ToAnnotatedDepictions<'own, ItemT>
+pub trait ToAnnotatedDepictions<'this, ItemT>
 where
-    Self: 'own + Sized,
-    &'own Self: IntoIterator<Item = &'own ItemT>,
-    ItemT: 'own,
+    Self: 'this + Sized,
+    &'this Self: IntoIterator<Item = &'this ItemT>,
+    ItemT: 'this,
 {
     /// To [AnnotatedDepictions].
-    fn annotated_depictions(&'own self, heading: Option<String>) -> AnnotatedDepictions<'own, Self, ItemT>;
+    fn annotated_depictions(&'this self, heading: Option<String>) -> AnnotatedDepictions<'this, Self, ItemT>;
 }
 
-impl<'own, ErrorIterableT, ErrorT> ToAnnotatedDepictions<'own, ErrorT> for ErrorIterableT
+impl<'this, ErrorIterableT, ErrorT> ToAnnotatedDepictions<'this, ErrorT> for ErrorIterableT
 where
-    ErrorIterableT: 'own,
-    &'own ErrorIterableT: IntoIterator<Item = &'own ErrorT>,
-    ErrorT: 'own + Error,
+    ErrorIterableT: 'this,
+    &'this ErrorIterableT: IntoIterator<Item = &'this ErrorT>,
+    ErrorT: 'this + Error,
 {
-    fn annotated_depictions(&'own self, heading: Option<String>) -> AnnotatedDepictions<'own, Self, ErrorT> {
+    fn annotated_depictions(&'this self, heading: Option<String>) -> AnnotatedDepictions<'this, Self, ErrorT> {
         AnnotatedDepictions::new(self, AnnotatedDepictionMode::Multiline, heading)
     }
 }

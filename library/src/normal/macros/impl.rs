@@ -58,8 +58,8 @@ macro_rules! impl_normal {
             }
         }
 
-        impl<'own, AnnotatedT> Into<&'own $inner> for &'own $type<AnnotatedT> {
-            fn into(self) -> &'own $inner {
+        impl<'this, AnnotatedT> Into<&'this $inner> for &'this $type<AnnotatedT> {
+            fn into(self) -> &'this $inner {
                 &self.inner
             }
         }

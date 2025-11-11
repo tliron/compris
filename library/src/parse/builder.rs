@@ -1,9 +1,12 @@
 use super::{
-    super::{annotate::*, hints::*, normal::*},
-    error::*,
+    super::{annotate::*, format::*, hints::*, normal::*},
+    errors::*,
 };
 
-use kutil::std::{collections::*, immutable::*};
+use {
+    kutil::std::{collections::*, immutable::*},
+    problemo::{common::*, *},
+};
 
 //
 // VariantBuilder
@@ -113,7 +116,7 @@ impl<AnnotatedT> VariantBuilder<AnnotatedT> {
     }
 
     /// Add a referenced [Variant].
-    pub fn add_referenced(&mut self, reference: usize) -> Result<(), ParseError>
+    pub fn add_referenced(&mut self, reference: usize, format: Format) -> Result<(), Problem>
     where
         AnnotatedT: Annotated + Clone,
     {
@@ -123,7 +126,9 @@ impl<AnnotatedT> VariantBuilder<AnnotatedT> {
                 Ok(())
             }
 
-            None => Err(ParseError::ReferenceNotFound(reference)),
+            None => Err(NotFoundError::new("reference")
+                .into_parse_problem(format)
+                .with(ReferenceAttachment::new(reference))),
         }
     }
 
@@ -218,7 +223,7 @@ impl<AnnotatedT> VariantBuilder<AnnotatedT> {
     /// Ends building a container with optional support for hint processing.
     ///
     /// See [Variant::to_hinted_variant].
-    pub fn end_container_with_hints(&mut self, hints: Option<&Hints>) -> Result<(), ParseError>
+    pub fn end_container_with_hints(&mut self, hints: Option<&Hints>) -> Result<(), Problem>
     where
         AnnotatedT: Annotated + Clone + Default,
     {

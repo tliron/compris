@@ -1,9 +1,10 @@
-use super::{
-    super::{super::normal::*, errors::*},
-    deserializer::*,
-};
+use super::{super::super::normal::*, deserializer::*, errors::*};
 
-use {serde::de, std::slice::*};
+use {
+    problemo::{common::*, *},
+    serde::de,
+    std::slice::*,
+};
 
 //
 // MapAsListDeserializer
@@ -19,14 +20,17 @@ impl<'de, AnnotatedT> MapAsListDeserializer<'de, AnnotatedT> {
         Self { iterator: list.inner.iter(), current_entry: None }
     }
 
-    fn next(&mut self) -> Result<(), DeserializeError> {
+    fn next(&mut self) -> Result<(), SerdeProblem>
+    where
+        AnnotatedT: 'static + Clone + Send + Sync,
+    {
         let current_entry = self.iterator.next();
 
         match current_entry {
             Some(current_entry) => {
                 self.current_entry = current_entry.to_pair();
                 if self.current_entry.is_none() {
-                    return Err(DeserializeError::incompatible_variant(current_entry));
+                    return Err(incompatible_error("map entry", current_entry.clone()));
                 }
             }
 
@@ -39,14 +43,17 @@ impl<'de, AnnotatedT> MapAsListDeserializer<'de, AnnotatedT> {
     }
 }
 
-impl<'de, AnnotatedT> de::MapAccess<'de> for MapAsListDeserializer<'de, AnnotatedT> {
-    type Error = DeserializeError;
+impl<'de, AnnotatedT> de::MapAccess<'de> for MapAsListDeserializer<'de, AnnotatedT>
+where
+    AnnotatedT: 'static + Clone + Send + Sync,
+{
+    type Error = SerdeProblem;
 
     fn next_key_seed<SeedT>(&mut self, seed: SeedT) -> Result<Option<SeedT::Value>, Self::Error>
     where
         SeedT: de::DeserializeSeed<'de>,
     {
-        self.next()?;
+        self.next().into_serde_deserialize_problem()?;
         match self.current_entry {
             Some((key, _)) => Ok(Some(seed.deserialize(&mut Deserializer::new(key))?)),
             None => Ok(None),
@@ -59,7 +66,8 @@ impl<'de, AnnotatedT> de::MapAccess<'de> for MapAsListDeserializer<'de, Annotate
     {
         match self.current_entry {
             Some((_, value)) => Ok(seed.deserialize(&mut Deserializer::new(value))?),
-            None => Err(DeserializeError::NoMoreItems), // this shouldn't happen, but still
+            // this shouldn't happen, but still
+            None => Err(NoMoreItemsError::new("map value").into_problem().into()),
         }
     }
 }

@@ -4,22 +4,22 @@ use super::super::{
     resolve::*,
 };
 
-use kutil::std::error::*;
+use problemo::*;
 
-impl<InnerT, AnnotatedT> Resolve<Annotate<InnerT, AnnotatedT>, AnnotatedT> for Variant<AnnotatedT>
+impl<InnerT, AnnotatedT> Resolve<Annotate<InnerT, AnnotatedT>> for Variant<AnnotatedT>
 where
     AnnotatedT: Annotated + Default,
-    Variant<AnnotatedT>: Resolve<InnerT, AnnotatedT>,
+    Variant<AnnotatedT>: Resolve<InnerT>,
 {
-    fn resolve_with_errors<ErrorReceiverT>(
+    fn resolve_with_problems<ProblemReceiverT>(
         self,
-        errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<Annotate<InnerT, AnnotatedT>, AnnotatedT>
+        problems: &mut ProblemReceiverT,
+    ) -> ResolveResult<Annotate<InnerT, AnnotatedT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         let annotations = self.annotations().cloned();
-        Ok(self.resolve_with_errors(errors)?.map(|inner| {
+        Ok(self.resolve_with_problems(problems)?.map(|inner| {
             let annotate = Annotate::new(inner);
             match annotations {
                 Some(annotations) => annotate.with_annotations(annotations),

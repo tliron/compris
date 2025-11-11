@@ -3,7 +3,7 @@ mod utils;
 use {
     anstream::println,
     compris::{annotate::*, parse::*, resolve::*, *},
-    depiction::*,
+    problemo::*,
 };
 
 // Note that #[derive(Resolve)] requires an implementation of the Default trait,
@@ -90,22 +90,24 @@ pub fn main() {
     let result: Result<Vec<User>, _> = variant.clone().resolve();
 
     utils::heading("fail-fast error", false);
-    result.err().expect("error").annotated_depiction().print_default_depiction();
+    result.err().expect("error").print_default_depiction();
+    //result.err().expect("error").annotated_depiction().print_default_depiction();
 
-    // Instead of failing fast, we can call "resolve_with_errors" to accumulate all the errors *without* failing
+    // Instead of failing fast, we can call "resolve_with_problems" to accumulate all the errors *without* failing
     // Note that we might still get a partially-resolved result even when there are accumulated errors,
     // but that behavior depends on the resolver implementations
 
-    let mut errors = ResolveErrors::default();
+    let mut problems = Problems::default();
     let users: Vec<User> =
-        variant.resolve_with_errors(&mut errors).expect("errors should be accumulated").expect("some");
+        variant.resolve_with_problems(&mut problems).expect("errors should be accumulated").expect("some");
 
     utils::heading("partially resolved", false);
     println!("{:#?}", users);
 
-    if !errors.is_empty() {
+    if !problems.is_empty() {
         println!();
-        errors.annotated_depictions(Some("accumulated errors".into())).print_default_depiction();
+        problems.print_default_depiction();
+        //problems.annotated_depictions(Some("accumulated errors".into())).print_default_depiction();
     }
 
     // Continue to examples/resolve_advanced.rs to learn more

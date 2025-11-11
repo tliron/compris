@@ -1,11 +1,11 @@
 use super::super::super::{
-    super::{annotate::*, kv::*, normal::*},
+    super::{annotate::*, errors::*, kv::*, normal::*},
     errors::*,
     iterator::*,
     resolve::*,
 };
 
-use kutil::std::error::*;
+use problemo::*;
 
 //
 // ResolvingKeyValuePairIterator
@@ -20,58 +20,62 @@ use kutil::std::error::*;
 ///
 /// Useful for implementing [Resolve] for map-like collections, such as
 /// [HashMap](std::collections::HashMap).
-pub struct ResolvingKeyValuePairIterator<'own, AnnotatedT> {
+pub struct ResolvingKeyValuePairIterator<'this, AnnotatedT> {
     /// Inner key-value pair iterator.
-    pub inner: Box<dyn IntoKeyValuePairIterator<AnnotatedT> + 'own>,
+    pub inner: Box<dyn IntoKeyValuePairIterator<AnnotatedT> + 'this>,
 }
 
-impl<'own, AnnotatedT> ResolvingKeyValuePairIterator<'own, AnnotatedT> {
+impl<'this, AnnotatedT> ResolvingKeyValuePairIterator<'this, AnnotatedT> {
     /// Constructor.
-    pub fn new(inner: Box<dyn IntoKeyValuePairIterator<AnnotatedT> + 'own>) -> Self {
+    pub fn new(inner: Box<dyn IntoKeyValuePairIterator<AnnotatedT> + 'this>) -> Self {
         Self { inner }
     }
 
     /// Constructor.
-    pub fn new_from<ErrorReceiverT>(
+    pub fn new_from<ProblemReceiverT>(
         variant: Variant<AnnotatedT>,
-        errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<Self, AnnotatedT>
+        problems: &mut ProblemReceiverT,
+    ) -> ResolveResult<Self>
     where
-        AnnotatedT: 'own + Annotated + Clone + Default,
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        AnnotatedT: 'this + Annotated + Clone + Default,
+        ProblemReceiverT: ProblemReceiver,
     {
         if variant.is_collection() {
             let iterator = variant.into_key_value_iterator().expect("map or list");
             Ok(Some(Self::new(iterator)))
         } else {
-            errors.give(IncompatibleVariantTypeError::new_from(&variant, &["map", "list"]))?;
+            problems.give(
+                IncompatibleVariantTypeError::new_from(&variant, &["map", "list"]).into_problem().via(ResolveError),
+            )?;
             Ok(None)
         }
     }
 }
 
-impl<'own, KeyT, ValueT, AnnotatedT> ResolvingIterator<(KeyT, ValueT), AnnotatedT>
-    for ResolvingKeyValuePairIterator<'own, AnnotatedT>
+impl<'this, KeyT, ValueT, AnnotatedT> ResolvingIterator<(KeyT, ValueT)>
+    for ResolvingKeyValuePairIterator<'this, AnnotatedT>
 where
-    Variant<AnnotatedT>: Resolve<KeyT, AnnotatedT>,
-    Variant<AnnotatedT>: Resolve<ValueT, AnnotatedT>,
+    Variant<AnnotatedT>: Resolve<KeyT>,
+    Variant<AnnotatedT>: Resolve<ValueT>,
     AnnotatedT: Annotated + Default,
 {
-    fn resolve_next<ErrorReceiverT>(&mut self, errors: &mut ErrorReceiverT) -> ResolveResult<(KeyT, ValueT), AnnotatedT>
+    fn resolve_next<ProblemReceiverT>(&mut self, problems: &mut ProblemReceiverT) -> ResolveResult<(KeyT, ValueT)>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         // Repeat until we get a non-error
         loop {
             match self.inner.next() {
                 Ok(next) => {
                     return Ok(match next {
-                        Some(pair) => pair.resolve_with_errors(errors)?,
+                        Some(pair) => pair.resolve_with_problems(problems)?,
                         None => None,
                     });
                 }
 
-                Err((error, cause)) => errors.give(error.with_annotations_from(&cause))?,
+                Err((error, cause)) => {
+                    problems.give(error.into_problem().maybe_with(cause.annotations().cloned()).via(ResolveError))?
+                }
             }
         }
     }

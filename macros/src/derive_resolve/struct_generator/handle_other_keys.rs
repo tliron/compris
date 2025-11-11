@@ -17,8 +17,8 @@ impl StructGenerator {
                     for (key, value) in map.inner {
                         if !declared_keys.contains(&key) {
                             #handle_null
-                            if let Some(key) = ::compris::resolve::Resolve::resolve_with_errors(key, errors)?
-                                && let Some(value) = ::compris::resolve::Resolve::resolve_with_errors(value, errors)?
+                            if let Some(key) = ::compris::resolve::Resolve::resolve_with_problems(key, problems)?
+                                && let Some(value) = ::compris::resolve::Resolve::resolve_with_problems(value, problems)?
                             {
                                 resolved.#other_keys_field_name.insert(key, value);
                             }
@@ -30,9 +30,12 @@ impl StructGenerator {
             None => quote! {
                 for (key, _) in map.inner {
                     if !declared_keys.contains(&key) {
-                        ::kutil::std::error::ErrorReceiver::give_error(
-                            errors,
-                            ::compris::resolve::InvalidKeyError::new(key.clone()).into(),
+                        ::problemo::ProblemReceiver::give(
+                            problems,
+                            ::compris::resolve::IntoResolveProblem::into_resolve_problem(
+                                ::compris::resolve::InvalidKeyError::new(key.clone()),
+                                &maybe_annotations,
+                            ),
                         )?;
                     }
                 }

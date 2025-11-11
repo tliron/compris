@@ -1,0 +1,22 @@
+use super::{casting::*, incompatible_variant_type::*};
+
+use {depiction::*, derive_more::*};
+
+//
+// ConversionError
+//
+
+/// Conversion.
+#[derive(Debug, Depict, Display, Error, From)]
+#[depict(variant = false)]
+pub enum ConversionError {
+    /// Incompatible value type.
+    #[display("incompatible value type: {_0}")]
+    #[depict(as(depict))]
+    IncompatibleVariantType(IncompatibleVariantTypeError),
+
+    /// Malformed.
+    #[display("casting: {_0}")]
+    #[depict(as(depict))]
+    Casting(CastingError),
+}

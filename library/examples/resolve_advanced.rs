@@ -4,6 +4,7 @@ use {
     anstream::{print, println},
     compris::{annotate::*, normal::*, parse::*, resolve::*, *},
     depiction::*,
+    problemo::*,
     std::{collections::*, fmt},
 };
 
@@ -84,18 +85,19 @@ pub fn main() {
         Parser::new(Format::JSON).with_source("json".into()).with_try_integers(true).parse_string(json).expect("parse")
     );
 
-    let mut errors = ResolveErrors::default();
+    let mut problems = Problems::default();
     let users: Vec<User<_, isize>> =
-        variant.resolve_with_errors(&mut errors).expect("errors should be accumulated").expect("some");
+        variant.resolve_with_problems(&mut problems).expect("errors should be accumulated").expect("some");
 
     utils::heading("partially resolved", true);
     for user in &users {
         user.print_default_depiction();
     }
 
-    if !errors.is_empty() {
+    if !problems.is_empty() {
         println!();
-        errors.annotated_depictions(Some("accumulated errors".into())).print_default_depiction();
+        problems.print_default_depiction();
+        //problems.annotated_depictions(Some("accumulated errors".into())).print_default_depiction();
     }
 
     utils::heading("annotations", false);

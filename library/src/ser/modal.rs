@@ -41,30 +41,30 @@ pub trait SerializeModalRescursive {
 //
 
 /// Provides a [Serialize] implementation for a [SerializeModal].
-pub struct ModalSerializable<'own, SerializeModalT>
+pub struct ModalSerializable<'this, SerializeModalT>
 where
     SerializeModalT: SerializeModal,
 {
     /// Wrapped serializable.
-    pub serializable: &'own SerializeModalT,
+    pub serializable: &'this SerializeModalT,
 
     /// Serialization mode.
-    pub mode: &'own SerializationMode,
+    pub mode: &'this SerializationMode,
 }
 
-impl<'own, SerializeModalT> ModalSerializable<'own, SerializeModalT>
+impl<'this, SerializeModalT> ModalSerializable<'this, SerializeModalT>
 where
     SerializeModalT: SerializeModal,
 {
     /// Constructor.
-    pub fn new(serializable: &'own SerializeModalT, mode: &'own SerializationMode) -> Self {
+    pub fn new(serializable: &'this SerializeModalT, mode: &'this SerializationMode) -> Self {
         Self { serializable, mode }
     }
 }
 
 // Delegates
 
-impl<'own, SerializeModalT> Serialize for ModalSerializable<'own, SerializeModalT>
+impl<'this, SerializeModalT> Serialize for ModalSerializable<'this, SerializeModalT>
 where
     SerializeModalT: SerializeModal,
 {
@@ -81,29 +81,29 @@ where
 //
 
 /// Provides a [Serialize] implementation for a [SerializeModalRescursive].
-pub struct RecursiveModalSerializable<'own, SerializeModalT>
+pub struct RecursiveModalSerializable<'this, SerializeModalT>
 where
     SerializeModalT: SerializeModalRescursive,
 {
     /// Wrapped modal serializable.
-    pub serializable: &'own SerializeModalT,
+    pub serializable: &'this SerializeModalT,
 
     /// Serialization mode.
-    pub mode: &'own SerializationMode,
+    pub mode: &'this SerializationMode,
 
     /// Modal serializer.
-    pub serializer: &'own ModalSerializer,
+    pub serializer: &'this ModalSerializer,
 }
 
-impl<'own, SerializeModalT> RecursiveModalSerializable<'own, SerializeModalT>
+impl<'this, SerializeModalT> RecursiveModalSerializable<'this, SerializeModalT>
 where
     SerializeModalT: SerializeModalRescursive,
 {
     /// Constructor.
     pub fn new(
-        serializable: &'own SerializeModalT,
-        mode: &'own SerializationMode,
-        serializer: &'own ModalSerializer,
+        serializable: &'this SerializeModalT,
+        mode: &'this SerializationMode,
+        serializer: &'this ModalSerializer,
     ) -> Self {
         Self { serializable, mode, serializer }
     }
@@ -111,7 +111,7 @@ where
 
 // Delegates
 
-impl<'own, SerializeModalT> Serialize for RecursiveModalSerializable<'own, SerializeModalT>
+impl<'this, SerializeModalT> Serialize for RecursiveModalSerializable<'this, SerializeModalT>
 where
     SerializeModalT: SerializeModalRescursive,
 {
@@ -133,14 +133,14 @@ where
     SerializeModalT: SerializeModal,
 {
     /// Wraps a [SerializeModal] with a [ModalSerializable].
-    fn modal<'own>(&'own self, mode: &'own SerializationMode) -> ModalSerializable<'own, SerializeModalT>;
+    fn modal<'this>(&'this self, mode: &'this SerializationMode) -> ModalSerializable<'this, SerializeModalT>;
 }
 
 impl<SerializeModalT> Modal<SerializeModalT> for SerializeModalT
 where
     SerializeModalT: SerializeModal,
 {
-    fn modal<'own>(&'own self, mode: &'own SerializationMode) -> ModalSerializable<'own, Self> {
+    fn modal<'this>(&'this self, mode: &'this SerializationMode) -> ModalSerializable<'this, Self> {
         ModalSerializable::new(self, mode)
     }
 }
@@ -155,22 +155,22 @@ where
     SerializeModalT: SerializeModalRescursive,
 {
     /// Wraps a [SerializeModalRescursive] with a [RecursiveModalSerializable].
-    fn modal<'own>(
-        &'own self,
-        mode: &'own SerializationMode,
-        serializer: &'own ModalSerializer,
-    ) -> RecursiveModalSerializable<'own, SerializeModalT>;
+    fn modal<'this>(
+        &'this self,
+        mode: &'this SerializationMode,
+        serializer: &'this ModalSerializer,
+    ) -> RecursiveModalSerializable<'this, SerializeModalT>;
 }
 
 impl<ModalSerializeT> RecursiveModal<ModalSerializeT> for ModalSerializeT
 where
     ModalSerializeT: SerializeModalRescursive,
 {
-    fn modal<'own>(
-        &'own self,
-        mode: &'own SerializationMode,
-        serializer: &'own ModalSerializer,
-    ) -> RecursiveModalSerializable<'own, Self> {
+    fn modal<'this>(
+        &'this self,
+        mode: &'this SerializationMode,
+        serializer: &'this ModalSerializer,
+    ) -> RecursiveModalSerializable<'this, Self> {
         RecursiveModalSerializable::new(self, mode, serializer)
     }
 }

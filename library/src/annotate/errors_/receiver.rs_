@@ -1,6 +1,6 @@
 use super::super::{annotations::*, r#struct::*, traits::*};
 
-use kutil::std::error::*;
+use problemo::*;
 
 //
 // ErrorReceiverWithFallbackAnnotations
@@ -8,33 +8,33 @@ use kutil::std::error::*;
 
 /// An [ErrorReceiver] wrapper that adds an [Annotations] to errors that don't already have
 /// [Annotations].
-pub struct ErrorReceiverWithFallbackAnnotations<'own, InnerT> {
+pub struct ErrorReceiverWithFallbackAnnotations<'this, InnerT> {
     /// Inner.
-    pub inner: &'own mut InnerT,
+    pub inner: &'this mut InnerT,
 
     /// Fallback annotations.
-    pub fallback_annotations: Option<&'own Annotations>,
+    pub fallback_annotations: Option<&'this Annotations>,
 }
 
-impl<'own, InnerT> ErrorReceiverWithFallbackAnnotations<'own, InnerT> {
+impl<'this, InnerT> ErrorReceiverWithFallbackAnnotations<'this, InnerT> {
     /// Constructor.
-    pub fn new(inner: &'own mut InnerT, fallback_annotations: Option<&'own Annotations>) -> Self {
+    pub fn new(inner: &'this mut InnerT, fallback_annotations: Option<&'this Annotations>) -> Self {
         Self { inner, fallback_annotations }
     }
 }
 
-impl<'own, ErrorT, InnerT> ErrorReceiver<ErrorT> for ErrorReceiverWithFallbackAnnotations<'own, InnerT>
+impl<'this, ErrorT, InnerT> ProblemReceiver<ErrorT> for ErrorReceiverWithFallbackAnnotations<'this, InnerT>
 where
     ErrorT: Annotated,
-    InnerT: ErrorReceiver<ErrorT>,
+    InnerT: ProblemReceiver<ErrorT>,
 {
-    fn give_error(&mut self, error: ErrorT) -> Result<(), ErrorT> {
+    fn give(&mut self, error: ErrorT) -> Result<(), ErrorT> {
         if !error.has_annotations()
             && let Some(annotations) = self.fallback_annotations
         {
-            self.inner.give_error(error.with_annotations(annotations.clone()))
+            self.inner.give(error.with_annotations(annotations.clone()))
         } else {
-            self.inner.give_error(error)
+            self.inner.give(error)
         }
     }
 }
@@ -44,19 +44,19 @@ where
 //
 
 /// With fallback annotations.
-pub trait WithFallbackAnnotations<'own, ErrorT, InnerT> {
+pub trait WithFallbackAnnotations<'this, ErrorT, InnerT> {
     /// With fallback annotations.
     fn with_fallback_annotations(
-        &'own mut self,
-        annotations: Option<&'own Annotations>,
-    ) -> ErrorReceiverWithFallbackAnnotations<'own, InnerT>;
+        &'this mut self,
+        annotations: Option<&'this Annotations>,
+    ) -> ErrorReceiverWithFallbackAnnotations<'this, InnerT>;
 
     /// With fallback annotations from field.
     fn with_fallback_annotations_from_field<StructT>(
-        &'own mut self,
-        r#struct: &'own StructT,
+        &'this mut self,
+        r#struct: &'this StructT,
         name: &str,
-    ) -> ErrorReceiverWithFallbackAnnotations<'own, InnerT>
+    ) -> ErrorReceiverWithFallbackAnnotations<'this, InnerT>
     where
         StructT: AnnotatedStruct,
     {
@@ -65,9 +65,9 @@ pub trait WithFallbackAnnotations<'own, ErrorT, InnerT> {
 
     /// With fallback annotations from struct.
     fn with_fallback_annotations_from_struct<StructT>(
-        &'own mut self,
-        r#struct: &'own StructT,
-    ) -> ErrorReceiverWithFallbackAnnotations<'own, InnerT>
+        &'this mut self,
+        r#struct: &'this StructT,
+    ) -> ErrorReceiverWithFallbackAnnotations<'this, InnerT>
     where
         StructT: AnnotatedStruct,
     {
@@ -75,15 +75,15 @@ pub trait WithFallbackAnnotations<'own, ErrorT, InnerT> {
     }
 }
 
-impl<'own, ErrorT, ErrorReceiverT> WithFallbackAnnotations<'own, ErrorT, ErrorReceiverT> for ErrorReceiverT
+impl<'this, ErrorT, ProblemReceiverT> WithFallbackAnnotations<'this, ErrorT, ProblemReceiverT> for ProblemReceiverT
 where
     ErrorT: Annotated,
-    ErrorReceiverT: ErrorReceiver<ErrorT>,
+    ProblemReceiverT: ProblemReceiver<ErrorT>,
 {
     fn with_fallback_annotations(
-        &'own mut self,
-        annotations: Option<&'own Annotations>,
-    ) -> ErrorReceiverWithFallbackAnnotations<'own, ErrorReceiverT> {
+        &'this mut self,
+        annotations: Option<&'this Annotations>,
+    ) -> ErrorReceiverWithFallbackAnnotations<'this, ProblemReceiverT> {
         ErrorReceiverWithFallbackAnnotations::new(self, annotations)
     }
 }

@@ -1,9 +1,10 @@
-use super::{
-    super::{super::normal::*, errors::*},
-    deserializer::*,
-};
+use super::{super::super::normal::*, deserializer::*};
 
-use {serde::de, std::collections::*};
+use {
+    problemo::{common::*, *},
+    serde::de,
+    std::collections::*,
+};
 
 //
 // MapDeserializer
@@ -24,8 +25,11 @@ impl<'de, AnnotatedT> MapDeserializer<'de, AnnotatedT> {
     }
 }
 
-impl<'de, AnnotatedT> de::MapAccess<'de> for MapDeserializer<'de, AnnotatedT> {
-    type Error = DeserializeError;
+impl<'de, AnnotatedT> de::MapAccess<'de> for MapDeserializer<'de, AnnotatedT>
+where
+    AnnotatedT: 'static + Clone + Send + Sync,
+{
+    type Error = SerdeProblem;
 
     fn next_key_seed<SeedT>(&mut self, seed: SeedT) -> Result<Option<SeedT::Value>, Self::Error>
     where
@@ -44,7 +48,8 @@ impl<'de, AnnotatedT> de::MapAccess<'de> for MapDeserializer<'de, AnnotatedT> {
     {
         match self.current_entry {
             Some((_, value)) => Ok(seed.deserialize(&mut Deserializer::new(value))?),
-            None => Err(DeserializeError::NoMoreItems), // this shouldn't happen, but still
+            // this shouldn't happen, but still
+            None => Err(NoMoreItemsError::new("map value").into_problem().into()),
         }
     }
 }

@@ -149,18 +149,18 @@ impl<AnnotatedT> IntoIterator for List<AnnotatedT> {
     }
 }
 
-impl<'own, AnnotatedT> IntoIterator for &'own List<AnnotatedT> {
-    type Item = &'own Variant<AnnotatedT>;
-    type IntoIter = slice::Iter<'own, Variant<AnnotatedT>>;
+impl<'this, AnnotatedT> IntoIterator for &'this List<AnnotatedT> {
+    type Item = &'this Variant<AnnotatedT>;
+    type IntoIter = slice::Iter<'this, Variant<AnnotatedT>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter()
     }
 }
 
-impl<'own, AnnotatedT> IntoIterator for &'own mut List<AnnotatedT> {
-    type Item = &'own mut Variant<AnnotatedT>;
-    type IntoIter = slice::IterMut<'own, Variant<AnnotatedT>>;
+impl<'this, AnnotatedT> IntoIterator for &'this mut List<AnnotatedT> {
+    type Item = &'this mut Variant<AnnotatedT>;
+    type IntoIter = slice::IterMut<'this, Variant<AnnotatedT>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter_mut()

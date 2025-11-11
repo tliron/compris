@@ -1,10 +1,13 @@
-use super::super::{super::errors::*, root::*};
+use super::super::root::*;
 
-use compris::{annotate::*, ser::*, *};
+use {
+    compris::{annotate::*, ser::*, *},
+    problemo::*,
+};
 
 impl Root {
     /// Convert.
-    pub fn convert(&self) -> Result<(), MainError> {
+    pub fn convert(&self) -> Result<(), Problem> {
         let variant = self.read::<WithAnnotations>()?;
 
         RepresentationWriter::new(self.output_format(), !self.output_plain, self.output_base64)

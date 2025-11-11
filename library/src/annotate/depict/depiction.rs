@@ -13,22 +13,22 @@ use {
 ///
 /// The inner [Depict] is called first and the
 /// [Annotations](super::super::annotations::Annotations) next.
-pub struct AnnotatedDepiction<'own, InnerT> {
+pub struct AnnotatedDepiction<'this, InnerT> {
     /// Inner.
-    pub inner: &'own InnerT,
+    pub inner: &'this InnerT,
 
     /// Mode.
     pub mode: AnnotatedDepictionMode,
 }
 
-impl<'own, InnerT> AnnotatedDepiction<'own, InnerT> {
+impl<'this, InnerT> AnnotatedDepiction<'this, InnerT> {
     /// Constructor.
-    pub fn new(inner: &'own InnerT, mode: AnnotatedDepictionMode) -> Self {
+    pub fn new(inner: &'this InnerT, mode: AnnotatedDepictionMode) -> Self {
         Self { inner, mode }
     }
 }
 
-impl<'own, InnerT> Depict for AnnotatedDepiction<'own, InnerT>
+impl<'this, InnerT> Depict for AnnotatedDepiction<'this, InnerT>
 where
     InnerT: Annotated + Depict,
 {
@@ -69,19 +69,19 @@ where
 //
 
 /// To [AnnotatedDepiction].
-pub trait ToAnnotatedDepiction<'own>
+pub trait ToAnnotatedDepiction<'this>
 where
     Self: Sized,
 {
     /// To [AnnotatedDepiction].
-    fn annotated_depiction(&'own self) -> AnnotatedDepiction<'own, Self>;
+    fn annotated_depiction(&'this self) -> AnnotatedDepiction<'this, Self>;
 }
 
-impl<'own, ErrorT> ToAnnotatedDepiction<'own> for ErrorT
+impl<'this, ErrorT> ToAnnotatedDepiction<'this> for ErrorT
 where
     ErrorT: Error,
 {
-    fn annotated_depiction(&'own self) -> AnnotatedDepiction<'own, Self> {
+    fn annotated_depiction(&'this self) -> AnnotatedDepiction<'this, Self> {
         AnnotatedDepiction::new(self, AnnotatedDepictionMode::Multiline)
     }
 }

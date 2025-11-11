@@ -10,22 +10,22 @@ use {depiction::*, std::io};
 //
 
 /// [Depict] wrapper for a [Map] with [Annotations].
-pub struct AnnotatedDepictMap<'own, AnnotatedT> {
+pub struct AnnotatedDepictMap<'this, AnnotatedT> {
     /// Inner.
-    pub inner: &'own Map<AnnotatedT>,
+    pub inner: &'this Map<AnnotatedT>,
 
     /// Mode.
     pub mode: AnnotatedDepictionMode,
 }
 
-impl<'own, AnnotatedT> AnnotatedDepictMap<'own, AnnotatedT> {
+impl<'this, AnnotatedT> AnnotatedDepictMap<'this, AnnotatedT> {
     /// Constructor.
-    pub fn new(inner: &'own Map<AnnotatedT>, mode: AnnotatedDepictionMode) -> Self {
+    pub fn new(inner: &'this Map<AnnotatedT>, mode: AnnotatedDepictionMode) -> Self {
         Self { inner, mode }
     }
 }
 
-impl<'own, AnnotatedT> Depict for AnnotatedDepictMap<'own, AnnotatedT>
+impl<'this, AnnotatedT> Depict for AnnotatedDepictMap<'this, AnnotatedT>
 where
     AnnotatedT: Annotated,
 {

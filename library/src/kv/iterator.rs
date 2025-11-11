@@ -1,4 +1,4 @@
-use super::super::normal::*;
+use super::super::{errors::*, normal::*};
 
 //
 // KeyValuePairIterator
@@ -16,7 +16,7 @@ pub trait KeyValuePairIterator<AnnotatedT> {
     /// so you likely won't be able to use the `?` operator directly on the result.
     fn next(
         &mut self,
-    ) -> Result<Option<(&Variant<AnnotatedT>, &Variant<AnnotatedT>)>, (MalformedError<AnnotatedT>, &Variant<AnnotatedT>)>;
+    ) -> Result<Option<(&Variant<AnnotatedT>, &Variant<AnnotatedT>)>, (MalformedError, &Variant<AnnotatedT>)>;
 }
 
 //
@@ -35,5 +35,5 @@ pub trait IntoKeyValuePairIterator<AnnotatedT> {
     /// so you likely won't be able to use the `?` operator directly on the result.
     fn next(
         &mut self,
-    ) -> Result<Option<(Variant<AnnotatedT>, Variant<AnnotatedT>)>, (MalformedError<AnnotatedT>, Variant<AnnotatedT>)>;
+    ) -> Result<Option<(Variant<AnnotatedT>, Variant<AnnotatedT>)>, (MalformedError, Variant<AnnotatedT>)>;
 }

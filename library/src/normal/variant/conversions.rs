@@ -1,6 +1,15 @@
 use super::super::{
-    super::annotate::*, blob::*, boolean::*, errors::*, float::*, integer::*, list::*, map::*, null::*, text::*,
-    unsigned_integer::*, variant::*,
+    super::{annotate::*, errors::*},
+    blob::*,
+    boolean::*,
+    float::*,
+    integer::*,
+    list::*,
+    map::*,
+    null::*,
+    text::*,
+    unsigned_integer::*,
+    variant::*,
 };
 
 use {
@@ -8,6 +17,7 @@ use {
     kutil::std::immutable::*,
     num_traits::cast,
     ordered_float::OrderedFloat,
+    problemo::*,
     std::{borrow::*, collections::*},
 };
 
@@ -117,14 +127,14 @@ where
   [Text]            ["text"]             [String];
   [Text]            ["text"]             [ByteString];
   [List]            ["list"]             [Vec<Variant<AnnotatedT>>];
-  [Map]             ["Map"]              [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
+  [Map]             ["map"]              [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
 )]
 #[allow(unused_variables)]
 impl<AnnotatedT> TryFrom<Variant<AnnotatedT>> for ToT
 where
     AnnotatedT: Annotated + Clone + Default,
 {
-    type Error = ConversionError<AnnotatedT>;
+    type Error = Problem;
 
     fn try_from(variant: Variant<AnnotatedT>) -> Result<Self, Self::Error> {
         match variant {
@@ -138,7 +148,7 @@ impl<AnnotatedT> TryFrom<Variant<AnnotatedT>> for ()
 where
     AnnotatedT: Annotated + Clone + Default,
 {
-    type Error = ConversionError<AnnotatedT>;
+    type Error = Problem;
 
     fn try_from(variant: Variant<AnnotatedT>) -> Result<Self, Self::Error> {
         match variant {
@@ -152,7 +162,7 @@ impl<AnnotatedT> TryFrom<Variant<AnnotatedT>> for Bytes
 where
     AnnotatedT: Annotated + Clone + Default,
 {
-    type Error = ConversionError<AnnotatedT>;
+    type Error = Problem;
 
     fn try_from(variant: Variant<AnnotatedT>) -> Result<Self, Self::Error> {
         match variant {
@@ -183,7 +193,7 @@ impl<AnnotatedT> TryFrom<Variant<AnnotatedT>> for NumberT
 where
     AnnotatedT: Annotated + Clone + Default,
 {
-    type Error = ConversionError<AnnotatedT>;
+    type Error = Problem;
 
     fn try_from(variant: Variant<AnnotatedT>) -> Result<Self, Self::Error> {
         match &variant {
@@ -223,7 +233,7 @@ impl<AnnotatedT> TryFrom<&Variant<AnnotatedT>> for ToT
 where
     AnnotatedT: Annotated + Clone + Default,
 {
-    type Error = ConversionError<AnnotatedT>;
+    type Error = Problem;
 
     fn try_from(variant: &Variant<AnnotatedT>) -> Result<Self, Self::Error> {
         match variant {
@@ -237,7 +247,7 @@ impl<AnnotatedT> TryFrom<&Variant<AnnotatedT>> for Bytes
 where
     AnnotatedT: Annotated + Clone + Default,
 {
-    type Error = ConversionError<AnnotatedT>;
+    type Error = Problem;
 
     fn try_from(variant: &Variant<AnnotatedT>) -> Result<Self, Self::Error> {
         match variant {
@@ -257,13 +267,13 @@ where
     [List]      ["list"] [Vec<Variant<AnnotatedT>>];
     [Map]       ["map"]  [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
   )]
-impl<'own, AnnotatedT> TryFrom<&'own Variant<AnnotatedT>> for &'own ToT
+impl<'this, AnnotatedT> TryFrom<&'this Variant<AnnotatedT>> for &'this ToT
 where
     AnnotatedT: Annotated + Clone + Default,
 {
-    type Error = ConversionError<AnnotatedT>;
+    type Error = Problem;
 
-    fn try_from(variant: &'own Variant<AnnotatedT>) -> Result<Self, Self::Error> {
+    fn try_from(variant: &'this Variant<AnnotatedT>) -> Result<Self, Self::Error> {
         match variant {
             Variant::FromNormalT(normal) => Ok(normal.into()),
             _ => Err(IncompatibleVariantTypeError::new_from(variant, &[name]).into()),
@@ -294,7 +304,7 @@ impl<AnnotatedT> TryFrom<&Variant<AnnotatedT>> for NumberT
 where
     AnnotatedT: Annotated + Clone + Default,
 {
-    type Error = ConversionError<AnnotatedT>;
+    type Error = Problem;
 
     fn try_from(variant: &Variant<AnnotatedT>) -> Result<Self, Self::Error> {
         match variant {
