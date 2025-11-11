@@ -17,7 +17,7 @@ impl StructGenerator {
                     if insert {
                         quote! {
                             if value.is_null() {
-                                if let ::std::option::Option::Some(key) = ::compris::resolve::Resolve::resolve_with_errors(key, errors)? {
+                                if let ::std::option::Option::Some(key) = ::compris::resolve::Resolve::resolve_with_problems(key, problems)? {
                                     resolved.#field_name.insert(key, #null);
                                 }
                             } else

@@ -63,7 +63,7 @@ where
 }
 
 impl<AnnotatedT> fmt::Display for Null<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         fmt::Display::fmt("Null", formatter)
     }
 }

@@ -1,20 +1,26 @@
-use super::{super::list::*, error::*, mode::*};
+use super::{
+    super::{super::annotate::*, list::*},
+    mode::*,
+};
 
-use {kutil::std::error::*, std::fmt};
+use {
+    problemo::{common::*, *},
+    std::fmt,
+};
 
 impl<AnnotatedT> List<AnnotatedT> {
     /// Merge another list into this list. Return true if any change happened.
     ///
     /// The merging behavior depends on the [MergeMode].
-    pub fn merge_with_errors<'own, ErrorReceiverT>(
+    pub fn merge_with_problems<ProblemReceiverT>(
         &mut self,
-        other: &'own Self,
+        other: &Self,
         merge_mode: &MergeMode,
-        errors: &mut ErrorReceiverT,
-    ) -> Result<bool, MergeError<'own, AnnotatedT>>
+        problems: &mut ProblemReceiverT,
+    ) -> Result<bool, Problem>
     where
-        AnnotatedT: Clone,
-        ErrorReceiverT: ErrorReceiver<MergeError<'own, AnnotatedT>>,
+        AnnotatedT: Annotated + Clone,
+        ProblemReceiverT: ProblemReceiver,
     {
         match merge_mode.list {
             ListMergeMode::Append => {
@@ -45,7 +51,7 @@ impl<AnnotatedT> List<AnnotatedT> {
                     if self.push_unique_clone(item) {
                         changed = true;
                     } else {
-                        errors.give(MergeError::new(item))?;
+                        problems.give(MergingError::as_problem("list").maybe_with(item.annotations().cloned()))?;
                     }
                 }
 
@@ -63,19 +69,15 @@ impl<AnnotatedT> List<AnnotatedT> {
         }
     }
 
-    /// Merge another list into this list while failing on the first encountered error.
+    /// Merge another list into this list while failing on the first encountered problem.
     /// Return true if any change happened.
     ///
     /// The merging behavior depends on the [MergeMode].
-    pub fn merge_with_mode<'own>(
-        &mut self,
-        other: &'own Self,
-        merge_mode: &MergeMode,
-    ) -> Result<bool, MergeError<'own, AnnotatedT>>
+    pub fn merge_with_mode(&mut self, other: &Self, merge_mode: &MergeMode) -> Result<bool, Problem>
     where
-        AnnotatedT: Clone,
+        AnnotatedT: Annotated + Clone,
     {
-        self.merge_with_errors(other, merge_mode, &mut FailFastErrorReceiver)
+        self.merge_with_problems(other, merge_mode, &mut FailFast)
     }
 
     /// Merge another list into this list. Return true if any change happened.
@@ -83,9 +85,9 @@ impl<AnnotatedT> List<AnnotatedT> {
     /// Uses the default [MergeMode].
     pub fn merge(&mut self, other: &Self) -> bool
     where
-        AnnotatedT: Clone + fmt::Debug,
+        AnnotatedT: Annotated + Clone + fmt::Debug,
     {
-        // The default mode should never cause errors, so unwrap is safe
+        // The default mode should never cause errors
         self.merge_with_mode(other, &Default::default()).expect("merge_with_mode")
     }
 }

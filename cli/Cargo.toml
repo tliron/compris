@@ -3,8 +3,8 @@ edition = "2024"
 
 name = "compris-cli"
 description = "Query and convert Composite Primitive Schema (CPS) formats"
-version = "0.0.10"
-rust-version = "1.91"
+version = "0.0.11"
+rust-version = "1.93"
 
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/tliron/compris"
@@ -21,16 +21,16 @@ categories = [
 keywords = ["cps"]
 
 [dependencies]
-anstream = "0.6.21"
-clap = { version = "4.5.51", features = ["derive"] }
+anstream = "1.0.0"
+clap = { version = "4.5.58", features = ["derive"] }
 clap_complete_command = "0.6.1"
 kutil = { version = "=0.0.5", features = ["cli", "clap"] }
 compris = { version = "=0.0.11", features = ["serde"] }
-read-url = { version = "=0.0.9", default-features = false, features = [
+problemo = { version = "=0.0.11", features = ["backtrace-external"] }
+read-url = { version = "=0.0.10", default-features = false, features = [
     "blocking",
 ] }
-thiserror = "2.0.17"
-tracing = "0.1.41"
+tracing = "0.1.44"
 
 [features]
 default = ["file", "http"]
@@ -40,3 +40,7 @@ http = ["read-url/http"]
 [[bin]]
 name = "compris"
 path = "src/main.rs"
+
+[profile.release]
+strip = "debuginfo"
+lto = true

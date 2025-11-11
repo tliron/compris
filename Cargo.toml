@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["library", "macros", "cli"]
+members = ["library", "macros", "python", "cli"]
 
 [profile.release]
 strip = "debuginfo"

@@ -1,15 +1,17 @@
 use super::super::{
     super::{
         annotate::{Span, *},
+        format::*,
         normal::{Variant, *},
     },
     Parser,
     builder::*,
-    *,
+    errors::*,
 };
 
 use {
     kutil::{io::reader::*, std::immutable::*},
+    problemo::*,
     saphyr_parser::{Event, Parser as SaphyrParser, Span as SaphyrSpan, *},
     std::{borrow::*, io},
 };
@@ -20,7 +22,7 @@ impl Parser {
     /// Is affected by [Parser::try_unsigned_integers](super::super::Parser),
     /// [Parser::allow_legacy_words](super::super::Parser),
     /// and [Parser::allow_legacy_types](super::super::Parser).
-    pub fn parse_yaml<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, ParseError>
+    pub fn parse_yaml<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, Problem>
     where
         ReadT: io::Read,
         AnnotatedT: Annotated + Clone + Default,
@@ -34,7 +36,11 @@ impl Parser {
             self.allow_legacy_words,
             self.allow_legacy_types,
         );
-        SaphyrParser::new_from_iter(io::BufReader::new(reader).chars()).load(&mut receiver, false)?;
+
+        SaphyrParser::new_from_iter(io::BufReader::new(reader).chars())
+            .load(&mut receiver, false)
+            .into_parsing_problem(Format::YAML)?;
+
         receiver.value()
     }
 }
@@ -53,7 +59,7 @@ struct YamlReceiver<AnnotatedT> {
 
     value_builder: VariantBuilder<AnnotatedT>,
     last_span: Option<SaphyrSpan>,
-    error: Option<ParseError>,
+    error: Option<Problem>,
 
     span: fn(&SaphyrSpan) -> Option<Span>,
     collection_span: fn(&Self, &SaphyrSpan) -> Option<Span>,
@@ -87,7 +93,7 @@ where
     }
 
     /// Returns the final built value.
-    fn value(&mut self) -> Result<Variant<AnnotatedT>, ParseError>
+    fn value(&mut self) -> Result<Variant<AnnotatedT>, Problem>
     where
         AnnotatedT: Default,
     {
@@ -103,7 +109,7 @@ where
         tag_prefix: &str,
         tag_suffix: &str,
         span: &SaphyrSpan,
-    ) -> Result<Variant<AnnotatedT>, ParseError>
+    ) -> Result<Variant<AnnotatedT>, Problem>
     where
         AnnotatedT: Annotated + Clone + Default,
     {
@@ -141,7 +147,10 @@ where
                 "binary" => {
                     // https://yaml.org/type/binary.html
                     if self.allow_legacy_types {
-                        return Ok(Blob::new_from_base64(value.as_ref())?.with_span((self.span)(span)).into());
+                        return Ok(Blob::new_from_base64(value.as_ref())
+                            .into_parsing_problem(Format::YAML)?
+                            .with_span((self.span)(span))
+                            .into());
                     } else {
                         tracing::trace!("unsupported legacy tag suffix: {}{}", tag_prefix, tag_suffix);
                     }
@@ -159,7 +168,7 @@ where
         Ok(Text::from(value).with_span((self.span)(span)).into())
     }
 
-    fn parse_yaml_bare_scalar(&self, value: Cow<'_, str>, span: &SaphyrSpan) -> Result<Variant<AnnotatedT>, ParseError>
+    fn parse_yaml_bare_scalar(&self, value: Cow<'_, str>, span: &SaphyrSpan) -> Result<Variant<AnnotatedT>, Problem>
     where
         AnnotatedT: Annotated + Clone + Default,
     {
@@ -181,30 +190,30 @@ where
         }
     }
 
-    fn parse_yaml_null(&self, value: &str, span: &SaphyrSpan) -> Result<(), ParseError> {
+    fn parse_yaml_null(&self, value: &str, span: &SaphyrSpan) -> Result<(), Problem> {
         if self.allow_legacy_words {
             // https://yaml.org/type/null.html
             match value {
                 "~" | "null" | "Null" | "NULL" => Ok(()),
-                _ => Err(ScanError::new_str(span.start, "not a null").into()),
+                _ => Err(ScanError::new_str(span.start, "not a null").into_parsing_problem(Format::YAML)),
             }
         } else {
             // Core schema, https://yaml.org/spec/1.2.2/#1032-tag-resolution
             // Section 10.2.1.1 in https://yaml.org/spec/1.2.2/#1021-tags
             match value {
                 "null" | "Null" | "NULL" | "~" => Ok(()),
-                _ => Err(ScanError::new_str(span.start, "not a null").into()),
+                _ => Err(ScanError::new_str(span.start, "not a null").into_parsing_problem(Format::YAML)),
             }
         }
     }
 
-    fn parse_yaml_bool(&self, value: &str, span: &SaphyrSpan) -> Result<bool, ParseError> {
+    fn parse_yaml_bool(&self, value: &str, span: &SaphyrSpan) -> Result<bool, Problem> {
         if self.allow_legacy_words {
             // https://yaml.org/type/bool.html
             match value {
                 "y" | "Y" | "yes" | "Yes" | "YES" | "true" | "True" | "TRUE" | "on" | "On" | "ON" => Ok(true),
                 "n" | "N" | "no" | "No" | "NO" | "false" | "False" | "FALSE" | "off" | "Off" | "OFF" => Ok(false),
-                _ => Err(ScanError::new_str(span.start, "not a bool").into()),
+                _ => Err(ScanError::new_str(span.start, "not a bool").into_parsing_problem(Format::YAML)),
             }
         } else {
             // Core schema, https://yaml.org/spec/1.2.2/#1032-tag-resolution
@@ -212,12 +221,12 @@ where
             match value {
                 "true" | "True" | "TRUE" => Ok(true),
                 "false" | "False" | "FALSE" => Ok(false),
-                _ => Err(ScanError::new_str(span.start, "not a bool").into()),
+                _ => Err(ScanError::new_str(span.start, "not a bool").into_parsing_problem(Format::YAML)),
             }
         }
     }
 
-    fn parse_yaml_integer(value: &str, span: &SaphyrSpan) -> Result<i64, ParseError> {
+    fn parse_yaml_integer(value: &str, span: &SaphyrSpan) -> Result<i64, Problem> {
         // Core schema, https://yaml.org/spec/1.2.2/#1032-tag-resolution
         // Section 10.2.1.3 in https://yaml.org/spec/1.2.2/#1021-tags
         if let Some(integer) = value.strip_prefix("0x") {
@@ -230,7 +239,7 @@ where
             }
         }
 
-        value.parse().map_err(|_| ScanError::new_str(span.start, "not an integer").into())
+        value.parse().map_err(|_| ScanError::new_str(span.start, "not an integer").into_parsing_problem(Format::YAML))
     }
 
     fn try_parse_yaml_unsigned_integer(value: &str) -> Option<u64> {
@@ -247,19 +256,21 @@ where
         value.parse().ok()
     }
 
-    fn parse_yaml_float(value: &str, span: &SaphyrSpan) -> Result<f64, ParseError> {
+    fn parse_yaml_float(value: &str, span: &SaphyrSpan) -> Result<f64, Problem> {
         // Core schema, https://yaml.org/spec/1.2.2/#1032-tag-resolution
         // Section 10.2.1.4 in https://yaml.org/spec/1.2.2/#1021-tags
         match value {
             ".inf" | ".Inf" | ".INF" | "+.inf" | "+.Inf" | "+.INF" => Ok(f64::INFINITY),
             "-.inf" | "-.Inf" | "-.INF" => Ok(f64::NEG_INFINITY),
             ".nan" | "NaN" | ".NAN" => Ok(f64::NAN),
-            _ => value.parse().map_err(|_| ScanError::new_str(span.start, "not a float").into()),
+            _ => value
+                .parse()
+                .map_err(|_| ScanError::new_str(span.start, "not a float").into_parsing_problem(Format::YAML)),
         }
     }
 }
 
-impl<'own, 'input, AnnotatedT> SpannedEventReceiver<'input> for YamlReceiver<AnnotatedT>
+impl<'input, AnnotatedT> SpannedEventReceiver<'input> for YamlReceiver<AnnotatedT>
 where
     AnnotatedT: Annotated + Clone + Default,
 {
@@ -313,7 +324,7 @@ where
             }
 
             Event::Alias(anchor_id) => {
-                if let Err(error) = self.value_builder.add_referenced(anchor_id) {
+                if let Err(error) = self.value_builder.add_referenced(anchor_id, Format::YAML) {
                     self.error = Some(error);
                     self.value_builder.add(Variant::Undefined, None);
                 }

@@ -20,7 +20,7 @@ pub enum PathSegment<KeyT> {
 
 impl<KeyT> Depict for PathSegment<KeyT>
 where
-    KeyT: fmt::Display,
+    KeyT: ToString,
 {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>
     where
@@ -48,9 +48,9 @@ where
 
 impl<KeyT> fmt::Display for PathSegment<KeyT>
 where
-    KeyT: fmt::Display,
+    KeyT: ToString,
 {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::ListIndex(index) => write!(formatter, "[{}]", index),
 
@@ -69,7 +69,7 @@ where
 
 impl<KeyT> PathSegment<KeyT>
 where
-    KeyT: fmt::Display,
+    KeyT: ToString,
 {
     /// To string keys.
     pub fn to_string_keys(&self) -> PathSegment<ByteString> {

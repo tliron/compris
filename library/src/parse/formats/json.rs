@@ -1,21 +1,23 @@
 use super::super::{
     super::{
         annotate::*,
+        format::*,
         hints::*,
         normal::{Variant, *},
     },
     builder::*,
+    errors::*,
     *,
 };
 
-use {kutil::std::immutable::*, std::io, struson::reader::*};
+use {kutil::std::immutable::*, problemo::*, std::io, struson::reader::*};
 
 impl Parser {
     /// Parses JSON into a [Variant].
     ///
     /// Is affected by [Parser::try_integers](super::super::Parser)
     /// and [Parser::try_unsigned_integers](super::super::Parser).
-    pub fn parse_json<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, ParseError>
+    pub fn parse_json<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, Problem>
     where
         ReadT: io::Read,
         AnnotatedT: Annotated + Clone + Default,
@@ -27,7 +29,7 @@ impl Parser {
     ///
     /// Is affected by [Parser::try_integers](super::super::Parser)
     /// and [Parser::try_unsigned_integers](super::super::Parser).
-    pub fn parse_xjson<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, ParseError>
+    pub fn parse_xjson<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, Problem>
     where
         ReadT: io::Read,
         AnnotatedT: Annotated + Clone + Default,
@@ -43,7 +45,7 @@ impl Parser {
         &self,
         reader: &mut ReadT,
         hints: Option<&Hints>,
-    ) -> Result<Variant<AnnotatedT>, ParseError>
+    ) -> Result<Variant<AnnotatedT>, Problem>
     where
         ReadT: io::Read,
         AnnotatedT: Annotated + Clone + Default,
@@ -63,7 +65,7 @@ fn read_next_json<JsonReaderT, AnnotatedT>(
     hints: Option<&Hints>,
     try_integers: bool,
     try_unsigned_integers: bool,
-) -> Result<(), ParseError>
+) -> Result<(), Problem>
 where
     JsonReaderT: JsonReader,
     AnnotatedT: Annotated + Clone + Default,
@@ -74,68 +76,78 @@ where
         |_reader: &mut JsonReaderT| -> Option<Span> { None }
     };
 
-    let value = reader.peek()?;
+    let value = reader.peek().into_parsing_problem(Format::JSON)?;
     tracing::trace!("{}", value);
     match value {
         ValueType::Null => {
             let span = get_span(reader);
-            reader.next_null()?;
+            reader.next_null().into_parsing_problem(Format::JSON)?;
             value_builder.add(Null::default().with_span(span), None);
         }
 
         ValueType::Number => {
             if try_integers || try_unsigned_integers {
                 let span = get_span(reader);
-                let number = reader.next_number_as_str()?;
+                let number = reader.next_number_as_str().into_parsing_problem(Format::JSON)?;
                 if let Some(number) = if try_unsigned_integers { number.parse::<u64>().ok() } else { None } {
                     value_builder.add(UnsignedInteger::from(number).with_span(span), None);
                 } else if let Some(number) = if try_integers { number.parse::<i64>().ok() } else { None } {
                     value_builder.add(Integer::from(number).with_span(span), None);
                 } else {
-                    value_builder.add(Float::from(number.parse::<f64>()?).with_span(span), None);
+                    value_builder.add(
+                        Float::from(number.parse::<f64>().into_parsing_problem(Format::JSON)?).with_span(span),
+                        None,
+                    );
                 }
             } else {
                 let span = get_span(reader);
-                let number: f64 = reader.next_number()??;
+                let number: f64 = reader.next_number().into_parsing_problem(Format::JSON)??;
                 value_builder.add(Float::from(number).with_span(span), None);
             }
         }
 
         ValueType::Boolean => {
             let span = get_span(reader);
-            value_builder.add(Boolean::from(reader.next_bool()?).with_span(span), None);
+            value_builder
+                .add(Boolean::from(reader.next_bool().into_parsing_problem(Format::JSON)?).with_span(span), None);
         }
 
         ValueType::String => {
             let span = get_span(reader);
-            value_builder.add(Text::from(ByteString::from(reader.next_str()?)).with_span(span), None);
+            value_builder.add(
+                Text::from(ByteString::from(reader.next_str().into_parsing_problem(Format::JSON)?)).with_span(span),
+                None,
+            );
         }
 
         ValueType::Array => {
             let span = get_span(reader);
-            reader.begin_array()?;
+            reader.begin_array().into_parsing_problem(Format::JSON)?;
             value_builder.start_list_with_span(span, None);
-            while reader.has_next()? {
+            while reader.has_next().into_parsing_problem(Format::JSON)? {
                 read_next_json(reader, value_builder, hints, try_integers, try_unsigned_integers)?;
             }
             value_builder.end_container();
-            reader.end_array()?;
+            reader.end_array().into_parsing_problem(Format::JSON)?;
         }
 
         ValueType::Object => {
             let span = get_span(reader);
-            reader.begin_object()?;
+            reader.begin_object().into_parsing_problem(Format::JSON)?;
             value_builder.start_map_with_span(span, None);
-            while reader.has_next()? {
+            while reader.has_next().into_parsing_problem(Format::JSON)? {
                 // Key
                 let span = get_span(reader);
-                value_builder.add(Text::from(ByteString::from(reader.next_name()?)).with_span(span), None);
+                value_builder.add(
+                    Text::from(ByteString::from(reader.next_name().into_parsing_problem(Format::JSON)?)).with_span(span),
+                    None,
+                );
 
                 // Value
                 read_next_json(reader, value_builder, hints, try_integers, try_unsigned_integers)?;
             }
             value_builder.end_container_with_hints(hints)?;
-            reader.end_object()?;
+            reader.end_object().into_parsing_problem(Format::JSON)?;
         }
     }
 

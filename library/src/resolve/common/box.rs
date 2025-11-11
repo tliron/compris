@@ -1,15 +1,15 @@
 use super::super::{super::normal::*, errors::*, resolve::*};
 
-use kutil::std::error::*;
+use problemo::*;
 
-impl<BoxedT, AnnotatedT> Resolve<Box<BoxedT>, AnnotatedT> for Variant<AnnotatedT>
+impl<InnerT, AnnotatedT> Resolve<Box<InnerT>> for Variant<AnnotatedT>
 where
-    Variant<AnnotatedT>: Resolve<BoxedT, AnnotatedT>,
+    Variant<AnnotatedT>: Resolve<InnerT>,
 {
-    fn resolve_with_errors<ErrorReceiverT>(self, errors: &mut ErrorReceiverT) -> ResolveResult<Box<BoxedT>, AnnotatedT>
+    fn resolve_with_problems<ProblemReceiverT>(self, problems: &mut ProblemReceiverT) -> ResolveResult<Box<InnerT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
-        Ok(self.resolve_with_errors(errors)?.map(|boxed| boxed.into()))
+        Ok(self.resolve_with_problems(problems)?.map(|inner| inner.into()))
     }
 }

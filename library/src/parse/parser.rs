@@ -1,9 +1,6 @@
-use super::{
-    super::{annotate::*, format::*, normal::*},
-    error::*,
-};
+use super::super::{annotate::*, format::*, normal::*};
 
-use {kutil::std::immutable::*, std::io};
+use {kutil::std::immutable::*, problemo::*, std::io};
 
 //
 // Parser
@@ -101,12 +98,12 @@ impl Parser {
 
     /// Parses into a [Variant] according to [Parser::format].
     #[allow(unused_variables)]
-    pub fn parse_reader<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, ParseError>
+    pub fn parse_reader<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, Problem>
     where
         ReadT: io::Read,
         AnnotatedT: Annotated + Clone + Default,
     {
-        match &self.format {
+        match self.format {
             #[cfg(feature = "cbor")]
             Format::CBOR => self.parse_cbor(reader),
 
@@ -132,12 +129,15 @@ impl Parser {
                 feature = "json",
                 feature = "xml",
             )))]
-            _ => Err(ParseError::UnsupportedFormat(self.format.clone())),
+            format => {
+                use super::errors::*;
+                Err(common::UnsupportedError::new("parse format").into_parsing_problem(format))
+            }
         }
     }
 
     /// Parses into a [Variant] according to [Parser::format].
-    pub fn parse_bytes<AnnotatedT>(&self, bytes: &[u8]) -> Result<Variant<AnnotatedT>, ParseError>
+    pub fn parse_bytes<AnnotatedT>(&self, bytes: &[u8]) -> Result<Variant<AnnotatedT>, Problem>
     where
         AnnotatedT: Annotated + Clone + Default,
     {
@@ -145,7 +145,7 @@ impl Parser {
     }
 
     /// Parses into a [Variant] according to [Parser::format].
-    pub fn parse_string<AnnotatedT>(&self, string: &str) -> Result<Variant<AnnotatedT>, ParseError>
+    pub fn parse_string<AnnotatedT>(&self, string: &str) -> Result<Variant<AnnotatedT>, Problem>
     where
         AnnotatedT: Annotated + Clone + Default,
     {

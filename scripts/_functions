@@ -1,3 +1,4 @@
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -13,6 +14,10 @@ function m () {
 	echo -e "$COLOR$1$RESET"
 }
 
+function howlong () {
+	/usr/bin/time --format='...took %e seconds' "$@"
+}
+
 function copy_function () {
 	local ORIG_FUNC=$(declare -f $1)
 	local NEWNAME_FUNC="$2${ORIG_FUNC#$1}"
@@ -25,6 +30,14 @@ function git_version () {
 	REVISION=$(git -C "$ROOT" rev-parse HEAD 2> /dev/null || echo '')
 	TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S %Z")
 	GO_VERSION=$(go version | { read _ _ v _; echo ${v#go}; })
+}
+
+function rust_host () {
+    rustc --version --verbose | sed -n 's|host: ||p'
+}
+
+function into_python () {
+    . "$ROOT/work/python/bin/activate"
 }
 
 function only_root () {

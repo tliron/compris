@@ -1,15 +1,19 @@
 use super::{
-    super::{annotate::*, normal::*, parse::*},
+    super::{annotate::*, normal::*},
+    errors::*,
     hints::*,
 };
 
-use kutil::std::immutable::*;
+use {
+    kutil::std::immutable::*,
+    problemo::{common::*, *},
+};
 
 impl<AnnotatedT> Variant<AnnotatedT> {
     /// Attempts to convert the [Variant] to a hinted [Variant].
     ///
     /// Also converts escaped hints to their unescaped values.
-    pub fn to_hinted_variant(&self, hints: &Hints) -> Result<Option<Variant<AnnotatedT>>, ParseError>
+    pub fn to_hinted_variant(&self, hints: &Hints) -> Result<Option<Variant<AnnotatedT>>, Problem>
     where
         AnnotatedT: Annotated + Clone + Default,
     {
@@ -50,7 +54,8 @@ impl<AnnotatedT> Variant<AnnotatedT> {
                         //     return Err(ReadError::Hint(format!("malformed {:?}, duplicate key", hints.map)));
                         // }
                     } else {
-                        return Err(ParseError::Hint(format!("malformed {:?}, item length is not 2", hints.map)));
+                        return Err(MalformedError::as_problem(format!("item list length is not 2: {:?}", hints.map))
+                            .via(HintError));
                     }
                 }
 
@@ -74,17 +79,17 @@ impl<AnnotatedT> Variant<AnnotatedT> {
         Ok(None)
     }
 
-    fn validate_hinted_text(&self, hint: &str) -> Result<&Text<AnnotatedT>, ParseError> {
+    fn validate_hinted_text(&self, hint: &str) -> Result<&Text<AnnotatedT>, Problem> {
         match self {
             Variant::Text(text) => Ok(text),
-            _ => Err(ParseError::Hint(format!("malformed {:?}, not text", hint))),
+            _ => Err(MalformedError::as_problem(format!("not text: {:?}", hint)).via(HintError)),
         }
     }
 
-    fn validate_hinted_list(&self, hint: &str) -> Result<&List<AnnotatedT>, ParseError> {
+    fn validate_hinted_list(&self, hint: &str) -> Result<&List<AnnotatedT>, Problem> {
         match self {
             Variant::List(list) => Ok(list),
-            _ => Err(ParseError::Hint(format!("malformed {:?}, not a list", hint))),
+            _ => Err(MalformedError::as_problem(format!("not a list: {:?}", hint)).via(HintError)),
         }
     }
 

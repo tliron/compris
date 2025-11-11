@@ -9,22 +9,22 @@ use super::super::{
 };
 
 use {
-    kutil::std::error::*,
+    problemo::*,
     std::{collections::*, hash::*},
 };
 
-impl<KeyT, ValueT, AnnotatedT> Resolve<BTreeMap<KeyT, ValueT>, AnnotatedT> for Variant<AnnotatedT>
+impl<KeyT, ValueT, AnnotatedT> Resolve<BTreeMap<KeyT, ValueT>> for Variant<AnnotatedT>
 where
     KeyT: Hash + Eq + Ord,
-    Variant<AnnotatedT>: Resolve<KeyT, AnnotatedT> + Resolve<ValueT, AnnotatedT>,
+    Variant<AnnotatedT>: Resolve<KeyT> + Resolve<ValueT>,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorReceiverT>(
+    fn resolve_with_problems<ProblemReceiverT>(
         self,
-        errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<BTreeMap<KeyT, ValueT>, AnnotatedT>
+        errors: &mut ProblemReceiverT,
+    ) -> ResolveResult<BTreeMap<KeyT, ValueT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         let mut resolved = BTreeMap::default();
 

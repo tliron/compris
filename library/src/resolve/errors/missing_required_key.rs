@@ -2,42 +2,35 @@ use super::super::super::{annotate::*, normal::*};
 
 use {
     depiction::*,
+    derive_more::*,
+    problemo::*,
     std::{fmt, io},
-    thiserror::*,
 };
 
 //
 // MissingRequiredKeyError
 //
 
-/// Missing required key.
-#[derive(Debug, Error)]
-pub struct MissingRequiredKeyError<AnnotatedT> {
+/// Missing required key error.
+#[derive(Debug, Error, PartialEq)]
+pub struct MissingRequiredKeyError {
     /// Key.
-    pub key: Variant<AnnotatedT>,
+    pub key: Variant<WithoutAnnotations>,
 }
 
-impl_annotated!(MissingRequiredKeyError, key);
-
-impl<AnnotatedT> MissingRequiredKeyError<AnnotatedT> {
+impl MissingRequiredKeyError {
     /// Constructor.
-    pub fn new(key: Variant<AnnotatedT>) -> Self {
-        Self { key }
+    pub fn new<AnnotatedT>(key: Variant<AnnotatedT>) -> Self {
+        Self { key: key.remove_annotations() }
+    }
+
+    /// Constructor.
+    pub fn as_problem<AnnotatedT>(key: Variant<AnnotatedT>) -> Problem {
+        Self::new(key).into_problem().with(AnnotatedCauseEquality::new::<Self>()).with(ErrorDepiction::new::<Self>())
     }
 }
 
-impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<MissingRequiredKeyError<NewAnnotatedT>>
-    for MissingRequiredKeyError<AnnotatedT>
-where
-    AnnotatedT: Annotated,
-    NewAnnotatedT: Annotated + Default,
-{
-    fn into_annotated(self) -> MissingRequiredKeyError<NewAnnotatedT> {
-        MissingRequiredKeyError::new(self.key.into_annotated())
-    }
-}
-
-impl<AnnotatedT> Depict for MissingRequiredKeyError<AnnotatedT> {
+impl Depict for MissingRequiredKeyError {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>
     where
         WriteT: io::Write,
@@ -47,8 +40,8 @@ impl<AnnotatedT> Depict for MissingRequiredKeyError<AnnotatedT> {
     }
 }
 
-impl<AnnotatedT> fmt::Display for MissingRequiredKeyError<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl fmt::Display for MissingRequiredKeyError {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(formatter, "{:?}", self.key.to_string())
     }
 }

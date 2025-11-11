@@ -1,11 +1,12 @@
 use super::super::{
-    super::{annotate::*, normal::*},
+    super::{annotate::*, format::*, normal::*},
     builder::*,
     *,
 };
 
 use {
     borc::{basic::streaming::*, errors::*},
+    problemo::*,
     std::io,
     tracing::trace,
 };
@@ -14,12 +15,13 @@ impl Parser {
     /// Parses CBOR into a [Variant].
     ///
     /// Is affected by [Parser::base64](super::super::Parser).
-    pub fn parse_cbor<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, ParseError>
+    pub fn parse_cbor<ReadT, AnnotatedT>(&self, reader: &mut ReadT) -> Result<Variant<AnnotatedT>, Problem>
     where
         ReadT: io::Read,
         AnnotatedT: Annotated + Clone + Default,
     {
         let mut value_builder = VariantBuilder::new(self.source.clone());
+
         if self.base64 {
             let reader = Self::base64_reader(reader);
             let mut decoder = Decoder::new(reader);
@@ -28,6 +30,7 @@ impl Parser {
             let mut decoder = Decoder::new(reader);
             read_next_cbor(&mut decoder, &mut value_builder, None)?;
         }
+
         Ok(value_builder.finalize())
     }
 }
@@ -38,12 +41,12 @@ fn read_next_cbor<ReadT, AnnotatedT>(
     decoder: &mut Decoder<ReadT>,
     value_builder: &mut VariantBuilder<AnnotatedT>,
     label: Option<Label>,
-) -> Result<bool, ParseError>
+) -> Result<bool, Problem>
 where
     ReadT: io::Read,
     AnnotatedT: Annotated + Clone + Default,
 {
-    let event = decoder.next_event()?;
+    let event = decoder.next_event().into_parsing_problem(Format::CBOR)?;
     trace!("{:?}", event);
 
     match event {
@@ -65,7 +68,9 @@ where
         }
 
         Event::Signed(integer) => {
-            let integer = Event::interpret_signed_checked(integer).ok_or_else(|| DecodeError::Malformed)?;
+            let integer = Event::interpret_signed_checked(integer)
+                .ok_or_else(|| DecodeError::Malformed)
+                .into_parsing_problem(Format::CBOR)?;
             value_builder.add(Integer::from(integer).with_label(label), None);
         }
 
@@ -82,7 +87,7 @@ where
         }
 
         Event::UnknownLengthTextString => {
-            let string = read_cbor_unknown_length_text_string(decoder)?;
+            let string = read_cbor_unknown_length_text_string(decoder).into_parsing_problem(Format::CBOR)?;
             value_builder.add(Text::from(string).with_label(label), None);
         }
 
@@ -91,7 +96,7 @@ where
         }
 
         Event::UnknownLengthByteString => {
-            let bytes = read_cbor_unknown_length_bytes(decoder)?;
+            let bytes = read_cbor_unknown_length_bytes(decoder).into_parsing_problem(Format::CBOR)?;
             value_builder.add(Blob::from(bytes).with_label(label), None);
         }
 
@@ -106,7 +111,7 @@ where
         Event::UnknownLengthArray => {
             value_builder.start_list_with_label(label, None);
             loop {
-                match decoder.next_event()? {
+                match decoder.next_event().into_parsing_problem(Format::CBOR)? {
                     Event::Break => {
                         break;
                     }
@@ -131,7 +136,7 @@ where
         Event::UnknownLengthMap => {
             value_builder.start_map_with_label(label, None);
             loop {
-                match decoder.next_event()? {
+                match decoder.next_event().into_parsing_problem(Format::CBOR)? {
                     Event::Break => {
                         break;
                     }

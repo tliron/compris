@@ -4,7 +4,7 @@ edition = "2024"
 name = "compris"
 description = "Composite Primitive Schema (CPS) for Rust"
 version = "0.0.11"
-rust-version = "1.91"
+rust-version = "1.93"
 
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/tliron/compris"
@@ -21,26 +21,28 @@ categories = [
 keywords = ["cps"]
 
 [dependencies]
-anstream = "0.6.21"
+anstream = "1.0.0"
 base64 = "0.22.1"
 base64-simd = "0.8.0"
 borc = { optional = true, version = "0.6.0" }
 compris-macros = { optional = true, version = "=0.0.11" }
-depiction = { version = "=0.0.1", features = ["derive"] }
+depiction = { version = "=0.0.1", features = ["derive", "problemo"] }
+derive_more = { version = "2.1.1", features = ["display", "error"] }
 duplicate = "2.0.1"
 kutil = { version = "=0.0.5", features = ["std", "io", "fast_collections", "immutable", "derive"] }
 num-traits = "0.2.19"
 ordered-float = "5.1.0"
+problemo = "=0.0.11"
+pyo3 = { optional = true, version = "0.28.1" }
 rmp = { optional = true, version = "0.8" }
-rmp-serde = { optional = true, version = "1.3.0" }
+rmp-serde = { optional = true, version = "1.3.1" }
 saphyr-parser = { optional = true, version = "0.0.6" }
 serde = { optional = true, version = "1.0.228", features = ["derive"] }
-#serde-saphyr = { optional = true, version = "0.0.7" }
-serde_norway = { optional = true, version = "0.9.42" }
-serde-xml-rs = { optional = true, version = "0.8.1" }
-struson = { optional = true, version = "0.6.0" }
-thiserror = "2.0.17"
-tracing = "0.1.41"
+serde-saphyr = { optional = true, version = "0.0.18" }
+#serde_norway = { optional = true, version = "0.9.42" }
+serde-xml-rs = { optional = true, version = "0.8.2" }
+struson = { optional = true, version = "0.7.2" }
+tracing = "0.1.44"
 tynm = "0.2.0"
 
 [dev-dependencies]
@@ -49,30 +51,40 @@ serde = { version = "1.0.228", features = ["derive"] }
 
 [features]
 default = ["yaml", "json", "xml", "cbor", "messagepack"]
+
 ## Enable YAML support.
 yaml = ["dep:saphyr-parser", "kutil/io"]
+
 ## Enable JSON support.
 json = ["dep:struson"]
+
 ## Enable XML support.
 xml = []
+
 ## Enable CBOR support.
 cbor = ["dep:borc"]
+
 ## Enable MessagePack support.
 messagepack = ["dep:rmp"]
 
 ## Include procedural macros for `derive`.
 derive = ["dep:compris-macros"]
+
 ## Enable serde support.
 serde = [
     "ordered-float/serde",
     "dep:rmp-serde",       # TODO: only when messagepack
     "dep:serde",
     "dep:serde-xml-rs",    # TODO: only when xml
-    "dep:serde_norway",    # TODO: only when yaml
-    #"dep:serde-saphyr",    # TODO: only when yaml
+    #"dep:serde_norway",    # TODO: only when yaml
+    "dep:serde-saphyr",    # TODO: only when yaml
     "struson?/serde",
     "kutil/serde",
+    "problemo/serde",
 ]
+
+## Enable Python API.
+pyo3 = ["dep:pyo3", "depiction/pyo3", "kutil/pyo3"]
 
 [[example]]
 name = "resolve_basic"

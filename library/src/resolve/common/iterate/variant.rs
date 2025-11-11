@@ -1,11 +1,11 @@
 use super::super::super::{
-    super::{annotate::*, normal::*},
+    super::{annotate::*, errors::*, normal::*},
     errors::*,
     iterator::*,
     resolve::*,
 };
 
-use {kutil::std::error::*, std::vec};
+use {problemo::*, std::vec};
 
 //
 // ResolvingVariantIterator
@@ -24,7 +24,7 @@ where
     pub inner: InnerT,
 }
 
-impl<'own, InnerT, AnnotatedT> ResolvingVariantIterator<InnerT, AnnotatedT>
+impl<InnerT, AnnotatedT> ResolvingVariantIterator<InnerT, AnnotatedT>
 where
     InnerT: Iterator<Item = Variant<AnnotatedT>>,
 {
@@ -42,38 +42,37 @@ where
     }
 }
 
-impl<'own, AnnotatedT> ResolvingVariantIterator<vec::IntoIter<Variant<AnnotatedT>>, AnnotatedT> {
+impl<AnnotatedT> ResolvingVariantIterator<vec::IntoIter<Variant<AnnotatedT>>, AnnotatedT> {
     /// Constructor.
-    pub fn new_from<ErrorReceiverT>(
+    pub fn new_from<ProblemReceiverT>(
         variant: Variant<AnnotatedT>,
-        errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<Self, AnnotatedT>
+        problems: &mut ProblemReceiverT,
+    ) -> ResolveResult<Self>
     where
         AnnotatedT: Annotated + Clone + Default,
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         match variant {
             Variant::List(list) => return Ok(Some(Self::new_for(list))),
 
-            _ => errors.give(IncompatibleVariantTypeError::new_from(&variant, &["list"]))?,
+            _ => problems.give(IncompatibleVariantTypeError::as_problem_from(&variant, &["list"]).via(ResolveError))?,
         }
 
         Ok(None)
     }
 }
 
-impl<'own, ResolvedT, InnerT, AnnotatedT> ResolvingIterator<ResolvedT, AnnotatedT>
-    for ResolvingVariantIterator<InnerT, AnnotatedT>
+impl<ResolvedT, InnerT, AnnotatedT> ResolvingIterator<ResolvedT> for ResolvingVariantIterator<InnerT, AnnotatedT>
 where
-    Variant<AnnotatedT>: Resolve<ResolvedT, AnnotatedT>,
+    Variant<AnnotatedT>: Resolve<ResolvedT>,
     InnerT: Iterator<Item = Variant<AnnotatedT>>,
 {
-    fn resolve_next<ErrorReceiverT>(&mut self, errors: &mut ErrorReceiverT) -> ResolveResult<ResolvedT, AnnotatedT>
+    fn resolve_next<ProblemReceiverT>(&mut self, problems: &mut ProblemReceiverT) -> ResolveResult<ResolvedT>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         Ok(match self.inner.next() {
-            Some(next) => next.resolve_with_errors(errors)?,
+            Some(next) => next.resolve_with_problems(problems)?,
             None => None,
         })
     }

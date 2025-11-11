@@ -1,7 +1,5 @@
 mod blob;
 mod boolean;
-mod depict;
-mod errors;
 mod float;
 mod integer;
 mod iterator;
@@ -17,6 +15,6 @@ mod variant;
 
 #[allow(unused_imports)]
 pub use {
-    blob::*, boolean::*, depict::*, errors::*, float::*, integer::*, iterator::*, list::*, macros::*, map::*, merge::*,
-    null::*, text::*, traversal::*, unsigned_integer::*, variant::*,
+    blob::*, boolean::*, float::*, integer::*, iterator::*, list::*, macros::*, map::*, merge::*, null::*, text::*,
+    traversal::*, unsigned_integer::*, variant::*,
 };

@@ -4,10 +4,7 @@ use super::super::{
     resolve::*,
 };
 
-use {
-    duplicate::*,
-    kutil::std::{error::*, immutable::*},
-};
+use {duplicate::*, kutil::std::immutable::*, problemo::*};
 
 // Note that Strings will be cloned, so using ByteString is more efficient
 
@@ -30,21 +27,21 @@ use {
   [String];
   [Bytes];
 )]
-impl<AnnotatedT> Resolve<ResolvedT, AnnotatedT> for Variant<AnnotatedT>
+impl<AnnotatedT> Resolve<ResolvedT> for Variant<AnnotatedT>
 where
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorReceiverT>(self, errors: &mut ErrorReceiverT) -> ResolveResult<ResolvedT, AnnotatedT>
+    fn resolve_with_problems<ProblemReceiverT>(self, problems: &mut ProblemReceiverT) -> ResolveResult<ResolvedT>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         let maybe_annotations = self.maybe_annotations();
 
         Ok(match self.try_into() {
             Ok(native) => Some(native),
 
-            Err(error) => {
-                errors.give(error.with_annotations_from(&maybe_annotations))?;
+            Err(problem) => {
+                problems.give(problem.maybe_with(maybe_annotations.annotations).via(ResolveError))?;
                 None
             }
         })
@@ -53,20 +50,20 @@ where
 
 // Failed attempt at blanket generic:
 //
-// impl<'own, ResolvedT, ContextT, ErrorT> Resolve<ResolvedT, ContextT, ErrorT> for Value
+// impl<'this, ResolvedT, ContextT, ErrorT> Resolve<ResolvedT, ContextT, ErrorT> for Value
 // where
 //     ContextT: ResolveContext,
 //     ErrorT: ResolveError,
-//     &'own Self: TryInto<ResolvedT, Error = IncompatibleValueTypeError>,
+//     &'this Self: TryInto<ResolvedT, Error = IncompatibleValueTypeError>,
 // {
-//     fn resolve_for<ErrorReceiverT>(
+//     fn resolve_for<ProblemReceiverT>(
 //         &self,
 //         _context: Option<&ContextT>,
 //         _ancestor: Option<&Value>,
-//         _errors: &mut ErrorReceiverT,
+//         _errors: &mut ProblemReceiverT,
 //     ) -> ResolveResult<ResolvedT, ErrorT>
 //     where
-//         ErrorReceiverT: ErrorReceiver<ErrorT>,
+//         ProblemReceiverT: ErrorReceiver<ErrorT>,
 //     {
 //         Ok(match self.try_into() { // ouch, lifetimes!!!!!!!
 //             Ok(resolved) => Some(resolved),

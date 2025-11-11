@@ -41,7 +41,7 @@ impl<AnnotatedT> Depict for Text<AnnotatedT> {
 }
 
 impl<AnnotatedT> fmt::Display for Text<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         fmt::Display::fmt(&self.inner, formatter)
     }
 }
@@ -90,8 +90,8 @@ impl<AnnotatedT> From<Text<AnnotatedT>> for String {
     }
 }
 
-impl<'own, AnnotatedT> From<&'own Text<AnnotatedT>> for &'own str {
-    fn from(text: &'own Text<AnnotatedT>) -> Self {
+impl<'this, AnnotatedT> From<&'this Text<AnnotatedT>> for &'this str {
+    fn from(text: &'this Text<AnnotatedT>) -> Self {
         &text.inner
     }
 }

@@ -8,7 +8,8 @@ use super::{
 };
 
 use {
-    kutil::std::{error::*, string::*},
+    kutil::std::string::*,
+    problemo::*,
     std::{fmt, marker::*, str::*},
 };
 
@@ -33,17 +34,17 @@ impl<InnerT, ParseStrT> ResolveParseStr<InnerT, ParseStrT> {
     }
 }
 
-impl<InnerT, ParseStrT, AnnotatedT> Resolve<ResolveParseStr<InnerT, ParseStrT>, AnnotatedT> for Variant<AnnotatedT>
+impl<InnerT, ParseStrT, AnnotatedT> Resolve<ResolveParseStr<InnerT, ParseStrT>> for Variant<AnnotatedT>
 where
     ParseStrT: ParseStr<InnerT>,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorReceiverT>(
+    fn resolve_with_problems<ProblemReceiverT>(
         self,
-        errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<ResolveParseStr<InnerT, ParseStrT>, AnnotatedT>
+        errors: &mut ProblemReceiverT,
+    ) -> ResolveResult<ResolveParseStr<InnerT, ParseStrT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         resolve_from_str(self, errors)
     }
@@ -76,7 +77,7 @@ impl<InnerT, ParseStrT> fmt::Display for ResolveParseStr<InnerT, ParseStrT>
 where
     InnerT: fmt::Display,
 {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         fmt::Display::fmt(&self.inner, formatter)
     }
 }

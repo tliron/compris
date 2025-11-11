@@ -2,41 +2,35 @@ use super::super::super::{annotate::*, normal::*};
 
 use {
     depiction::*,
+    derive_more::*,
+    problemo::*,
     std::{fmt, io},
-    thiserror::*,
 };
 
 //
 // InvalidKeyError
 //
 
-/// Invalid key.
-#[derive(Debug, Error)]
-pub struct InvalidKeyError<AnnotatedT> {
+/// Invalid key error.
+#[derive(Debug, Error, PartialEq)]
+pub struct InvalidKeyError {
     /// Key.
-    pub key: Variant<AnnotatedT>,
+    pub key: Variant<WithoutAnnotations>,
 }
 
-impl_annotated!(InvalidKeyError, key);
-
-impl<AnnotatedT> InvalidKeyError<AnnotatedT> {
+impl InvalidKeyError {
     /// Constructor.
-    pub fn new(key: Variant<AnnotatedT>) -> Self {
-        Self { key }
+    pub fn new<AnnotatedT>(key: Variant<AnnotatedT>) -> Self {
+        Self { key: key.remove_annotations() }
+    }
+
+    /// Constructor.
+    pub fn as_problem<AnnotatedT>(key: Variant<AnnotatedT>) -> Problem {
+        Self::new(key).into_problem().with(AnnotatedCauseEquality::new::<Self>()).with(ErrorDepiction::new::<Self>())
     }
 }
 
-impl<AnnotatedT, NewAnnotatedT> IntoAnnotated<InvalidKeyError<NewAnnotatedT>> for InvalidKeyError<AnnotatedT>
-where
-    AnnotatedT: Annotated,
-    NewAnnotatedT: Annotated + Default,
-{
-    fn into_annotated(self) -> InvalidKeyError<NewAnnotatedT> {
-        InvalidKeyError::new(self.key.into_annotated())
-    }
-}
-
-impl<AnnotatedT> Depict for InvalidKeyError<AnnotatedT> {
+impl Depict for InvalidKeyError {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>
     where
         WriteT: io::Write,
@@ -46,8 +40,8 @@ impl<AnnotatedT> Depict for InvalidKeyError<AnnotatedT> {
     }
 }
 
-impl<AnnotatedT> fmt::Display for InvalidKeyError<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl fmt::Display for InvalidKeyError {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(formatter, "{:?}", self.key.to_string())
     }
 }

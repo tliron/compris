@@ -35,7 +35,7 @@ impl<AnnotatedT> Depict for UnsignedInteger<AnnotatedT> {
 }
 
 impl<AnnotatedT> fmt::Display for UnsignedInteger<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(formatter, "{}u64", self.inner)
     }
 }

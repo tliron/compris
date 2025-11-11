@@ -55,7 +55,7 @@ impl<AnnotatedT> Depict for Blob<AnnotatedT> {
 }
 
 impl<AnnotatedT> fmt::Display for Blob<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(formatter, "{} bytes", self.inner.len())
     }
 }
@@ -132,8 +132,8 @@ impl<AnnotatedT> From<Blob<AnnotatedT>> for Vec<u8> {
     }
 }
 
-impl<'own, AnnotatedT> From<&'own Blob<AnnotatedT>> for &'own [u8] {
-    fn from(blob: &'own Blob<AnnotatedT>) -> Self {
+impl<'this, AnnotatedT> From<&'this Blob<AnnotatedT>> for &'this [u8] {
+    fn from(blob: &'this Blob<AnnotatedT>) -> Self {
         &blob.inner
     }
 }

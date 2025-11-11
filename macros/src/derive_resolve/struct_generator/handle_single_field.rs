@@ -43,7 +43,7 @@ impl StructGenerator {
             quote! {
                 #handle_annotations1
                 if let ::std::option::Option::Some(value) =
-                    ::compris::resolve::Resolve::resolve_with_errors(self, errors)?
+                    ::compris::resolve::Resolve::resolve_with_problems(self, problems)?
                 {
                     resolved.#field_name = value;
                     #handle_annotations2
@@ -55,12 +55,15 @@ impl StructGenerator {
             }
         } else {
             quote! {
-                ::kutil::std::error::ErrorReceiver::give_error(
-                    errors,
-                    ::compris::normal::IncompatibleVariantTypeError::new_from(
-                        &self,
-                        &["map"],
-                    ).into(),
+                ::problemo::ProblemReceiver::give(
+                    problems,
+                    ::compris::resolve::IntoResolveProblem::into_resolve_problem(
+                        ::compris::errors::IncompatibleVariantTypeError::as_problem_from(
+                            &self,
+                            &["map"],
+                        ),
+                        &maybe_annotations,
+                    ),
                 )?;
 
                 return ::compris::resolve::ResolveResult::Ok(

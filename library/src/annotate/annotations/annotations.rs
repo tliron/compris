@@ -6,12 +6,6 @@ use {
     std::{fmt, io},
 };
 
-/// Depict annotations prefix.
-pub const DEPICT_ANNOTATIONS_PREFIX: char = '@';
-
-/// Depict annotations separator.
-pub const DEPICT_ANNOTATIONS_SEPARATOR: char = ':';
-
 //
 // Annotations
 //
@@ -120,7 +114,7 @@ impl Depict for Annotations {
             // source + span (no path)
             DepictionFormat::Compact => {
                 context.separate(writer)?;
-                context.theme.write_delimiter(writer, DEPICT_ANNOTATIONS_PREFIX)?;
+                context.theme.write_delimiter(writer, DEPICT_LOCATION_PREFIX)?;
 
                 let mut separate = false;
                 if let Some(source) = &self.source {
@@ -132,7 +126,7 @@ impl Depict for Annotations {
                     && span.has_debug()
                 {
                     if separate {
-                        context.theme.write_delimiter(writer, DEPICT_ANNOTATIONS_SEPARATOR)?;
+                        context.theme.write_delimiter(writer, DEPICT_LOCATION_SEPARATOR)?;
                     }
                     span.depict(writer, context)?;
                 }
@@ -156,7 +150,7 @@ impl Depict for Annotations {
                     if separate {
                         write!(writer, " ")?;
                     }
-                    context.theme.write_delimiter(writer, DEPICT_ANNOTATIONS_PREFIX)?;
+                    context.theme.write_delimiter(writer, DEPICT_LOCATION_PREFIX)?;
                     span.depict(writer, context)?;
                     separate = true;
                 }
@@ -187,7 +181,7 @@ impl Depict for Annotations {
                     if separate {
                         write!(writer, " ")?;
                     }
-                    context.theme.write_delimiter(writer, DEPICT_ANNOTATIONS_PREFIX)?;
+                    context.theme.write_delimiter(writer, DEPICT_LOCATION_PREFIX)?;
                     span.depict(writer, context)?;
                 }
 
@@ -198,7 +192,7 @@ impl Depict for Annotations {
 }
 
 impl fmt::Display for Annotations {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut separate = false;
         if let Some(source) = &self.source {
             write!(formatter, "{}", source)?;
@@ -209,7 +203,7 @@ impl fmt::Display for Annotations {
             if separate {
                 write!(formatter, " ")?;
             }
-            write!(formatter, "{}{}", DEPICT_ANNOTATIONS_PREFIX, span)?;
+            write!(formatter, "{}{}", DEPICT_LOCATION_PREFIX, span)?;
             separate = true;
         }
 

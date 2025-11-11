@@ -1,0 +1,30 @@
+[package]
+edition = "2024"
+
+name = "compris-python"
+description = "Composite Primitive Schema (CPS) for Rust"
+version = "0.0.11"
+rust-version = "1.93"
+
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/tliron/compris"
+documentation = "https://docs.rs/compris"
+authors = ["Tal Liron"]
+
+readme = "../README.md"
+
+categories = [
+    "data-structures",
+    "encoding",
+    "parsing",
+] # https://crates.io/category_slugs
+keywords = ["cps"]
+
+[lib]
+name = "compris"
+crate-type = ["cdylib"]
+
+[dependencies]
+compris = { version = "=0.0.11", default-features = false, features = ["pyo3"] }
+kutil = { version = "=0.0.5", features = ["pyo3"] }
+pyo3 = "0.28.1"

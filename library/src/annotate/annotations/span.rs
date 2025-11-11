@@ -5,9 +5,6 @@ use {
     std::{fmt, io},
 };
 
-/// Depict span separator.
-pub const DEPICT_SPAN_SEPARATOR: char = '→';
-
 //
 // Span
 //
@@ -42,11 +39,18 @@ impl Depict for Span {
         if self.start.has_debug() {
             self.start.depict(writer, context)?;
 
-            if let Some(end) = &self.end
-                && end.has_debug()
-            {
-                context.theme.write_delimiter(writer, DEPICT_SPAN_SEPARATOR)?;
-                end.depict(writer, context)?;
+            if let Some(end) = &self.end {
+                if end.row == self.start.row {
+                    if let Some(column) = end.column
+                        && (Some(column) != self.start.column)
+                    {
+                        context.theme.write_delimiter(writer, DEPICT_SPAN_SEPARATOR)?;
+                        context.theme.write_number(writer, column + 1)?;
+                    }
+                } else if end.has_debug() {
+                    context.theme.write_delimiter(writer, DEPICT_SPAN_SEPARATOR)?;
+                    end.depict(writer, context)?;
+                }
             }
         }
 
@@ -55,7 +59,7 @@ impl Depict for Span {
 }
 
 impl fmt::Display for Span {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         if self.start.has_debug() {
             write!(formatter, "{}", self.start)?;
 

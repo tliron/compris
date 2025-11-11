@@ -9,24 +9,23 @@ use super::super::{
 };
 
 use {
-    kutil::std::error::*,
+    problemo::*,
     std::{collections::*, hash::*},
 };
 
-impl<KeyT, ValueT, BuildHasherT, AnnotatedT> Resolve<HashMap<KeyT, ValueT, BuildHasherT>, AnnotatedT>
-    for Variant<AnnotatedT>
+impl<KeyT, ValueT, BuildHasherT, AnnotatedT> Resolve<HashMap<KeyT, ValueT, BuildHasherT>> for Variant<AnnotatedT>
 where
     KeyT: Hash + Eq,
-    Variant<AnnotatedT>: Resolve<KeyT, AnnotatedT> + Resolve<ValueT, AnnotatedT>,
-    AnnotatedT: 'static + Annotated + Clone + Default,
+    Variant<AnnotatedT>: Resolve<KeyT> + Resolve<ValueT>,
+    AnnotatedT: Annotated + Clone + Default,
     BuildHasherT: BuildHasher + Default,
 {
-    fn resolve_with_errors<ErrorReceiverT>(
+    fn resolve_with_problems<ProblemReceiverT>(
         self,
-        errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<HashMap<KeyT, ValueT, BuildHasherT>, AnnotatedT>
+        errors: &mut ProblemReceiverT,
+    ) -> ResolveResult<HashMap<KeyT, ValueT, BuildHasherT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         let mut resolved = HashMap::default();
 
