@@ -21,9 +21,9 @@ pub struct Deserializer<'own, AnnotatedT> {
     variant: &'own Variant<AnnotatedT>,
 }
 
-impl<'own, AnnotatedT> Deserializer<'own, AnnotatedT> {
+impl<'de, AnnotatedT> Deserializer<'de, AnnotatedT> {
     /// Constructor
-    pub fn new(variant: &'own Variant<AnnotatedT>) -> Self {
+    pub fn new(variant: &'de Variant<AnnotatedT>) -> Self {
         Self { variant }
     }
 
@@ -390,9 +390,9 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
         Err(DeserializeError::NotSupported("deserialize_char"))
     }
 
-    fn deserialize_str<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    fn deserialize_str<VisitorT>(self, visitor: VisitorT) -> Result<VisitorT::Value, Self::Error>
     where
-        V: de::Visitor<'de>,
+        VisitorT: de::Visitor<'de>,
     {
         match self.variant {
             Variant::Text(text) => visitor.visit_str(text.into()),

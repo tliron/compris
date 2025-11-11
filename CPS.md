@@ -53,7 +53,7 @@ Which to choose? Due to some unfortunate drama, CBOR is a (non-enforced) [IETF s
 
 ### YAML
 
-YAML 1.2, when including the common [JSON schema](https://yaml.org/spec/1.2/spec.html#id2803231)), supports *most* of CPS.
+YAML 1.2 (when including the common [JSON schema](https://yaml.org/spec/1.2/spec.html#id2803231)), supports *most* of CPS.
 
 It does lack a distinction between signed and unsigned integers. If you need full 64-bit unsigned integers, which cannot be guaranteed casting to signed integers, then it might be best to encode them as string representations, e.g. in decimal or (smaller) hex.
 

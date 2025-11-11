@@ -14,8 +14,8 @@ pub(crate) struct VariantDeserializer<'de, AnnotatedT> {
 }
 
 impl<'de, AnnotatedT> VariantDeserializer<'de, AnnotatedT> {
-    pub fn new(value: &'de Variant<AnnotatedT>) -> Self {
-        Self { variant: value }
+    pub fn new(variant: &'de Variant<AnnotatedT>) -> Self {
+        Self { variant }
     }
 }
 

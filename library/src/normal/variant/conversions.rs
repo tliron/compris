@@ -117,7 +117,7 @@ where
   [Text]            ["text"]             [String];
   [Text]            ["text"]             [ByteString];
   [List]            ["list"]             [Vec<Variant<AnnotatedT>>];
-  [Map]             ["Map"]              [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
+  [Map]             ["map"]              [BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>];
 )]
 #[allow(unused_variables)]
 impl<AnnotatedT> TryFrom<Variant<AnnotatedT>> for ToT
