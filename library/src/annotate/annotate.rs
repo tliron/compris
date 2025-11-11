@@ -108,7 +108,7 @@ impl<InnerT, AnnotatedT> fmt::Display for Annotate<InnerT, AnnotatedT>
 where
     InnerT: fmt::Display,
 {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         fmt::Display::fmt(&self.inner, formatter)
     }
 }

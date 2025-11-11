@@ -1,11 +1,11 @@
 use super::{
     super::{annotate::*, normal::*, *},
-    errors::*,
     serializer::*,
 };
 
 use {
     depiction::*,
+    problemo::{common::*, *},
     std::{fs::*, io, path},
 };
 
@@ -39,10 +39,10 @@ impl RepresentationWriter {
         quiet_empty: bool,
         trace: bool,
         path: Option<PathT>,
-    ) -> Result<(), SerializeError>
+    ) -> Result<(), Problem>
     where
         PathT: AsRef<path::Path>,
-        AnnotatedT: Annotated + Clone + Default,
+        AnnotatedT: 'static + Annotated + Clone + Default,
     {
         let format = if trace && let Some(format) = self.format { format.as_str() } else { "debug depiction" };
 
@@ -52,40 +52,36 @@ impl RepresentationWriter {
                 tracing::info!("writing {} to file: {}", format, path.display());
             }
 
-            self.write(variant, &mut io::BufWriter::new(File::create(path)?))?;
+            self.write(variant, &mut io::BufWriter::new(File::create(path).via(LowLevelError)?))
         } else if quiet {
             if quiet_empty {
                 if trace {
                     tracing::info!("writing {} to empty", format);
                 }
 
-                self.write(variant, &mut io::empty())?;
+                self.write(variant, &mut io::empty())
+            } else {
+                Ok(())
             }
         } else if self.is_binary() {
             if trace {
                 tracing::info!("writing {} to stdout (raw)", format);
             }
 
-            self.write(variant, &mut io::stdout())?;
+            self.write(variant, &mut io::stdout())
         } else {
             if trace {
                 tracing::info!("writing {} to stdout", format);
             }
 
-            self.write(variant, &mut anstream::stdout())?;
+            self.write(variant, &mut anstream::stdout())
         }
-
-        Ok(())
     }
 
     /// Write.
-    pub fn write<AnnotatedT, WriteT>(
-        &self,
-        variant: &Variant<AnnotatedT>,
-        mut writer: WriteT,
-    ) -> Result<(), SerializeError>
+    pub fn write<AnnotatedT, WriteT>(&self, variant: &Variant<AnnotatedT>, mut writer: WriteT) -> Result<(), Problem>
     where
-        AnnotatedT: Annotated + Clone + Default,
+        AnnotatedT: 'static + Annotated + Clone + Default,
         WriteT: io::Write,
     {
         match self.format {
@@ -94,11 +90,13 @@ impl RepresentationWriter {
                 .with_base64(self.base64)
                 .write_modal(variant, &mut writer),
 
-            None => Ok(if self.pretty {
-                variant.write_default_depiction(&mut writer)
-            } else {
-                variant.write_plain_depiction(&mut writer)
-            }?),
+            None => {
+                if self.pretty {
+                    variant.annotated_depiction().write_default_depiction(&mut writer).via(LowLevelError)
+                } else {
+                    variant.annotated_depiction().write_plain_depiction(&mut writer).via(LowLevelError)
+                }
+            }
         }
     }
 

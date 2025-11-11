@@ -1,21 +1,21 @@
 use super::super::{super::normal::*, errors::*, resolve::*};
 
-use kutil::std::error::*;
+use problemo::*;
 
 // We only have to care about Some, because None will never get resolved
 // (A Null is definitely not a None and requires entirely different consideration)
 
-impl<OptionalT, AnnotatedT> Resolve<Option<OptionalT>, AnnotatedT> for Variant<AnnotatedT>
+impl<OptionalT, AnnotatedT> Resolve<Option<OptionalT>> for Variant<AnnotatedT>
 where
-    Variant<AnnotatedT>: Resolve<OptionalT, AnnotatedT>,
+    Variant<AnnotatedT>: Resolve<OptionalT>,
 {
-    fn resolve_with_errors<ErrorReceiverT>(
+    fn resolve_with_problems<ProblemReceiverT>(
         self,
-        errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<Option<OptionalT>, AnnotatedT>
+        problems: &mut ProblemReceiverT,
+    ) -> ResolveResult<Option<OptionalT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
-        Ok(Some(self.resolve_with_errors(errors)?))
+        Ok(Some(self.resolve_with_problems(problems)?))
     }
 }

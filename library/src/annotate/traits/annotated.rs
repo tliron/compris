@@ -19,7 +19,7 @@ where
     /// The annotations.
     fn annotations(&self) -> Option<&Annotations>;
 
-    /// The annotations as mutable.
+    /// The annotations.
     fn annotations_mut(&mut self) -> Option<&mut Annotations>;
 
     /// Whether we have [Annotations].

@@ -29,7 +29,7 @@ impl<AnnotatedT> Depict for Boolean<AnnotatedT> {
 }
 
 impl<AnnotatedT> fmt::Display for Boolean<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         fmt::Display::fmt(&self.inner, formatter)
     }
 }

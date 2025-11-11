@@ -8,17 +8,17 @@ use std::{mem::*, slice, vec};
 
 /// If the variant is a [List](super::list::List), iterates its items. Otherwise just iterates
 /// itself once.
-pub enum VariantIterator<'own, AnnotatedT> {
+pub enum VariantIterator<'inner, AnnotatedT> {
     /// Iterator.
-    Iterator(slice::Iter<'own, Variant<AnnotatedT>>),
+    Iterator(slice::Iter<'inner, Variant<AnnotatedT>>),
 
     /// Variant.
-    Variant(Option<&'own Variant<AnnotatedT>>),
+    Variant(Option<&'inner Variant<AnnotatedT>>),
 }
 
-impl<'own, AnnotatedT> VariantIterator<'own, AnnotatedT> {
+impl<'inner, AnnotatedT> VariantIterator<'inner, AnnotatedT> {
     /// Constructor.
-    pub fn new(variant: &'own Variant<AnnotatedT>) -> Self {
+    pub fn new(variant: &'inner Variant<AnnotatedT>) -> Self {
         match variant {
             Variant::List(list) => Self::Iterator(list.inner.iter()),
             _ => Self::Variant(Some(variant)),
@@ -26,8 +26,8 @@ impl<'own, AnnotatedT> VariantIterator<'own, AnnotatedT> {
     }
 }
 
-impl<'own, AnnotatedT> Iterator for VariantIterator<'own, AnnotatedT> {
-    type Item = &'own Variant<AnnotatedT>;
+impl<'inner, AnnotatedT> Iterator for VariantIterator<'inner, AnnotatedT> {
+    type Item = &'inner Variant<AnnotatedT>;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {

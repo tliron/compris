@@ -1,6 +1,10 @@
-use super::super::{errors::*, serializer::*};
+use super::super::{super::format::*, errors::*, serializer::*};
 
-use {serde::Serialize, std::io};
+use {
+    problemo::{common::*, *},
+    serde::Serialize,
+    std::io,
+};
 
 impl Serializer {
     /// Serializes the provided value to the writer as MessagePack.
@@ -10,25 +14,29 @@ impl Serializer {
         &self,
         value: &SerializableT,
         writer: &mut WriteT,
-    ) -> Result<(), SerializeError>
+    ) -> Result<(), Problem>
     where
         WriteT: io::Write,
         SerializableT: Serialize + ?Sized,
     {
-        fn write<WriteT, SerializableT>(value: &SerializableT, writer: &mut WriteT) -> Result<(), SerializeError>
+        fn write<WriteT, SerializableT>(value: &SerializableT, writer: &mut WriteT) -> Result<(), Problem>
         where
             WriteT: io::Write,
             SerializableT: Serialize + ?Sized,
         {
-            Ok(rmp_serde::encode::write(writer, value)?)
+            rmp_serde::encode::write(writer, value).via(SerializationError::new("serde")).with(Format::MessagePack)
         }
 
         if self.base64 {
-            write(value, &mut Self::base64_writer(writer))?;
+            write(value, &mut Self::base64_writer(writer)).into_low_level_serialization_problem(Format::MessagePack)?;
         } else {
-            write(value, writer)?;
+            write(value, writer).into_low_level_serialization_problem(Format::MessagePack)?;
         }
 
-        if self.pretty { Self::write_newline(writer) } else { Ok(()) }
+        if self.pretty {
+            Self::write_newline(writer).into_low_level_serialization_problem(Format::MessagePack)
+        } else {
+            Ok(())
+        }
     }
 }

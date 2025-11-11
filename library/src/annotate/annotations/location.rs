@@ -3,15 +3,6 @@ use {
     std::{fmt, io},
 };
 
-/// Depict location separator.
-pub const DEPICT_LOCATION_SEPARATOR: char = '.';
-
-/// Depict location start index.
-pub const DEPICT_LOCATION_START_INDEX: char = '[';
-
-/// Depict location end index.
-pub const DEPICT_LOCATION_END_INDEX: char = ']';
-
 //
 // Location
 //
@@ -51,18 +42,18 @@ impl Depict for Location {
         if let Some(row) = self.row {
             // Though our row and column start at 0, users usually expect them to start at 1
 
-            context.theme.write_meta(writer, row + 1)?;
+            context.theme.write_number(writer, row + 1)?;
 
             if let Some(column) = self.column {
-                context.theme.write_delimiter(writer, DEPICT_LOCATION_SEPARATOR)?;
-                context.theme.write_meta(writer, column + 1)?;
+                context.theme.write_delimiter(writer, DEPICT_COORDINATE_SEPARATOR)?;
+                context.theme.write_number(writer, column + 1)?;
             }
         } else if let Some(index) = self.index {
             // We'll show the index only if there is no row/column
 
-            context.theme.write_delimiter(writer, DEPICT_LOCATION_START_INDEX)?;
-            context.theme.write_meta(writer, index)?;
-            context.theme.write_delimiter(writer, DEPICT_LOCATION_END_INDEX)?;
+            context.theme.write_delimiter(writer, DEPICT_INDEX_START)?;
+            context.theme.write_number(writer, index)?;
+            context.theme.write_delimiter(writer, DEPICT_INDEX_END)?;
         }
 
         Ok(())
@@ -70,18 +61,18 @@ impl Depict for Location {
 }
 
 impl fmt::Display for Location {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         if let Some(row) = self.row {
             // Though our row and column start at 0, users usually expect them to start at 1
 
             write!(formatter, "{}", row + 1)?;
 
             if let Some(column) = self.column {
-                write!(formatter, "{}{}", DEPICT_LOCATION_SEPARATOR, column + 1)?;
+                write!(formatter, "{}{}", DEPICT_COORDINATE_SEPARATOR, column + 1)?;
             }
         } else if let Some(index) = self.index {
             // We'll show the index only if there is no row/column
-            write!(formatter, "{}{}{}", DEPICT_LOCATION_START_INDEX, index, DEPICT_LOCATION_END_INDEX)?;
+            write!(formatter, "{}{}{}", DEPICT_INDEX_START, index, DEPICT_INDEX_END)?;
         }
 
         Ok(())

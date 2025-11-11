@@ -1,9 +1,9 @@
-use super::super::{super::errors::*, root::*};
+use super::super::root::*;
 
 use {
     clap::*,
     compris::{annotate::*, normal::*, parse::Parser, *},
-    kutil::cli::run::*,
+    problemo::{common::*, *},
     read_url::*,
     std::{
         io::{self, IsTerminal},
@@ -12,23 +12,23 @@ use {
 };
 
 impl Root {
-    pub fn read<AnnotatedT>(&self) -> Result<Variant<AnnotatedT>, MainError>
+    pub fn read<AnnotatedT>(&self) -> Result<Variant<AnnotatedT>, Problem>
     where
         AnnotatedT: Annotated + Clone + Default,
     {
         let mut reader = self.get_reader()?;
         let input_format = self.input_format()?;
 
-        Ok(Parser::new(input_format.clone())
+        Parser::new(input_format.clone())
             .with_try_integers(self.input_integers)
             .with_try_unsigned_integers(self.input_unsigned_integers)
             .with_allow_legacy_words(self.input_legacy)
             .with_allow_legacy_types(self.input_legacy)
             .with_base64(self.input_base64)
-            .parse_reader(&mut reader)?)
+            .parse_reader(&mut reader)
     }
 
-    fn get_reader(&self) -> Result<ReadRef, MainError> {
+    fn get_reader(&self) -> Result<ReadRef, Problem> {
         Ok(match &self.input_path_or_url {
             Some(input_url) => {
                 let url_context = UrlContext::new();
@@ -50,7 +50,7 @@ impl Root {
                 let stdin = io::stdin();
                 if stdin.is_terminal() {
                     Root::command().print_help()?;
-                    return Err(ExitError::success().into());
+                    return Err(ExitError::success());
                 }
 
                 tracing::info!("reading from stdin");
@@ -77,6 +77,6 @@ impl Root {
             }
         };
 
-        Err("cannot determine input format; specify it explicitly with --input-format/-n".into())
+        Err("cannot determine input format; specify it explicitly with --input-format/-F".into())
     }
 }

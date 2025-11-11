@@ -1,6 +1,7 @@
-use super::super::{errors::*, serializer::*};
+use super::super::{super::format::*, errors::*, serializer::*};
 
 use {
+    problemo::{common::*, *},
     serde::Serialize,
     std::io,
     struson::{serde::*, writer::*},
@@ -8,11 +9,7 @@ use {
 
 impl Serializer {
     /// Serializes the provided value to the writer as JSON.
-    pub fn write_json<WriteT, SerializableT>(
-        &self,
-        value: &SerializableT,
-        writer: &mut WriteT,
-    ) -> Result<(), SerializeError>
+    pub fn write_json<WriteT, SerializableT>(&self, value: &SerializableT, writer: &mut WriteT) -> Result<(), Problem>
     where
         WriteT: io::Write,
         SerializableT: Serialize + ?Sized,
@@ -28,10 +25,14 @@ impl Serializer {
 
         let mut json_stream_writer = StyledJsonWriter::new(json_stream_writer);
 
-        json_stream_writer.serialize_value(&value)?;
-        json_stream_writer.finish_document()?;
+        json_stream_writer.serialize_value(&value).via(SerializationError::new("serde")).with(Format::JSON)?;
+        json_stream_writer.finish_document().via(SerializationError::new("serde")).with(Format::JSON)?;
 
-        if self.pretty { Self::write_newline(writer) } else { Ok(()) }
+        if self.pretty {
+            Self::write_newline(writer).into_low_level_serialization_problem(Format::JSON)
+        } else {
+            Ok(())
+        }
     }
 }
 

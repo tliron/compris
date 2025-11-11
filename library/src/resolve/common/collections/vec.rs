@@ -8,16 +8,16 @@ use super::super::{
     iterate::*,
 };
 
-use kutil::std::error::*;
+use problemo::*;
 
-impl<ItemT, AnnotatedT> Resolve<Vec<ItemT>, AnnotatedT> for Variant<AnnotatedT>
+impl<ItemT, AnnotatedT> Resolve<Vec<ItemT>> for Variant<AnnotatedT>
 where
-    Variant<AnnotatedT>: Resolve<ItemT, AnnotatedT>,
+    Variant<AnnotatedT>: Resolve<ItemT>,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorReceiverT>(self, errors: &mut ErrorReceiverT) -> ResolveResult<Vec<ItemT>, AnnotatedT>
+    fn resolve_with_problems<ProblemReceiverT>(self, errors: &mut ProblemReceiverT) -> ResolveResult<Vec<ItemT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         let mut resolved = Vec::default();
 

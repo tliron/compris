@@ -50,7 +50,7 @@ impl<KeyT> fmt::Display for PathSegment<KeyT>
 where
     KeyT: fmt::Display,
 {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::ListIndex(index) => write!(formatter, "[{}]", index),
 

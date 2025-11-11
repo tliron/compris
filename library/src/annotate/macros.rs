@@ -25,46 +25,56 @@ macro_rules! impl_annotated {
     };
 }
 
-/// Helper macro for implementing [DynAnnotatedError](super::DynAnnotatedError).
-#[macro_export]
-macro_rules! impl_dyn_annotated_error {
-    ( $type:ident $(,)? ) => {
-        $crate::impl_dyn_annotated_error!($type, annotated);
-    };
+// /// Helper macro for implementing [DynAnnotatedError](super::DynAnnotatedError).
+// #[macro_export]
+// macro_rules! impl_dyn_annotated_error {
+//     ( $type:ident $(,)? ) => {
+//         $crate::impl_dyn_annotated_error!($type, annotated);
+//     };
 
-    ( $type:ident, $field:ident $(,)? ) => {
-        $crate::impl_annotated!($type, $field);
+//     ( $type:ident, $field:ident $(,)? ) => {
+//         $crate::impl_annotated!($type, $field);
 
-        impl<AnnotatedT> $type<AnnotatedT> {
-            /// Captured.
-            pub fn captured(self) -> $crate::annotate::CapturedAnnotatedError
-            where
-                AnnotatedT: 'static
-                    + $crate::annotate::Annotated
-                    + ::std::fmt::Debug
-                    + ::std::marker::Send
-                    + ::std::marker::Sync,
-            {
-                ::std::boxed::Box::new(self)
-            }
-        }
+//         impl<AnnotatedT> $type<AnnotatedT> {
+//             /// Captured.
+//             pub fn captured(self) -> $crate::annotate::CapturedAnnotatedError
+//             where
+//                 AnnotatedT: 'static
+//                     + $crate::annotate::Annotated
+//                     + ::std::fmt::Debug
+//                     + ::std::marker::Send
+//                     + ::std::marker::Sync,
+//             {
+//                 ::std::boxed::Box::new(self)
+//             }
+//         }
 
-        impl<AnnotatedT> $crate::annotate::DynAnnotatedError for $type<AnnotatedT> where
-            AnnotatedT: $crate::annotate::Annotated + ::std::fmt::Debug + ::std::marker::Send + ::std::marker::Sync
-        {
-        }
+//         impl<AnnotatedT> ::kutil::std::any::AsAny for $type<AnnotatedT>
+//         where
+//             AnnotatedT: 'static,
+//         {
+//             fn as_any(&self) -> Option<&dyn ::std::any::Any> {
+//                 Some(self)
+//             }
+//         }
 
-        impl<AnnotatedT> Into<$crate::annotate::CapturedAnnotatedError> for $type<AnnotatedT>
-        where
-            AnnotatedT:
-                'static + $crate::annotate::Annotated + ::std::fmt::Debug + ::std::marker::Send + ::std::marker::Sync,
-        {
-            fn into(self) -> $crate::annotate::CapturedAnnotatedError {
-                self.captured()
-            }
-        }
-    };
-}
+//         impl<AnnotatedT> $crate::annotate::DynAnnotatedError for $type<AnnotatedT> where
+//             AnnotatedT:
+//                 'static + $crate::annotate::Annotated + ::std::fmt::Debug + ::std::marker::Send + ::std::marker::Sync
+//         {
+//         }
+
+//         impl<AnnotatedT> Into<$crate::annotate::CapturedAnnotatedError> for $type<AnnotatedT>
+//         where
+//             AnnotatedT:
+//                 'static + $crate::annotate::Annotated + ::std::fmt::Debug + ::std::marker::Send + ::std::marker::Sync,
+//         {
+//             fn into(self) -> $crate::annotate::CapturedAnnotatedError {
+//                 self.captured()
+//             }
+//         }
+//     };
+// }
 
 #[allow(unused_imports)]
-pub use {impl_annotated, impl_dyn_annotated_error};
+pub use impl_annotated;

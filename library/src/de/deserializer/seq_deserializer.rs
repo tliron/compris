@@ -1,9 +1,6 @@
-use super::{
-    super::{super::normal::*, errors::*},
-    deserializer::*,
-};
+use super::{super::super::normal::*, deserializer::*};
 
-use {serde::de, std::slice::*};
+use {problemo::*, serde::de, std::slice::*};
 
 //
 // SeqDeserializer
@@ -24,8 +21,11 @@ impl<'de, AnnotatedT> SeqDeserializer<'de, AnnotatedT> {
     }
 }
 
-impl<'de, AnnotatedT> de::SeqAccess<'de> for SeqDeserializer<'de, AnnotatedT> {
-    type Error = DeserializeError;
+impl<'de, AnnotatedT> de::SeqAccess<'de> for SeqDeserializer<'de, AnnotatedT>
+where
+    AnnotatedT: 'static + Clone + Send + Sync,
+{
+    type Error = SerdeProblem;
 
     fn next_element_seed<SeedT>(&mut self, seed: SeedT) -> Result<Option<SeedT::Value>, Self::Error>
     where

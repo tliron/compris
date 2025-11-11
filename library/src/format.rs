@@ -78,4 +78,4 @@ impl Format {
 // UnknownFormatError
 //
 
-message_error!(UnknownFormatError, "unknown format");
+string_error!(UnknownFormatError, "unknown format");

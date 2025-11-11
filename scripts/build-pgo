@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+HERE=$(dirname "$(readlink --canonicalize "$BASH_SOURCE")")
+. "$HERE/_env"
+
+# cargo install cargo-pgo
+# rustup component add llvm-tools-preview
+
+# sudo dnf install llvm
+# llvm-profdata show target/pgo-profiles/...
+
+TARGET=x86_64-unknown-linux-gnu
+TARGET_DIR=$ROOT/target/$TARGET/release
+
+cd "$ROOT"
+
+m 'building binaries (instrument)...' "$CYAN"
+CARGO_PROFILE_RELEASE_LTO=true \
+cargo pgo build -- --package=compris-cli
+
+"$TARGET_DIR/compris" -i work/yaml1.yaml
+"$TARGET_DIR/compris" -i work/cbor.cbor
+
+cargo pgo optimize

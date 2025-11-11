@@ -1,0 +1,21 @@
+use super::super::super::annotate::*;
+
+use {depiction::*, std::io};
+
+/// Source and span tag for a [Depict](depiction::Depict).
+pub fn source_and_span<AnnotatedFieldsT, WriteT>(
+    annotated_fields: &AnnotatedFieldsT,
+    field_name: &str,
+    writer: &mut WriteT,
+    context: &DepictionContext,
+) -> io::Result<()>
+where
+    AnnotatedFieldsT: AnnotatedStruct,
+    WriteT: io::Write,
+{
+    if let Some(annotations) = annotated_fields.field_annotations(field_name) {
+        annotations.depict(writer, &context.child().with_format(DepictionFormat::Compact))?;
+    }
+
+    Ok(())
+}

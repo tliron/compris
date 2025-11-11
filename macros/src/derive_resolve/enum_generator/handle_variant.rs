@@ -12,7 +12,7 @@ impl EnumGenerator {
         if select_variant.has_fields {
             quote! {
                 #key =>
-                    ::compris::resolve::Resolve::resolve_with_errors(value, errors)?
+                    ::compris::resolve::Resolve::resolve_with_problems(value, problems)?
                     .map(|value| #enum_name::#variant_name(value)),
             }
         } else {

@@ -31,10 +31,7 @@ impl PathRepresentation {
     /// Important: For our purposes here, the identities of the provided variants are the
     /// *pointers* represented by the references. Thus a clone of a variant or an otherwise equal
     /// variant will *not* be considered identical.
-    pub fn find<'own, AnnotatedT>(
-        ancestor: &'own Variant<AnnotatedT>,
-        descendent: &'own Variant<AnnotatedT>,
-    ) -> Option<Self>
+    pub fn find<AnnotatedT>(ancestor: &Variant<AnnotatedT>, descendent: &Variant<AnnotatedT>) -> Option<Self>
     where
         AnnotatedT: Default,
     {
@@ -77,7 +74,7 @@ impl Depict for PathRepresentation {
 }
 
 impl fmt::Display for PathRepresentation {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         for (segment, first) in IterateWithFirst::new(&self.segments) {
             if !first && matches!(segment, PathSegment::MapKey(_)) {
                 formatter.write_char('.')?;

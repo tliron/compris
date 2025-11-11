@@ -1,4 +1,9 @@
-use super::{super::annotate::*, depict::*, macros::*, map::*, variant::*};
+use super::{
+    super::{annotate::*, depict::*},
+    macros::*,
+    map::*,
+    variant::*,
+};
 
 use {
     depiction::*,
@@ -85,8 +90,8 @@ impl<AnnotatedT> List<AnnotatedT> {
     }
 
     /// [Depict] with [Annotations].
-    pub fn annotated_depict(&self, mode: AnnotatedDepictionMode) -> AnnotatedDepictList<'_, AnnotatedT> {
-        AnnotatedDepictList::new(self, mode)
+    pub fn annotated_depiction(&self) -> AnnotatedListDepiction<'_, AnnotatedT> {
+        AnnotatedListDepiction::new(self)
     }
 }
 
@@ -119,12 +124,12 @@ impl<AnnotatedT> Depict for List<AnnotatedT> {
     where
         WriteT: io::Write,
     {
-        utils::depict_list(self.inner.iter(), None, writer, context)
+        depict_list(&self.inner, None, writer, context)
     }
 }
 
 impl<AnnotatedT> fmt::Display for List<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_char('[')?;
 
         for (item, last) in IterateWithLast::new(self) {
@@ -149,18 +154,18 @@ impl<AnnotatedT> IntoIterator for List<AnnotatedT> {
     }
 }
 
-impl<'own, AnnotatedT> IntoIterator for &'own List<AnnotatedT> {
-    type Item = &'own Variant<AnnotatedT>;
-    type IntoIter = slice::Iter<'own, Variant<AnnotatedT>>;
+impl<'this, AnnotatedT> IntoIterator for &'this List<AnnotatedT> {
+    type Item = &'this Variant<AnnotatedT>;
+    type IntoIter = slice::Iter<'this, Variant<AnnotatedT>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter()
     }
 }
 
-impl<'own, AnnotatedT> IntoIterator for &'own mut List<AnnotatedT> {
-    type Item = &'own mut Variant<AnnotatedT>;
-    type IntoIter = slice::IterMut<'own, Variant<AnnotatedT>>;
+impl<'this, AnnotatedT> IntoIterator for &'this mut List<AnnotatedT> {
+    type Item = &'this mut Variant<AnnotatedT>;
+    type IntoIter = slice::IterMut<'this, Variant<AnnotatedT>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter_mut()

@@ -1,39 +1,41 @@
 use super::super::{
-    super::{annotate::*, normal::*},
+    super::{annotate::*, errors::*, normal::*},
     errors::*,
     resolve::*,
 };
 
 use {
-    kutil::std::error::*,
+    problemo::*,
     std::{fmt, str::*},
 };
 
 /// Resolve a [Variant] into a [FromStr].
-pub fn resolve_from_str<FromStrT, AnnotatedT, ErrorReceiverT>(
+pub fn resolve_from_str<FromStrT, AnnotatedT, ProblemReceiverT>(
     variant: Variant<AnnotatedT>,
-    errors: &mut ErrorReceiverT,
-) -> ResolveResult<FromStrT, AnnotatedT>
+    problems: &mut ProblemReceiverT,
+) -> ResolveResult<FromStrT>
 where
     FromStrT: FromStr,
     FromStrT::Err: fmt::Display,
     AnnotatedT: Annotated + Clone + Default,
-    ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+    ProblemReceiverT: ProblemReceiver,
 {
     Ok(match variant {
         Variant::Text(text) => match text.inner.parse() {
             Ok(parsed) => Some(parsed),
 
             Err(error) => {
-                errors.give(
-                    MalformedError::new(tynm::type_name::<FromStrT>(), error.to_string()).with_annotations_from(&text),
+                problems.give(
+                    MalformedError::as_problem(tynm::type_name::<FromStrT>(), error.to_string())
+                        .maybe_with(text.annotations().cloned())
+                        .via(ResolveError),
                 )?;
                 None
             }
         },
 
         _ => {
-            errors.give(IncompatibleVariantTypeError::new_from(&variant, &["text"]))?;
+            problems.give(IncompatibleVariantTypeError::as_problem_from(&variant, &["text"]).via(ResolveError))?;
             None
         }
     })
@@ -43,18 +45,18 @@ where
 #[macro_export]
 macro_rules! impl_resolve_from_str {
     ( $type:ident $(,)? ) => {
-        impl<AnnotatedT> $crate::resolve::Resolve<$type, AnnotatedT> for $crate::normal::Variant<AnnotatedT>
+        impl<AnnotatedT> $crate::resolve::Resolve<$type> for $crate::normal::Variant<AnnotatedT>
         where
             AnnotatedT: $crate::annotate::Annotated + ::std::clone::Clone + ::std::default::Default,
         {
-            fn resolve_with_errors<ErrorReceiverT>(
+            fn resolve_with_problems<ProblemReceiverT>(
                 self,
-                errors: &mut ErrorReceiverT,
-            ) -> $crate::resolve::ResolveResult<$type, AnnotatedT>
+                problems: &mut ProblemReceiverT,
+            ) -> $crate::resolve::ResolveResult<$type>
             where
-                ErrorReceiverT: ::kutil::std::error::ErrorReceiver<$crate::resolve::ResolveError<AnnotatedT>>,
+                ProblemReceiverT: ::problemo::ProblemReceiver,
             {
-                $crate::resolve::resolve_from_str(self, errors)
+                $crate::resolve::resolve_from_str(self, problems)
             }
         }
     };
@@ -82,20 +84,20 @@ impl<InnerT> ResolveFromStr<InnerT> {
     }
 }
 
-impl<InnerT, AnnotatedT> Resolve<ResolveFromStr<InnerT>, AnnotatedT> for Variant<AnnotatedT>
+impl<InnerT, AnnotatedT> Resolve<ResolveFromStr<InnerT>> for Variant<AnnotatedT>
 where
     InnerT: FromStr,
     InnerT::Err: fmt::Display,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorReceiverT>(
+    fn resolve_with_problems<ProblemReceiverT>(
         self,
-        errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<ResolveFromStr<InnerT>, AnnotatedT>
+        problems: &mut ProblemReceiverT,
+    ) -> ResolveResult<ResolveFromStr<InnerT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
-        resolve_from_str(self, errors).map(|resolved| resolved.map(ResolveFromStr::new))
+        resolve_from_str(self, problems).map(|resolved| resolved.map(ResolveFromStr::new))
     }
 }
 
@@ -115,7 +117,7 @@ impl<InnerT> fmt::Display for ResolveFromStr<InnerT>
 where
     InnerT: fmt::Display,
 {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         fmt::Display::fmt(&self.inner, formatter)
     }
 }

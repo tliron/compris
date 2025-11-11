@@ -1,6 +1,9 @@
-use super::{super::normal::*, iterator::*};
+use super::{
+    super::{errors::*, normal::*},
+    iterator::*,
+};
 
-use kutil::std::collections::*;
+use {kutil::std::collections::*, problemo::*};
 
 //
 // KeyValuePairIteratorForVariantIterator
@@ -11,15 +14,15 @@ use kutil::std::collections::*;
 /// The items are expected to be [List](super::super::normal::List) of length 2 (key-value pairs).
 ///
 /// Keeps track of keys and will report errors if it encounters duplicates.
-pub struct KeyValuePairIteratorForVariantIterator<'own, InnerT, AnnotatedT> {
+pub struct KeyValuePairIteratorForVariantIterator<'inner, InnerT, AnnotatedT> {
     /// Inner.
     pub inner: InnerT,
 
     /// Accumulated keys.
-    pub keys: FastHashSet<&'own Variant<AnnotatedT>>,
+    pub keys: FastHashSet<&'inner Variant<AnnotatedT>>,
 }
 
-impl<'own, InnerT, AnnotatedT> KeyValuePairIteratorForVariantIterator<'own, InnerT, AnnotatedT> {
+impl<'inner, InnerT, AnnotatedT> KeyValuePairIteratorForVariantIterator<'inner, InnerT, AnnotatedT> {
     /// Constructor.
     pub fn new(inner: InnerT) -> Self {
         Self { inner, keys: FastHashSet::default() }
@@ -34,29 +37,27 @@ impl<'own, InnerT, AnnotatedT> KeyValuePairIteratorForVariantIterator<'own, Inne
     }
 }
 
-impl<'own, InnerT, AnnotatedT> KeyValuePairIterator<AnnotatedT>
-    for KeyValuePairIteratorForVariantIterator<'own, InnerT, AnnotatedT>
+impl<'inner, InnerT, AnnotatedT> KeyValuePairIterator<AnnotatedT>
+    for KeyValuePairIteratorForVariantIterator<'inner, InnerT, AnnotatedT>
 where
-    InnerT: Iterator<Item = &'own Variant<AnnotatedT>>,
+    InnerT: Iterator<Item = &'inner Variant<AnnotatedT>>,
     AnnotatedT: Default,
 {
     fn next(
         &mut self,
-    ) -> Result<
-        Option<(&'own Variant<AnnotatedT>, &'own Variant<AnnotatedT>)>,
-        (MalformedError<AnnotatedT>, &Variant<AnnotatedT>),
-    > {
+    ) -> Result<Option<(&'inner Variant<AnnotatedT>, &'inner Variant<AnnotatedT>)>, (Problem, &Variant<AnnotatedT>)>
+    {
         if let Some(item) = self.inner.next() {
             if let Some((key, value)) = item.to_pair() {
                 if self.keys.contains(key) {
-                    return Err((MalformedError::new("key-value pair".into(), "key is not unique".into()), key));
+                    return Err((MalformedError::as_problem("key-value pair", "key is not unique"), key));
                 } else {
                     self.keys.insert(key);
                     return Ok(Some((key, value)));
                 }
             }
 
-            return Err((MalformedError::new("key-value pair".into(), "is not list of length 2".into()), item));
+            return Err((MalformedError::as_problem("key-value pair", "is not list of length 2"), item));
         }
 
         Ok(None)
@@ -101,17 +102,14 @@ where
     InnerT: Iterator<Item = Variant<AnnotatedT>>,
     AnnotatedT: Clone + Default,
 {
-    fn next(
-        &mut self,
-    ) -> Result<Option<(Variant<AnnotatedT>, Variant<AnnotatedT>)>, (MalformedError<AnnotatedT>, Variant<AnnotatedT>)>
-    {
+    fn next(&mut self) -> Result<Option<(Variant<AnnotatedT>, Variant<AnnotatedT>)>, (Problem, Variant<AnnotatedT>)> {
         if let Some(item) = self.inner.next() {
             if let Variant::List(list) = &item
                 && list.inner.len() == 2
             {
                 let (key, value) = item.into_pair().expect("list of length 2");
                 if self.keys.contains(&key) {
-                    return Err((MalformedError::new("key-value pair".into(), "key is not unique".into()), key));
+                    return Err((MalformedError::as_problem("key-value pair", "key is not unique"), key));
                 } else {
                     // TODO: any way we can test this without cloning?
                     self.keys.insert(key.clone());
@@ -119,7 +117,7 @@ where
                 }
             }
 
-            return Err((MalformedError::new("key-value pair".into(), "is not list of length 2".into()), item));
+            return Err((MalformedError::as_problem("key-value pair", "is not list of length 2"), item));
         }
 
         Ok(None)

@@ -41,14 +41,14 @@ impl StructGenerator {
             #[automatically_derived]
             impl
                 #impl_generics
-                Resolve<#struct_name #type_generics, #annotated_parameter>
+                Resolve<#struct_name #type_generics>
                 for ::compris::normal::Variant<#annotated_parameter>
                 #where_clause
             {
-                fn resolve_with_errors<ErrorReceiverT>(mut self, errors: &mut ErrorReceiverT) ->
-                    ::compris::resolve::ResolveResult<#struct_name #type_generics, #annotated_parameter>
-                    where ErrorReceiverT:
-                        ::kutil::std::error::ErrorReceiver<::compris::resolve::ResolveError<#annotated_parameter>>
+                fn resolve_with_problems<ProblemReceiverT>(mut self, problems: &mut ProblemReceiverT) ->
+                    ::compris::resolve::ResolveResult<#struct_name #type_generics>
+                    where ProblemReceiverT:
+                        ::problemo::ProblemReceiver
                 {
                     let mut resolved: #struct_name #type_generics = ::std::default::Default::default();
                     let maybe_annotations = ::compris::annotate::Annotated::maybe_annotations(&self);

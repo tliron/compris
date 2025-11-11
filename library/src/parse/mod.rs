@@ -1,4 +1,4 @@
-mod error;
+mod errors;
 mod formats;
 mod parser;
 
@@ -6,4 +6,4 @@ mod parser;
 pub mod builder;
 
 #[allow(unused_imports)]
-pub use {error::*, formats::*, parser::*};
+pub use {errors::*, formats::*, parser::*};

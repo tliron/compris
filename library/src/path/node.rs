@@ -6,17 +6,20 @@ use super::{super::normal::*, segment::*};
 
 /// [Path](super::Path) node.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct PathNode<'own, AnnotatedT> {
+pub struct PathNode<'context, AnnotatedT> {
     /// Variant.
-    pub variant: &'own Variant<AnnotatedT>,
+    pub variant: &'context Variant<AnnotatedT>,
 
     /// Segment.
-    pub segment: Option<PathSegment<&'own Variant<AnnotatedT>>>,
+    pub segment: Option<PathSegment<&'context Variant<AnnotatedT>>>,
 }
 
-impl<'own, AnnotatedT> PathNode<'own, AnnotatedT> {
+impl<'context, AnnotatedT> PathNode<'context, AnnotatedT> {
     /// Constructor.
-    pub fn new(variant: &'own Variant<AnnotatedT>, segment: Option<PathSegment<&'own Variant<AnnotatedT>>>) -> Self {
+    pub fn new(
+        variant: &'context Variant<AnnotatedT>,
+        segment: Option<PathSegment<&'context Variant<AnnotatedT>>>,
+    ) -> Self {
         Self { variant, segment }
     }
 }

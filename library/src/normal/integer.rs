@@ -35,7 +35,7 @@ impl<AnnotatedT> Depict for Integer<AnnotatedT> {
 }
 
 impl<AnnotatedT> fmt::Display for Integer<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(formatter, "{}i64", self.inner)
     }
 }

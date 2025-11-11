@@ -1,7 +1,5 @@
 use super::{
-    super::{annotate::*, kv::*},
-    depict::*,
-    errors::*,
+    super::{annotate::*, depict::*, kv::*},
     list::*,
     macros::*,
     variant::*,
@@ -10,6 +8,7 @@ use super::{
 use {
     depiction::*,
     kutil::std::iter::*,
+    problemo::*,
     std::{
         collections::*,
         fmt::{self, Write},
@@ -95,8 +94,8 @@ impl<AnnotatedT> Map<AnnotatedT> {
     }
 
     /// [Depict] with [Annotations].
-    pub fn annotated_depict(&self, mode: AnnotatedDepictionMode) -> AnnotatedDepictMap<'_, AnnotatedT> {
-        AnnotatedDepictMap::new(self, mode)
+    pub fn annotated_depiction(&self) -> AnnotatedMapDepiction<'_, AnnotatedT> {
+        AnnotatedMapDepiction::new(self)
     }
 }
 
@@ -137,12 +136,12 @@ impl<AnnotatedT> Depict for Map<AnnotatedT> {
             None
         };
 
-        utils::depict_map(self.inner.iter(), override_format, writer, context)
+        depict_map(&self.inner, override_format, writer, context)
     }
 }
 
 impl<AnnotatedT> fmt::Display for Map<AnnotatedT> {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_char('{')?;
 
         for ((key, value), last) in IterateWithLast::new(self) {
@@ -169,18 +168,18 @@ impl<AnnotatedT> IntoIterator for Map<AnnotatedT> {
     }
 }
 
-impl<'own, AnnotatedT> IntoIterator for &'own Map<AnnotatedT> {
-    type Item = (&'own Variant<AnnotatedT>, &'own Variant<AnnotatedT>);
-    type IntoIter = btree_map::Iter<'own, Variant<AnnotatedT>, Variant<AnnotatedT>>;
+impl<'this, AnnotatedT> IntoIterator for &'this Map<AnnotatedT> {
+    type Item = (&'this Variant<AnnotatedT>, &'this Variant<AnnotatedT>);
+    type IntoIter = btree_map::Iter<'this, Variant<AnnotatedT>, Variant<AnnotatedT>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter()
     }
 }
 
-impl<'own, AnnotatedT> IntoIterator for &'own mut Map<AnnotatedT> {
-    type Item = (&'own Variant<AnnotatedT>, &'own mut Variant<AnnotatedT>);
-    type IntoIter = btree_map::IterMut<'own, Variant<AnnotatedT>, Variant<AnnotatedT>>;
+impl<'this, AnnotatedT> IntoIterator for &'this mut Map<AnnotatedT> {
+    type Item = (&'this Variant<AnnotatedT>, &'this mut Variant<AnnotatedT>);
+    type IntoIter = btree_map::IterMut<'this, Variant<AnnotatedT>, Variant<AnnotatedT>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.inner.iter_mut()
@@ -214,7 +213,7 @@ impl<AnnotatedT> TryFrom<List<AnnotatedT>> for Map<AnnotatedT>
 where
     AnnotatedT: Clone + Default,
 {
-    type Error = MalformedError<AnnotatedT>;
+    type Error = Problem;
 
     /// The iterated values are expected to be [List] of length 2 (key-value pairs).
     ///

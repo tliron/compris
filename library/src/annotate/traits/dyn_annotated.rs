@@ -4,12 +4,12 @@ use super::{super::annotations::*, annotated::*};
 // DynAnnotated
 //
 
-/// A reduced `dyn`-compatible version of [Annotated](super::annotated::Annotated).
+/// A reduced `dyn`-compatible version of [Annotated].
 pub trait DynAnnotated {
     /// The annotations.
     fn dyn_annotations(&self) -> Option<&Annotations>;
 
-    /// The annotations as mutable.
+    /// The annotations.
     fn dyn_annotations_mut(&mut self) -> Option<&mut Annotations>;
 }
 

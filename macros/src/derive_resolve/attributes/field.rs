@@ -23,11 +23,11 @@ pub struct FieldAttribute {
 
     /// Whether this field must be resolved.
     ///
-    /// Will report an error if the key is not in the map.
+    /// Will give an error if the key is not in the map.
     #[deluxe(default)]
     pub required: bool,
 
-    /// Whether to ignore null values instead of reporting an error.
+    /// Whether to ignore null values instead of giving an error.
     ///
     /// The field will simply stay at its default value.
     ///

@@ -62,7 +62,7 @@ pub fn main() {
     // However, note that we cannot support serialization modes for those (unless you specifically program it),
     // so you could get errors for incompatible data (this is a limitation of Serde, not Compris)
 
-    let user = User { name: "Tal".into(), enabled: true };
+    let user = User { name: "Faramir".into(), enabled: true };
 
     utils::heading("YAML", false);
     Serializer::new(Format::YAML).with_pretty(true).write(&user, &mut stdout()).expect("write");
