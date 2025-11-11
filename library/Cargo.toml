@@ -37,7 +37,7 @@ saphyr-parser = { optional = true, version = "0.0.6" }
 serde = { optional = true, version = "1.0.228", features = ["derive"] }
 #serde-saphyr = { optional = true, version = "0.0.7" }
 serde_norway = { optional = true, version = "0.9.42" }
-serde-xml-rs = { optional = true, version = "0.8.1" }
+serde-xml-rs = { optional = true, version = "0.8.2" }
 struson = { optional = true, version = "0.6.0" }
 thiserror = "2.0.17"
 tracing = "0.1.41"
