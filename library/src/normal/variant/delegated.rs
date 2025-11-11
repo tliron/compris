@@ -111,16 +111,14 @@ impl<AnnotatedT> PartialEq for Variant<AnnotatedT> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Undefined, Self::Undefined) | (Self::Null(_), Self::Null(_)) => true,
-            (Self::Integer(integer), Self::Integer(other_integer)) => integer == other_integer,
-            (Self::UnsignedInteger(unsigned_integer), Self::UnsignedInteger(other_unsigned_integer)) => {
-                unsigned_integer == other_unsigned_integer
-            }
-            (Self::Float(float), Self::Float(other_float)) => float == other_float,
-            (Self::Boolean(boolean), Self::Boolean(other_boolean)) => boolean == other_boolean,
-            (Self::Text(text), Self::Text(other_text)) => text == other_text,
-            (Self::Blob(blob), Self::Blob(other_blob)) => blob == other_blob,
-            (Self::List(list), Self::List(other_list)) => list == other_list,
-            (Self::Map(map), Self::Map(other_map)) => map == other_map,
+            (Self::Integer(left), Self::Integer(right)) => left == right,
+            (Self::UnsignedInteger(left), Self::UnsignedInteger(right)) => left == right,
+            (Self::Float(left), Self::Float(right)) => left == right,
+            (Self::Boolean(left), Self::Boolean(right)) => left == right,
+            (Self::Text(left), Self::Text(right)) => left == right,
+            (Self::Blob(left), Self::Blob(right)) => left == right,
+            (Self::List(left), Self::List(right)) => left == right,
+            (Self::Map(left), Self::Map(right)) => left == right,
             _ => false,
         }
     }
@@ -132,16 +130,14 @@ impl<AnnotatedT> PartialOrd for Variant<AnnotatedT> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {
             (Self::Undefined, Self::Undefined) | (Self::Null(_), Self::Null(_)) => Some(Ordering::Equal),
-            (Self::Integer(integer), Self::Integer(other_integer)) => integer.partial_cmp(other_integer),
-            (Self::UnsignedInteger(unsigned_integer), Self::UnsignedInteger(other_unsigned_integer)) => {
-                unsigned_integer.partial_cmp(other_unsigned_integer)
-            }
-            (Self::Float(float), Self::Float(other_float)) => float.partial_cmp(other_float),
-            (Self::Boolean(boolean), Self::Boolean(other_boolean)) => boolean.partial_cmp(other_boolean),
-            (Self::Text(text), Self::Text(other_text)) => text.partial_cmp(other_text),
-            (Self::Blob(blob), Self::Blob(other_blob)) => blob.partial_cmp(other_blob),
-            (Self::List(list), Self::List(other_list)) => list.partial_cmp(other_list),
-            (Self::Map(map), Self::Map(other_map)) => map.partial_cmp(other_map),
+            (Self::Integer(left), Self::Integer(right)) => left.partial_cmp(right),
+            (Self::UnsignedInteger(left), Self::UnsignedInteger(right)) => left.partial_cmp(right),
+            (Self::Float(left), Self::Float(right)) => left.partial_cmp(right),
+            (Self::Boolean(left), Self::Boolean(right)) => left.partial_cmp(right),
+            (Self::Text(left), Self::Text(right)) => left.partial_cmp(right),
+            (Self::Blob(left), Self::Blob(right)) => left.partial_cmp(right),
+            (Self::List(left), Self::List(right)) => left.partial_cmp(right),
+            (Self::Map(left), Self::Map(right)) => left.partial_cmp(right),
             _ => None,
         }
     }
@@ -151,16 +147,14 @@ impl<AnnotatedT> Ord for Variant<AnnotatedT> {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
             (Self::Undefined, Self::Undefined) | (Self::Null(_), Self::Null(_)) => Ordering::Equal,
-            (Self::Integer(integer), Self::Integer(other_integer)) => integer.cmp(other_integer),
-            (Self::UnsignedInteger(unsigned_integer), Self::UnsignedInteger(other_unsigned_integer)) => {
-                unsigned_integer.cmp(other_unsigned_integer)
-            }
-            (Self::Float(float), Self::Float(other_float)) => float.cmp(other_float),
-            (Self::Boolean(boolean), Self::Boolean(other_boolean)) => boolean.cmp(other_boolean),
-            (Self::Text(text), Self::Text(other_text)) => text.cmp(other_text),
-            (Self::Blob(blob), Self::Blob(other_blob)) => blob.cmp(other_blob),
-            (Self::List(list), Self::List(other_list)) => list.cmp(other_list),
-            (Self::Map(map), Self::Map(other_map)) => map.cmp(other_map),
+            (Self::Integer(left), Self::Integer(right)) => left.cmp(right),
+            (Self::UnsignedInteger(left), Self::UnsignedInteger(right)) => left.cmp(right),
+            (Self::Float(left), Self::Float(right)) => left.cmp(right),
+            (Self::Boolean(left), Self::Boolean(right)) => left.cmp(right),
+            (Self::Text(left), Self::Text(right)) => left.cmp(right),
+            (Self::Blob(left), Self::Blob(right)) => left.cmp(right),
+            (Self::List(left), Self::List(right)) => left.cmp(right),
+            (Self::Map(left), Self::Map(right)) => left.cmp(right),
 
             (Self::Undefined, _) => Ordering::Less,
 
