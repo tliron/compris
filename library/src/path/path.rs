@@ -18,12 +18,12 @@ use {
 /// Because this type contains references to the variants, it shares their lifetime. For a version of
 /// [Path] that does not keep the references see [PathRepresentation].
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Path<'own, AnnotatedT> {
+pub struct Path<'this, AnnotatedT> {
     /// Path nodes.
-    pub nodes: Vec<PathNode<'own, AnnotatedT>>,
+    pub nodes: Vec<PathNode<'this, AnnotatedT>>,
 }
 
-impl<'own, AnnotatedT> Path<'own, AnnotatedT> {
+impl<'this, AnnotatedT> Path<'this, AnnotatedT> {
     /// Find the path from an ancestor to a descendent, if it exists.
     ///
     /// Paths will include the endpoints. In the case of the route from oneself to oneself, it will
@@ -32,7 +32,7 @@ impl<'own, AnnotatedT> Path<'own, AnnotatedT> {
     /// Important: For our purposes here, the identities of the provided variants are the
     /// *pointers* represented by the references. Thus a clone of a variant or an otherwise equal
     /// variant will *not* be considered identical.
-    pub fn find(ancestor: &'own Variant<AnnotatedT>, descendent: &'own Variant<AnnotatedT>) -> Option<Self>
+    pub fn find(ancestor: &'this Variant<AnnotatedT>, descendent: &'this Variant<AnnotatedT>) -> Option<Self>
     where
         AnnotatedT: Default,
     {
@@ -79,22 +79,22 @@ impl<'own, AnnotatedT> Path<'own, AnnotatedT> {
     }
 
     /// Push a new path node.
-    pub fn push(&mut self, variant: &'own Variant<AnnotatedT>) {
+    pub fn push(&mut self, variant: &'this Variant<AnnotatedT>) {
         self.nodes.push(PathNode::new(variant, None))
     }
 
     /// Push a new list index path node.
-    pub fn push_list_index(&mut self, variant: &'own Variant<AnnotatedT>, index: usize) {
+    pub fn push_list_index(&mut self, variant: &'this Variant<AnnotatedT>, index: usize) {
         self.nodes.push(PathNode::new(variant, Some(PathSegment::ListIndex(index))))
     }
 
     /// Push a new map key path node.
-    pub fn push_map_key(&mut self, variant: &'own Variant<AnnotatedT>, key: &'own Variant<AnnotatedT>) {
+    pub fn push_map_key(&mut self, variant: &'this Variant<AnnotatedT>, key: &'this Variant<AnnotatedT>) {
         self.nodes.push(PathNode::new(variant, Some(PathSegment::MapKey(key))))
     }
 
     /// Extend this path with another path.
-    pub fn extend(&mut self, other: Path<'own, AnnotatedT>) {
+    pub fn extend(&mut self, other: Path<'this, AnnotatedT>) {
         self.nodes.extend(other.nodes);
     }
 
@@ -110,7 +110,7 @@ impl<'own, AnnotatedT> Path<'own, AnnotatedT> {
     }
 }
 
-impl<'own, AnnotatedT> Depict for Path<'own, AnnotatedT> {
+impl<'this, AnnotatedT> Depict for Path<'this, AnnotatedT> {
     fn depict<WriteT>(&self, writer: &mut WriteT, context: &DepictionContext) -> io::Result<()>
     where
         WriteT: io::Write,
@@ -129,7 +129,7 @@ impl<'own, AnnotatedT> Depict for Path<'own, AnnotatedT> {
     }
 }
 
-impl<'own, AnnotatedT> fmt::Display for Path<'own, AnnotatedT> {
+impl<'this, AnnotatedT> fmt::Display for Path<'this, AnnotatedT> {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         for (node, first) in IterateWithFirst::new(&self.nodes) {
             if let Some(segment) = &node.segment {

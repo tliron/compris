@@ -1,6 +1,6 @@
 use super::{super::normal::*, iterator::*};
 
-use std::collections::*;
+use {problemo::*, std::collections::*};
 
 //
 // KeyValuePairIteratorForBTreeMap
@@ -9,30 +9,27 @@ use std::collections::*;
 /// A [KeyValuePairIterator] for [BTreeMap].
 ///
 /// It's just a simple wrapper.
-pub struct KeyValuePairIteratorForBTreeMap<'own, AnnotatedT> {
+pub struct KeyValuePairIteratorForBTreeMap<'this, AnnotatedT> {
     /// Inner.
-    pub inner: btree_map::Iter<'own, Variant<AnnotatedT>, Variant<AnnotatedT>>,
+    pub inner: btree_map::Iter<'this, Variant<AnnotatedT>, Variant<AnnotatedT>>,
 }
 
-impl<'own, AnnotatedT> KeyValuePairIteratorForBTreeMap<'own, AnnotatedT> {
+impl<'this, AnnotatedT> KeyValuePairIteratorForBTreeMap<'this, AnnotatedT> {
     /// Constructor.
-    pub fn new(inner: btree_map::Iter<'own, Variant<AnnotatedT>, Variant<AnnotatedT>>) -> Self {
+    pub fn new(inner: btree_map::Iter<'this, Variant<AnnotatedT>, Variant<AnnotatedT>>) -> Self {
         Self { inner }
     }
 
     /// Constructor.
-    pub fn new_for(map: &'own BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>) -> Self {
+    pub fn new_for(map: &'this BTreeMap<Variant<AnnotatedT>, Variant<AnnotatedT>>) -> Self {
         Self::new(map.into_iter())
     }
 }
 
-impl<'own, AnnotatedT> KeyValuePairIterator<AnnotatedT> for KeyValuePairIteratorForBTreeMap<'own, AnnotatedT> {
+impl<'this, AnnotatedT> KeyValuePairIterator<AnnotatedT> for KeyValuePairIteratorForBTreeMap<'this, AnnotatedT> {
     fn next(
         &mut self,
-    ) -> Result<
-        Option<(&'own Variant<AnnotatedT>, &'own Variant<AnnotatedT>)>,
-        (MalformedError<AnnotatedT>, &Variant<AnnotatedT>),
-    > {
+    ) -> Result<Option<(&'this Variant<AnnotatedT>, &'this Variant<AnnotatedT>)>, (Problem, &Variant<AnnotatedT>)> {
         Ok(self.inner.next())
     }
 }
@@ -62,10 +59,7 @@ impl<AnnotatedT> IntoKeyValuePairIteratorForBTreeMap<AnnotatedT> {
 }
 
 impl<AnnotatedT> IntoKeyValuePairIterator<AnnotatedT> for IntoKeyValuePairIteratorForBTreeMap<AnnotatedT> {
-    fn next(
-        &mut self,
-    ) -> Result<Option<(Variant<AnnotatedT>, Variant<AnnotatedT>)>, (MalformedError<AnnotatedT>, Variant<AnnotatedT>)>
-    {
+    fn next(&mut self) -> Result<Option<(Variant<AnnotatedT>, Variant<AnnotatedT>)>, (Problem, Variant<AnnotatedT>)> {
         Ok(self.inner.next())
     }
 }

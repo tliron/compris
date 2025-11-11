@@ -32,12 +32,14 @@ impl StructGenerator {
         let handle_required = if field.attribute.required {
             quote! {
                 else {
-                    ::kutil::std::error::ErrorReceiver::give_error(
-                        errors,
-                        ::compris::annotate::Annotated::with_annotations_from(
-                            ::compris::resolve::MissingRequiredKeyError::new(key.into()).into(),
+                    ::problemo::ProblemReceiver::give(
+                        problems,
+                        ::compris::resolve::IntoResolveProblem::into_resolve_problem(
+                            ::compris::resolve::MissingRequiredKeyError::as_problem(
+                                ::compris::normal::Variant::<::compris::annotate::WithoutAnnotations>::from(key)
+                            ),
                             &maybe_annotations,
-                        )
+                        ),
                     )?;
                 }
             }
@@ -53,7 +55,7 @@ impl StructGenerator {
                 #handle_annotations
                 #handle_null
                 if let ::std::option::Option::Some(value) =
-                    ::compris::resolve::Resolve::resolve_with_errors(value, errors)?
+                    ::compris::resolve::Resolve::resolve_with_problems(value, problems)?
                 {
                     resolved.#field_name = value;
                 }

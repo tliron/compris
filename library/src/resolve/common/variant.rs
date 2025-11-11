@@ -4,19 +4,19 @@ use super::super::{
     resolve::*,
 };
 
-use kutil::std::error::*;
+use problemo::*;
 
-impl<ResolvedAnnotationsT, AnnotatedT> Resolve<Variant<ResolvedAnnotationsT>, AnnotatedT> for Variant<AnnotatedT>
+impl<ResolvedAnnotationsT, AnnotatedT> Resolve<Variant<ResolvedAnnotationsT>> for Variant<AnnotatedT>
 where
     ResolvedAnnotationsT: Annotated + Default,
     AnnotatedT: Annotated + Clone,
 {
-    fn resolve_with_errors<ErrorReceiverT>(
+    fn resolve_with_problems<ProblemReceiverT>(
         self,
-        _errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<Variant<ResolvedAnnotationsT>, AnnotatedT>
+        _problems: &mut ProblemReceiverT,
+    ) -> ResolveResult<Variant<ResolvedAnnotationsT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         Ok(Some(self.into_annotated()))
     }

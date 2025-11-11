@@ -1,0 +1,104 @@
+use super::super::{annotations::*, r#struct::*, traits::*};
+
+use problemo::*;
+
+//
+// ErrorReceiverWithFallbackAnnotations
+//
+
+/// An [ErrorReceiver] wrapper that adds an [Annotations] to errors that don't already have
+/// [Annotations].
+pub struct ErrorReceiverWithFallbackAnnotations<'this, InnerT> {
+    /// Inner.
+    pub inner: &'this mut InnerT,
+
+    /// Fallback annotations.
+    pub fallback_annotations: Option<&'this Annotations>,
+}
+
+impl<'this, InnerT> ErrorReceiverWithFallbackAnnotations<'this, InnerT> {
+    /// Constructor.
+    pub fn new(inner: &'this mut InnerT, fallback_annotations: Option<&'this Annotations>) -> Self {
+        Self { inner, fallback_annotations }
+    }
+}
+
+impl<'this, ErrorT, InnerT> ProblemReceiver<ErrorT> for ErrorReceiverWithFallbackAnnotations<'this, InnerT>
+where
+    ErrorT: Annotated,
+    InnerT: ProblemReceiver<ErrorT>,
+{
+    fn give(&mut self, error: ErrorT) -> Result<(), ErrorT> {
+        if !error.has_annotations()
+            && let Some(annotations) = self.fallback_annotations
+        {
+            self.inner.give(error.with_annotations(annotations.clone()))
+        } else {
+            self.inner.give(error)
+        }
+    }
+}
+
+//
+// WithFallbackAnnotations
+//
+
+/// With fallback annotations.
+pub trait WithFallbackAnnotations<'this, ErrorT, InnerT> {
+    /// With fallback annotations.
+    fn with_fallback_annotations(
+        &'this mut self,
+        annotations: Option<&'this Annotations>,
+    ) -> ErrorReceiverWithFallbackAnnotations<'this, InnerT>;
+
+    /// With fallback annotations from field.
+    fn with_fallback_annotations_from_field<StructT>(
+        &'this mut self,
+        r#struct: &'this StructT,
+        name: &str,
+    ) -> ErrorReceiverWithFallbackAnnotations<'this, InnerT>
+    where
+        StructT: AnnotatedStruct,
+    {
+        self.with_fallback_annotations(r#struct.field_or_struct_annotations(name))
+    }
+
+    /// With fallback annotations from struct.
+    fn with_fallback_annotations_from_struct<StructT>(
+        &'this mut self,
+        r#struct: &'this StructT,
+    ) -> ErrorReceiverWithFallbackAnnotations<'this, InnerT>
+    where
+        StructT: AnnotatedStruct,
+    {
+        self.with_fallback_annotations(r#struct.struct_annotations())
+    }
+}
+
+impl<'this, ErrorT, ProblemReceiverT> WithFallbackAnnotations<'this, ErrorT, ProblemReceiverT> for ProblemReceiverT
+where
+    ErrorT: Annotated,
+    ProblemReceiverT: ProblemReceiver<ErrorT>,
+{
+    fn with_fallback_annotations(
+        &'this mut self,
+        annotations: Option<&'this Annotations>,
+    ) -> ErrorReceiverWithFallbackAnnotations<'this, ProblemReceiverT> {
+        ErrorReceiverWithFallbackAnnotations::new(self, annotations)
+    }
+}
+
+/// Wrap errors with fallback [Annotations] from field.
+#[macro_export]
+macro_rules! errors_with_fallback_annotations_from_field {
+    ( $new_errors:ident, $errors:expr, $self:expr, $field:expr, $( $code:tt )* ) => {
+        {
+            let annotations = $self.field_or_struct_annotations($field).cloned();
+            let $new_errors = &mut $errors.with_fallback_annotations(annotations.as_ref());
+            $( $code )*
+        }
+    };
+}
+
+#[allow(unused_imports)]
+pub use errors_with_fallback_annotations_from_field;

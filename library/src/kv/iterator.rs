@@ -1,5 +1,7 @@
 use super::super::normal::*;
 
+use problemo::*;
+
 //
 // KeyValuePairIterator
 //
@@ -14,9 +16,8 @@ pub trait KeyValuePairIterator<AnnotatedT> {
     ///
     /// Also note that the [Err] here is a tuple of the actual error with the value that caused it,
     /// so you likely won't be able to use the `?` operator directly on the result.
-    fn next(
-        &mut self,
-    ) -> Result<Option<(&Variant<AnnotatedT>, &Variant<AnnotatedT>)>, (MalformedError<AnnotatedT>, &Variant<AnnotatedT>)>;
+    fn next(&mut self)
+    -> Result<Option<(&Variant<AnnotatedT>, &Variant<AnnotatedT>)>, (Problem, &Variant<AnnotatedT>)>;
 }
 
 //
@@ -33,7 +34,5 @@ pub trait IntoKeyValuePairIterator<AnnotatedT> {
     ///
     /// Also note that the [Err] here is a tuple of the actual error with the value that caused it,
     /// so you likely won't be able to use the `?` operator directly on the result.
-    fn next(
-        &mut self,
-    ) -> Result<Option<(Variant<AnnotatedT>, Variant<AnnotatedT>)>, (MalformedError<AnnotatedT>, Variant<AnnotatedT>)>;
+    fn next(&mut self) -> Result<Option<(Variant<AnnotatedT>, Variant<AnnotatedT>)>, (Problem, Variant<AnnotatedT>)>;
 }

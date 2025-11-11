@@ -1,7 +1,8 @@
-use super::super::{errors::*, serializer::*};
+use super::super::{super::format::*, errors::*, serializer::*};
 
 use {
     borc::{basic::streaming::*, errors::*},
+    problemo::*,
     serde::{Serialize, ser},
     std::io,
 };
@@ -10,26 +11,30 @@ impl Serializer {
     /// Serializes the provided value to the writer as CBOR.
     ///
     /// Is affected by [Serializer::base64](super::super::Serializer::base64).
-    pub fn write_cbor<WriteT, SerializableT>(
-        &self,
-        value: &SerializableT,
-        writer: &mut WriteT,
-    ) -> Result<(), SerializeError>
+    pub fn write_cbor<WriteT, SerializableT>(&self, value: &SerializableT, writer: &mut WriteT) -> Result<(), Problem>
     where
         WriteT: io::Write,
         SerializableT: Serialize + ?Sized,
     {
-        fn write<W: io::Write, V: Serialize + ?Sized>(value: &V, writer: &mut W) -> Result<(), SerializeError> {
-            Ok(value.serialize(&mut CborSerializer::new(writer))?)
+        fn write<WriteT, SerializeT>(value: &SerializeT, writer: &mut WriteT) -> Result<(), Problem>
+        where
+            WriteT: io::Write,
+            SerializeT: Serialize + ?Sized,
+        {
+            value.serialize(&mut CborSerializer::new(writer)).from_serde_problem().with(Format::CBOR)
         }
 
         if self.base64 {
-            write(value, &mut Self::base64_writer(writer))?;
+            write(value, &mut Self::base64_writer(writer)).into_low_level_serialization_problem(Format::CBOR)?;
         } else {
-            write(value, writer)?;
+            write(value, writer).into_low_level_serialization_problem(Format::CBOR)?;
         }
 
-        if self.pretty { Self::write_newline(writer) } else { Ok(()) }
+        if self.pretty {
+            Self::write_newline(writer).into_low_level_serialization_problem(Format::CBOR)
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -58,78 +63,78 @@ where
     }
 }
 
-impl<'own, WriteT> ser::Serializer for &'own mut CborSerializer<WriteT>
+impl<'this, WriteT> ser::Serializer for &'this mut CborSerializer<WriteT>
 where
     WriteT: io::Write,
 {
     type Ok = ();
-    type Error = CborWriteError;
-    type SerializeSeq = CborSeqSerializer<'own, WriteT>;
-    type SerializeTuple = CborTupleSerializer<'own, WriteT>;
-    type SerializeTupleStruct = CborTupleStructSerializer<'own, WriteT>;
-    type SerializeTupleVariant = CborTupleVariantSerializer<'own, WriteT>;
-    type SerializeMap = CborMapSerializer<'own, WriteT>;
-    type SerializeStruct = CborStructSerializer<'own, WriteT>;
-    type SerializeStructVariant = CborStructVariantSerializer<'own, WriteT>;
+    type Error = SerdeProblem;
+    type SerializeSeq = CborSeqSerializer<'this, WriteT>;
+    type SerializeTuple = CborTupleSerializer<'this, WriteT>;
+    type SerializeTupleStruct = CborTupleStructSerializer<'this, WriteT>;
+    type SerializeTupleVariant = CborTupleVariantSerializer<'this, WriteT>;
+    type SerializeMap = CborMapSerializer<'this, WriteT>;
+    type SerializeStruct = CborStructSerializer<'this, WriteT>;
+    type SerializeStructVariant = CborStructVariantSerializer<'this, WriteT>;
 
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::Bool(v))?)
+        self.event(Event::Bool(v)).into_serde_serialize_problem()
     }
 
     fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
         // Note: Borc will encode positive integers as unsigned
-        Ok(self.event(Event::create_signed(v as i64))?)
+        self.event(Event::create_signed(v as i64)).into_serde_serialize_problem()
     }
 
     fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
         // Note: Borc will encode positive integers as unsigned
-        Ok(self.event(Event::create_signed(v as i64))?)
+        self.event(Event::create_signed(v as i64)).into_serde_serialize_problem()
     }
 
     fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
         // Note: Borc will encode positive integers as unsigned
-        Ok(self.event(Event::create_signed(v as i64))?)
+        self.event(Event::create_signed(v as i64)).into_serde_serialize_problem()
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
         // Note: Borc will encode positive integers as unsigned
-        Ok(self.event(Event::create_signed(v))?)
+        self.event(Event::create_signed(v)).into_serde_serialize_problem()
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::Unsigned(v as u64))?)
+        self.event(Event::Unsigned(v as u64)).into_serde_serialize_problem()
     }
 
     fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::Unsigned(v as u64))?)
+        Ok(self.event(Event::Unsigned(v as u64)).into_serde_serialize_problem()?)
     }
 
     fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::Unsigned(v as u64))?)
+        self.event(Event::Unsigned(v as u64)).into_serde_serialize_problem()
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::Unsigned(v))?)
+        self.event(Event::Unsigned(v)).into_serde_serialize_problem()
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::Float(v as f64))?)
+        self.event(Event::Float(v as f64)).into_serde_serialize_problem()
     }
 
     fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::Float(v))?)
+        self.event(Event::Float(v)).into_serde_serialize_problem()
     }
 
     fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::Unsigned(v as u64))?)
+        self.event(Event::Unsigned(v as u64)).into_serde_serialize_problem()
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::TextString(v.into()))?)
+        self.event(Event::TextString(v.into())).into_serde_serialize_problem()
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::ByteString(v.into()))?)
+        self.event(Event::ByteString(v.into())).into_serde_serialize_problem()
     }
 
     fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
@@ -141,7 +146,7 @@ where
     }
 
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
-        Ok(self.event(Event::Null)?)
+        self.event(Event::Null).into_serde_serialize_problem()
     }
 
     fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok, Self::Error> {
@@ -154,7 +159,7 @@ where
         variant_index: u32,
         variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
-        self.event(Event::Tag(variant_index as u64))?;
+        self.event(Event::Tag(variant_index as u64)).into_serde_serialize_problem()?;
         self.serialize_str(variant)
     }
 
@@ -179,8 +184,8 @@ where
     where
         SerializableT: ?Sized + Serialize,
     {
-        self.event(Event::Tag(variant_index as u64))?;
-        self.event(Event::Map(1))?;
+        self.event(Event::Tag(variant_index as u64)).into_serde_serialize_problem()?;
+        self.event(Event::Map(1)).into_serde_serialize_problem()?;
         variant.serialize(&mut *self)?;
         value.serialize(&mut *self)
     }
@@ -188,18 +193,18 @@ where
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
         match len {
             Some(len) => {
-                self.event(Event::Array(len as u64))?;
+                self.event(Event::Array(len as u64)).into_serde_serialize_problem()?;
                 Ok(CborSeqSerializer { serializer: self, known: true })
             }
             None => {
-                self.event(Event::UnknownLengthArray)?;
+                self.event(Event::UnknownLengthArray).into_serde_serialize_problem()?;
                 Ok(CborSeqSerializer { serializer: self, known: false })
             }
         }
     }
 
     fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, Self::Error> {
-        self.event(Event::Array(len as u64))?;
+        self.event(Event::Array(len as u64)).into_serde_serialize_problem()?;
         Ok(CborTupleSerializer { serializer: self })
     }
 
@@ -208,7 +213,7 @@ where
         _name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleStruct, Self::Error> {
-        self.event(Event::Array(len as u64))?;
+        self.event(Event::Array(len as u64)).into_serde_serialize_problem()?;
         Ok(CborTupleStructSerializer { serializer: self })
     }
 
@@ -219,28 +224,28 @@ where
         variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
-        self.event(Event::Tag(variant_index as u64))?;
-        self.event(Event::Map(1))?;
+        self.event(Event::Tag(variant_index as u64)).into_serde_serialize_problem()?;
+        self.event(Event::Map(1)).into_serde_serialize_problem()?;
         variant.serialize(&mut *self)?;
-        self.event(Event::Array(len as u64))?;
+        self.event(Event::Array(len as u64)).into_serde_serialize_problem()?;
         Ok(CborTupleVariantSerializer { serializer: self })
     }
 
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
         match len {
             Some(len) => {
-                self.event(Event::Map(len as u64))?;
+                self.event(Event::Map(len as u64)).into_serde_serialize_problem()?;
                 Ok(CborMapSerializer { serializer: self, known: true })
             }
             None => {
-                self.event(Event::UnknownLengthMap)?;
+                self.event(Event::UnknownLengthMap).into_serde_serialize_problem()?;
                 Ok(CborMapSerializer { serializer: self, known: false })
             }
         }
     }
 
     fn serialize_struct(self, _name: &'static str, len: usize) -> Result<Self::SerializeStruct, Self::Error> {
-        self.event(Event::Map(len as u64))?;
+        self.event(Event::Map(len as u64)).into_serde_serialize_problem()?;
         Ok(CborStructSerializer { serializer: self })
     }
 
@@ -251,10 +256,10 @@ where
         variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
-        self.event(Event::Tag(variant_index as u64))?;
-        self.event(Event::Map(1))?;
+        self.event(Event::Tag(variant_index as u64)).into_serde_serialize_problem()?;
+        self.event(Event::Map(1)).into_serde_serialize_problem()?;
         variant.serialize(&mut *self)?;
-        self.event(Event::Map(len as u64))?;
+        self.event(Event::Map(len as u64)).into_serde_serialize_problem()?;
         Ok(CborStructVariantSerializer { serializer: self })
     }
 }
@@ -263,20 +268,20 @@ where
 // CborSeqSerializer
 //
 
-pub struct CborSeqSerializer<'own, WriteT>
+pub struct CborSeqSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
-    serializer: &'own mut CborSerializer<WriteT>,
+    serializer: &'this mut CborSerializer<WriteT>,
     known: bool,
 }
 
-impl<'own, WriteT> ser::SerializeSeq for CborSeqSerializer<'own, WriteT>
+impl<'this, WriteT> ser::SerializeSeq for CborSeqSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
     type Ok = ();
-    type Error = CborWriteError;
+    type Error = SerdeProblem;
 
     fn serialize_element<SerializableT>(&mut self, value: &SerializableT) -> Result<(), Self::Error>
     where
@@ -286,7 +291,7 @@ where
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(if self.known { () } else { self.serializer.event(Event::Break)? })
+        if self.known { Ok(()) } else { self.serializer.event(Event::Break).into_serde_serialize_problem() }
     }
 }
 
@@ -294,19 +299,19 @@ where
 // CborTupleSerializer
 //
 
-pub struct CborTupleSerializer<'own, WriteT>
+pub struct CborTupleSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
-    serializer: &'own mut CborSerializer<WriteT>,
+    serializer: &'this mut CborSerializer<WriteT>,
 }
 
-impl<'own, WriteT> ser::SerializeTuple for CborTupleSerializer<'own, WriteT>
+impl<'this, WriteT> ser::SerializeTuple for CborTupleSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
     type Ok = ();
-    type Error = CborWriteError;
+    type Error = SerdeProblem;
 
     fn serialize_element<SerializableT>(&mut self, value: &SerializableT) -> Result<(), Self::Error>
     where
@@ -324,19 +329,19 @@ where
 // CborTupleStructSerializer
 //
 
-pub struct CborTupleStructSerializer<'own, WriteT>
+pub struct CborTupleStructSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
-    serializer: &'own mut CborSerializer<WriteT>,
+    serializer: &'this mut CborSerializer<WriteT>,
 }
 
-impl<'own, WriteT> ser::SerializeTupleStruct for CborTupleStructSerializer<'own, WriteT>
+impl<'this, WriteT> ser::SerializeTupleStruct for CborTupleStructSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
     type Ok = ();
-    type Error = CborWriteError;
+    type Error = SerdeProblem;
 
     fn serialize_field<SerializableT>(&mut self, value: &SerializableT) -> Result<(), Self::Error>
     where
@@ -354,19 +359,19 @@ where
 // CborTupleVariantSerializer
 //
 
-pub struct CborTupleVariantSerializer<'own, WriteT>
+pub struct CborTupleVariantSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
-    serializer: &'own mut CborSerializer<WriteT>,
+    serializer: &'this mut CborSerializer<WriteT>,
 }
 
-impl<'own, WriteT> ser::SerializeTupleVariant for CborTupleVariantSerializer<'own, WriteT>
+impl<'this, WriteT> ser::SerializeTupleVariant for CborTupleVariantSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
     type Ok = ();
-    type Error = CborWriteError;
+    type Error = SerdeProblem;
 
     fn serialize_field<SerializableT>(&mut self, value: &SerializableT) -> Result<(), Self::Error>
     where
@@ -384,20 +389,20 @@ where
 // CborMapSerializer
 //
 
-pub struct CborMapSerializer<'own, WriteT>
+pub struct CborMapSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
-    serializer: &'own mut CborSerializer<WriteT>,
+    serializer: &'this mut CborSerializer<WriteT>,
     known: bool,
 }
 
-impl<'own, WriteT> ser::SerializeMap for CborMapSerializer<'own, WriteT>
+impl<'this, WriteT> ser::SerializeMap for CborMapSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
     type Ok = ();
-    type Error = CborWriteError;
+    type Error = SerdeProblem;
 
     fn serialize_key<SerializableT>(&mut self, key: &SerializableT) -> Result<(), Self::Error>
     where
@@ -414,7 +419,7 @@ where
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(if self.known { () } else { self.serializer.event(Event::Break)? })
+        if self.known { Ok(()) } else { self.serializer.event(Event::Break).into_serde_serialize_problem() }
     }
 }
 
@@ -422,19 +427,19 @@ where
 // CborStructSerializer
 //
 
-pub struct CborStructSerializer<'own, WriteT>
+pub struct CborStructSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
-    serializer: &'own mut CborSerializer<WriteT>,
+    serializer: &'this mut CborSerializer<WriteT>,
 }
 
-impl<'own, WriteT> ser::SerializeStruct for CborStructSerializer<'own, WriteT>
+impl<'this, WriteT> ser::SerializeStruct for CborStructSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
     type Ok = ();
-    type Error = CborWriteError;
+    type Error = SerdeProblem;
 
     fn serialize_field<SerializableT>(&mut self, key: &'static str, value: &SerializableT) -> Result<(), Self::Error>
     where
@@ -453,19 +458,19 @@ where
 // CborStructVariantSerializer
 //
 
-pub struct CborStructVariantSerializer<'own, WriteT>
+pub struct CborStructVariantSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
-    serializer: &'own mut CborSerializer<WriteT>,
+    serializer: &'this mut CborSerializer<WriteT>,
 }
 
-impl<'own, WriteT> ser::SerializeStructVariant for CborStructVariantSerializer<'own, WriteT>
+impl<'this, WriteT> ser::SerializeStructVariant for CborStructVariantSerializer<'this, WriteT>
 where
     WriteT: io::Write,
 {
     type Ok = ();
-    type Error = CborWriteError;
+    type Error = SerdeProblem;
 
     fn serialize_field<SerializableT>(&mut self, key: &'static str, value: &SerializableT) -> Result<(), Self::Error>
     where
@@ -479,3 +484,29 @@ where
         Ok(())
     }
 }
+
+// //
+// // SerializeCborError
+// //
+
+// /// Serialize CBOR error.
+// ///
+// /// We can't use [Problem] because we need the error to implement [ser::Error].
+// #[derive(Debug, Display, Error, From)]
+// pub enum SerializeCborError {
+//     /// Encode.
+//     #[display("{_0:?}")]
+//     Encode(borc::errors::EncodeError),
+
+//     /// Custom Serde.
+//     Custom(#[error(not(source))] String),
+// }
+
+// impl ser::Error for SerializeCborError {
+//     fn custom<DisplayT>(custom: DisplayT) -> Self
+//     where
+//         DisplayT: fmt::Display,
+//     {
+//         Self::Custom(format!("{}", custom))
+//     }
+// }

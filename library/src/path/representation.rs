@@ -31,9 +31,9 @@ impl PathRepresentation {
     /// Important: For our purposes here, the identities of the provided variants are the
     /// *pointers* represented by the references. Thus a clone of a variant or an otherwise equal
     /// variant will *not* be considered identical.
-    pub fn find<'own, AnnotatedT>(
-        ancestor: &'own Variant<AnnotatedT>,
-        descendent: &'own Variant<AnnotatedT>,
+    pub fn find<'this, AnnotatedT>(
+        ancestor: &'this Variant<AnnotatedT>,
+        descendent: &'this Variant<AnnotatedT>,
     ) -> Option<Self>
     where
         AnnotatedT: Default,

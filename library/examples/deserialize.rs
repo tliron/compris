@@ -46,7 +46,8 @@ pub fn main() {
     // We can also deserialize from a parser of any representation format
     // (note that internally it is first parsed into normal types like above)
 
-    let json = r#"{
+    let json = r#"
+{
     "name": "Linus",
     "credit": 250,
     "enabled": false,

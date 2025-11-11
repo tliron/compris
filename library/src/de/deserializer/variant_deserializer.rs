@@ -1,9 +1,9 @@
-use super::{
-    super::{super::normal::*, errors::*},
-    deserializer::*,
-};
+use super::{super::super::normal::*, deserializer::*, errors::*};
 
-use serde::{Deserializer as _, de};
+use {
+    problemo::*,
+    serde::{Deserializer as _, de},
+};
 
 //
 // VariantDeserializer
@@ -14,16 +14,19 @@ pub(crate) struct VariantDeserializer<'de, AnnotatedT> {
 }
 
 impl<'de, AnnotatedT> VariantDeserializer<'de, AnnotatedT> {
-    pub fn new(value: &'de Variant<AnnotatedT>) -> Self {
-        Self { variant: value }
+    pub fn new(variant: &'de Variant<AnnotatedT>) -> Self {
+        Self { variant }
     }
 }
 
-impl<'de, AnnotatedT> de::VariantAccess<'de> for VariantDeserializer<'de, AnnotatedT> {
-    type Error = DeserializeError;
+impl<'de, AnnotatedT> de::VariantAccess<'de> for VariantDeserializer<'de, AnnotatedT>
+where
+    AnnotatedT: 'static + Clone + Send + Sync,
+{
+    type Error = SerdeProblem;
 
     fn unit_variant(self) -> Result<(), Self::Error> {
-        Err(DeserializeError::incompatible_variant(self.variant))
+        Err(incompatible_deserialization_problem("unit", self.variant.clone()))
     }
 
     fn newtype_variant_seed<SeedT>(self, seed: SeedT) -> Result<SeedT::Value, Self::Error>

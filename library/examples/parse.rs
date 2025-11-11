@@ -6,7 +6,8 @@ use {
 };
 
 pub fn main() {
-    let yaml = r#"- [true, True, !!bool true]
+    let yaml = r#"
+- [true, True, !!bool true]
 - [null, Null, ~]
 - &my-anchor [ -1, element, 1.5 ]
 - *my-anchor
@@ -24,7 +25,8 @@ pub fn main() {
         .annotated_depict()
         .print_depiction(&DEFAULT_DEPICTION_CONTEXT.child().with_format(DepictionFormat::Verbose));
 
-    let xjson = r#"[
+    let xjson = r#"
+[
   {
     "simple_key1": {"$hint.int": "1"},
     "simple_key2": {"$hint.uint": "2"}

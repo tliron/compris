@@ -1,5 +1,6 @@
 mod deserializer;
 mod enum_deserializer;
+mod errors;
 mod map_as_list_deserializer;
 mod map_deserializer;
 mod seq_deserializer;

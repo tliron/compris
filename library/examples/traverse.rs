@@ -7,7 +7,8 @@ use {
 };
 
 pub fn main() {
-    let yaml = r#"hello:
+    let yaml = r#"
+hello:
   world:
     10: # note that this is an integer map key, not a list index!
       how:

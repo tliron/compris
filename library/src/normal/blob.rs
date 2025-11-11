@@ -132,8 +132,8 @@ impl<AnnotatedT> From<Blob<AnnotatedT>> for Vec<u8> {
     }
 }
 
-impl<'own, AnnotatedT> From<&'own Blob<AnnotatedT>> for &'own [u8] {
-    fn from(blob: &'own Blob<AnnotatedT>) -> Self {
+impl<'this, AnnotatedT> From<&'this Blob<AnnotatedT>> for &'this [u8] {
+    fn from(blob: &'this Blob<AnnotatedT>) -> Self {
         &blob.inner
     }
 }

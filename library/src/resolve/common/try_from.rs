@@ -1,26 +1,27 @@
 use super::super::{
-    super::{annotate::*, normal::*},
+    super::{annotate::*, errors::*, normal::*},
     errors::*,
     resolve::*,
 };
 
 use {
-    kutil::std::error::*,
+    problemo::*,
     std::{fmt, marker::*},
+    tynm::*,
 };
 
 /// Resolve a [Variant] into a [TryFrom] via an intermediate.
-pub fn resolve_try_from<TryFromT, IntermediateT, AnnotatedT, ErrorReceiverT>(
+pub fn resolve_try_from<TryFromT, IntermediateT, AnnotatedT, ProblemReceiverT>(
     variant: Variant<AnnotatedT>,
-    errors: &mut ErrorReceiverT,
-) -> ResolveResult<TryFromT, AnnotatedT>
+    problems: &mut ProblemReceiverT,
+) -> ResolveResult<TryFromT>
 where
     Variant<AnnotatedT>: TryInto<IntermediateT>,
     <Variant<AnnotatedT> as TryInto<IntermediateT>>::Error: fmt::Display,
     TryFromT: TryFrom<IntermediateT>,
     TryFromT::Error: fmt::Display,
     AnnotatedT: Annotated + Clone + Default,
-    ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+    ProblemReceiverT: ProblemReceiver,
 {
     let maybe_annotations = variant.maybe_annotations();
 
@@ -28,9 +29,10 @@ where
         Ok(intermediate) => intermediate,
 
         Err(error) => {
-            errors.give(
-                MalformedError::new(tynm::type_name::<IntermediateT>(), error.to_string())
-                    .with_annotations_from(&maybe_annotations),
+            problems.give(
+                MalformedError::as_problem(type_name::<IntermediateT>(), error.to_string())
+                    .maybe_with(maybe_annotations.annotations().cloned())
+                    .via(ResolveError),
             )?;
             return Ok(None);
         }
@@ -40,9 +42,10 @@ where
         Ok(resolved) => Some(resolved),
 
         Err(error) => {
-            errors.give(
-                MalformedError::new(tynm::type_name::<TryFromT>(), error.to_string())
-                    .with_annotations_from(&maybe_annotations),
+            problems.give(
+                MalformedError::as_problem(type_name::<TryFromT>(), error.to_string())
+                    .maybe_with(maybe_annotations.annotations().cloned())
+                    .via(ResolveError),
             )?;
             None
         }
@@ -70,8 +73,7 @@ impl<InnerT, IntermediateT> ResolveTryFrom<InnerT, IntermediateT> {
     }
 }
 
-impl<InnerT, IntermediateT, AnnotatedT> Resolve<ResolveTryFrom<InnerT, IntermediateT>, AnnotatedT>
-    for Variant<AnnotatedT>
+impl<InnerT, IntermediateT, AnnotatedT> Resolve<ResolveTryFrom<InnerT, IntermediateT>> for Variant<AnnotatedT>
 where
     Variant<AnnotatedT>: TryInto<IntermediateT>,
     <Variant<AnnotatedT> as TryInto<IntermediateT>>::Error: fmt::Display,
@@ -79,12 +81,12 @@ where
     InnerT::Error: fmt::Display,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorReceiverT>(
+    fn resolve_with_problems<ProblemReceiverT>(
         self,
-        errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<ResolveTryFrom<InnerT, IntermediateT>, AnnotatedT>
+        errors: &mut ProblemReceiverT,
+    ) -> ResolveResult<ResolveTryFrom<InnerT, IntermediateT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         resolve_try_from(self, errors).map(|resolved| resolved.map(ResolveTryFrom::new))
     }

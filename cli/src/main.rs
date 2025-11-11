@@ -4,20 +4,26 @@
 
 /*!
 A Rust library to work with CPS (Composite Primitive Schema) data and parse it from and serialize
-it to several binary and textual representation formats.
+it to several binary and textual representation formats, such as YAML, JSON, and CBOR.
 
-What is CPS? It's the implicit data schema underlying JSON and many other representation formats.
-It comprises primitive data types (numbers, booleans, strings, etc.) as well as list and map
-collection types. The collections allow for nested structure, hence it is "composite" (a.k.a.
+A useful side effect of this bi-direction is that Compris can be used to convert between these
+formats.
+
+What is CPS? It's the implicit, common data schema underlying these representation formats. It
+comprises primitive data types (numbers, booleans, strings, etc.) as well as list and map
+collection types, which enable a nested (recursive) structure. Hence it is "composite" (a.k.a.
 "algebraic").
 
-And yet despite being so widely used, it has been unnamed... until now. You're welcome.
+And yet despite being so widely used, CPS has been unnamed... until now. You're welcome.
 
 CPS is sometimes glossed as "JSON", but that's misleading and ultimately unhelpful because JSON is
-merely one representation format for the data, and is actually comparitively quite limited (e.g.
+merely one representation format for the data, and is actually comparatively quite limited (e.g.
 implementations do not often preserve the distinction between integers and floats). So instead of
 saying "let's just store it as JSON", say "let's just store it as CPS", and use Compris to handle
-the representation. It will allow you and your users to select from several formats at runtime.
+the representation. It will allow you and your users to select from all supported formats at
+runtime.
+
+See [here](https://github.com/tliron/compris/blob/main/CPS.md) for a full description of CPS.
 
 Compris is pronounced "com-PREE". The name comes from shortening CompositePrimitiveSchema to
 ComPriS.
@@ -29,7 +35,6 @@ J'ai compris!
 */
 
 mod commands;
-mod errors;
 mod run;
 
 use run::*;

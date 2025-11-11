@@ -1,12 +1,9 @@
 use super::{
-    super::{super::normal::*, errors::*},
-    enum_deserializer::*,
-    map_as_list_deserializer::*,
-    map_deserializer::*,
+    super::super::normal::*, enum_deserializer::*, errors::*, map_as_list_deserializer::*, map_deserializer::*,
     seq_deserializer::*,
 };
 
-use {num_traits::*, serde::de};
+use {num_traits::*, problemo::*, serde::de};
 
 //
 // Deserializer
@@ -17,36 +14,31 @@ use {num_traits::*, serde::de};
 /// Will convert number types only if information is not lost. Otherwise, will return an error.
 ///
 /// See [NumCast::from](cast::NumCast::from).
-pub struct Deserializer<'own, AnnotatedT> {
-    variant: &'own Variant<AnnotatedT>,
+pub struct Deserializer<'this, AnnotatedT> {
+    variant: &'this Variant<AnnotatedT>,
 }
 
-impl<'own, AnnotatedT> Deserializer<'own, AnnotatedT> {
+impl<'de, AnnotatedT> Deserializer<'de, AnnotatedT> {
     /// Constructor
-    pub fn new(variant: &'own Variant<AnnotatedT>) -> Self {
+    pub fn new(variant: &'de Variant<AnnotatedT>) -> Self {
         Self { variant }
-    }
-
-    fn incompatible_type_error(&self) -> DeserializeError {
-        DeserializeError::incompatible_type(&self.variant)
-    }
-
-    fn incompatible_value_error(&self) -> DeserializeError {
-        DeserializeError::incompatible_variant(&self.variant)
     }
 }
 
 // See: https://serde.rs/impl-deserializer.html
 
-impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de, AnnotatedT> {
-    type Error = DeserializeError;
+impl<'de, 'this, AnnotatedT> de::Deserializer<'de> for &'this mut Deserializer<'de, AnnotatedT>
+where
+    AnnotatedT: 'static + Clone + Send + Sync,
+{
+    type Error = SerdeProblem;
 
     fn deserialize_any<VisitorT>(self, visitor: VisitorT) -> Result<VisitorT::Value, Self::Error>
     where
         VisitorT: de::Visitor<'de>,
     {
         match self.variant {
-            Variant::Undefined => Err(self.incompatible_type_error()),
+            Variant::Undefined => Err(incompatible_deserialization_problem("undefined variant", self.variant.clone())),
             Variant::Null(_) => self.deserialize_unit(visitor),
             Variant::Integer(_) => self.deserialize_i64(visitor),
             Variant::UnsignedInteger(_) => self.deserialize_u64(visitor),
@@ -65,7 +57,7 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
     {
         match self.variant {
             Variant::Boolean(boolean) => visitor.visit_bool(boolean.inner),
-            _ => Err(self.incompatible_type_error()),
+            variant => Err(incompatible_deserialization_problem("not a boolean", variant.clone())),
         }
     }
 
@@ -76,12 +68,15 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
         match self.variant {
             Variant::Integer(integer) => match cast(integer.inner) {
                 Some(integer) => visitor.visit_i8(integer),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem("cannot cast integer to i8", self.variant.clone())),
             },
 
             Variant::UnsignedInteger(unsigned_integer) => match cast(unsigned_integer.inner) {
                 Some(integer) => visitor.visit_i8(integer),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem(
+                    "cannot cast unsigned integer to i8",
+                    self.variant.clone(),
+                )),
             },
 
             Variant::Float(float) => {
@@ -89,14 +84,16 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
                 if float.fract() == 0. {
                     match cast(float) {
                         Some(integer) => visitor.visit_i8(integer),
-                        None => Err(self.incompatible_value_error()),
+                        None => {
+                            Err(incompatible_deserialization_problem("cannot cast float to i8", self.variant.clone()))
+                        }
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast float to i8", self.variant.clone()))
                 }
             }
 
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a number", self.variant.clone())),
         }
     }
 
@@ -107,12 +104,15 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
         match self.variant {
             Variant::Integer(integer) => match cast(integer.inner) {
                 Some(integer) => visitor.visit_i16(integer),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem("cannot cast integer to i16", self.variant.clone())),
             },
 
             Variant::UnsignedInteger(unsigned_integer) => match cast(unsigned_integer.inner) {
                 Some(integer) => visitor.visit_i16(integer),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem(
+                    "cannot cast unsigned integer to i16",
+                    self.variant.clone(),
+                )),
             },
 
             Variant::Float(float) => {
@@ -120,14 +120,16 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
                 if float.fract() == 0. {
                     match cast(float) {
                         Some(integer) => visitor.visit_i16(integer),
-                        None => Err(self.incompatible_value_error()),
+                        None => {
+                            Err(incompatible_deserialization_problem("cannot cast float to i16", self.variant.clone()))
+                        }
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast float to i16", self.variant.clone()))
                 }
             }
 
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a number", self.variant.clone())),
         }
     }
 
@@ -138,12 +140,15 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
         match self.variant {
             Variant::Integer(integer) => match cast(integer.inner) {
                 Some(integer) => visitor.visit_i32(integer),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem("cannot cast integer to i32", self.variant.clone())),
             },
 
             Variant::UnsignedInteger(unsigned_integer) => match cast(unsigned_integer.inner) {
                 Some(integer) => visitor.visit_i32(integer),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem(
+                    "cannot cast unsigned integer to i32",
+                    self.variant.clone(),
+                )),
             },
 
             Variant::Float(float) => {
@@ -151,14 +156,16 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
                 if float.fract() == 0. {
                     match cast(float) {
                         Some(integer) => visitor.visit_i32(integer),
-                        None => Err(self.incompatible_value_error()),
+                        None => {
+                            Err(incompatible_deserialization_problem("cannot cast float to i32", self.variant.clone()))
+                        }
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast float to i32", self.variant.clone()))
                 }
             }
 
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a number", self.variant.clone())),
         }
     }
 
@@ -171,7 +178,10 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
 
             Variant::UnsignedInteger(unsigned_integer) => match cast(unsigned_integer.inner) {
                 Some(integer) => visitor.visit_i64(integer),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem(
+                    "cannot cast unsigned integer to i64",
+                    self.variant.clone(),
+                )),
             },
 
             Variant::Float(float) => {
@@ -179,14 +189,16 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
                 if float.fract() == 0. {
                     match cast(float) {
                         Some(integer) => visitor.visit_i64(integer),
-                        None => Err(self.incompatible_value_error()),
+                        None => {
+                            Err(incompatible_deserialization_problem("cannot cast float to i64", self.variant.clone()))
+                        }
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast float to i64", self.variant.clone()))
                 }
             }
 
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a number", self.variant.clone())),
         }
     }
 
@@ -197,17 +209,22 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
         match self.variant {
             Variant::UnsignedInteger(unsigned_integer) => match cast(unsigned_integer.inner) {
                 Some(unsigned_integer) => visitor.visit_u8(unsigned_integer),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem(
+                    "cannot cast unsigned integer to u8",
+                    self.variant.clone(),
+                )),
             },
 
             Variant::Integer(integer) => {
                 if integer.inner >= 0 {
                     match cast(integer.inner) {
-                        Some(insigned_integer) => visitor.visit_u8(insigned_integer),
-                        None => Err(self.incompatible_value_error()),
+                        Some(unsigned_integer) => visitor.visit_u8(unsigned_integer),
+                        None => {
+                            Err(incompatible_deserialization_problem("cannot cast integer to u8", self.variant.clone()))
+                        }
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast integer to u8", self.variant.clone()))
                 }
             }
 
@@ -216,14 +233,16 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
                 if (float >= 0.) && (float.fract() == 0.) {
                     match cast(float) {
                         Some(unsigned_integer) => visitor.visit_u8(unsigned_integer),
-                        None => Err(self.incompatible_value_error()),
+                        None => {
+                            Err(incompatible_deserialization_problem("cannot cast float to u8", self.variant.clone()))
+                        }
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast float to u8", self.variant.clone()))
                 }
             }
 
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a number", self.variant.clone())),
         }
     }
 
@@ -234,17 +253,23 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
         match self.variant {
             Variant::UnsignedInteger(unsigned_integer) => match cast(unsigned_integer.inner) {
                 Some(unsigned_integer) => visitor.visit_u16(unsigned_integer),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem(
+                    "cannot cast unsigned integer to u16",
+                    self.variant.clone(),
+                )),
             },
 
             Variant::Integer(integer) => {
                 if integer.inner >= 0 {
                     match cast(integer.inner) {
-                        Some(insigned_integer) => visitor.visit_u16(insigned_integer),
-                        None => Err(self.incompatible_value_error()),
+                        Some(unsigned_integer) => visitor.visit_u16(unsigned_integer),
+                        None => Err(incompatible_deserialization_problem(
+                            "cannot cast integer to u16",
+                            self.variant.clone(),
+                        )),
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast integer to u16", self.variant.clone()))
                 }
             }
 
@@ -253,14 +278,16 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
                 if (float >= 0.) && (float.fract() == 0.) {
                     match cast(float) {
                         Some(unsigned_integer) => visitor.visit_u16(unsigned_integer),
-                        None => Err(self.incompatible_value_error()),
+                        None => {
+                            Err(incompatible_deserialization_problem("cannot cast float to u16", self.variant.clone()))
+                        }
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast float to u16", self.variant.clone()))
                 }
             }
 
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a number", self.variant.clone())),
         }
     }
 
@@ -271,17 +298,23 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
         match self.variant {
             Variant::UnsignedInteger(unsigned_integer) => match cast(unsigned_integer.inner) {
                 Some(unsigned_integer) => visitor.visit_u32(unsigned_integer),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem(
+                    "cannot cast unsigned integer to u32",
+                    self.variant.clone(),
+                )),
             },
 
             Variant::Integer(integer) => {
                 if integer.inner >= 0 {
                     match cast(integer.inner) {
-                        Some(insigned_integer) => visitor.visit_u32(insigned_integer),
-                        None => Err(self.incompatible_value_error()),
+                        Some(unsigned_integer) => visitor.visit_u32(unsigned_integer),
+                        None => Err(incompatible_deserialization_problem(
+                            "cannot cast integer to u32",
+                            self.variant.clone(),
+                        )),
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast integer to u32", self.variant.clone()))
                 }
             }
 
@@ -290,14 +323,16 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
                 if (float >= 0.) && (float.fract() == 0.) {
                     match cast(float) {
                         Some(unsigned_integer) => visitor.visit_u32(unsigned_integer),
-                        None => Err(self.incompatible_value_error()),
+                        None => {
+                            Err(incompatible_deserialization_problem("cannot cast float to u32", self.variant.clone()))
+                        }
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast to u32", self.variant.clone()))
                 }
             }
 
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a number", self.variant.clone())),
         }
     }
 
@@ -311,11 +346,14 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
             Variant::Integer(integer) => {
                 if integer.inner >= 0 {
                     match cast(integer.inner) {
-                        Some(insigned_integer) => visitor.visit_u64(insigned_integer),
-                        None => Err(self.incompatible_value_error()),
+                        Some(unsigned_integer) => visitor.visit_u64(unsigned_integer),
+                        None => Err(incompatible_deserialization_problem(
+                            "cannot cast integer to u64",
+                            self.variant.clone(),
+                        )),
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast integer to u64", self.variant.clone()))
                 }
             }
 
@@ -324,14 +362,16 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
                 if (float >= 0.) && (float.fract() == 0.) {
                     match cast(float) {
                         Some(unsigned_integer) => visitor.visit_u64(unsigned_integer),
-                        None => Err(self.incompatible_value_error()),
+                        None => {
+                            Err(incompatible_deserialization_problem("cannot cast float to u64", self.variant.clone()))
+                        }
                     }
                 } else {
-                    Err(self.incompatible_value_error())
+                    Err(incompatible_deserialization_problem("cannot cast float to u64", self.variant.clone()))
                 }
             }
 
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a number", self.variant.clone())),
         }
     }
 
@@ -344,21 +384,24 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
                 let float: f64 = float.into();
                 match cast(float) {
                     Some(float) => visitor.visit_f32(float),
-                    None => Err(self.incompatible_value_error()),
+                    None => Err(incompatible_deserialization_problem("cannot cast float to f32", self.variant.clone())),
                 }
             }
 
             Variant::Integer(integer) => match cast(integer.inner) {
                 Some(float) => visitor.visit_f32(float),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem("cannot cast integer to f32", self.variant.clone())),
             },
 
             Variant::UnsignedInteger(unsigned_integer) => match cast(unsigned_integer.inner) {
                 Some(float) => visitor.visit_f32(float),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem(
+                    "cannot cast unsigned integer to f32",
+                    self.variant.clone(),
+                )),
             },
 
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a number", self.variant.clone())),
         }
     }
 
@@ -371,15 +414,18 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
 
             Variant::Integer(integer) => match cast(integer.inner) {
                 Some(float) => visitor.visit_f64(float),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem("cannot cast integer to f64", self.variant.clone())),
             },
 
             Variant::UnsignedInteger(unsigned_integer) => match cast::<_, f64>(unsigned_integer.inner) {
                 Some(float) => visitor.visit_f64(float),
-                None => Err(self.incompatible_value_error()),
+                None => Err(incompatible_deserialization_problem(
+                    "cannot cast unsigned integer to f64",
+                    self.variant.clone(),
+                )),
             },
 
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a number", self.variant.clone())),
         }
     }
 
@@ -387,16 +433,16 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
     where
         VisitorT: de::Visitor<'de>,
     {
-        Err(DeserializeError::NotSupported("deserialize_char"))
+        Err(unsupported_deserialization_problem("deserialize_char"))
     }
 
-    fn deserialize_str<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    fn deserialize_str<VisitorT>(self, visitor: VisitorT) -> Result<VisitorT::Value, Self::Error>
     where
-        V: de::Visitor<'de>,
+        VisitorT: de::Visitor<'de>,
     {
         match self.variant {
             Variant::Text(text) => visitor.visit_str(text.into()),
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not text", self.variant.clone())),
         }
     }
 
@@ -406,7 +452,7 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
     {
         match self.variant {
             Variant::Text(text) => visitor.visit_str(text.into()),
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not text", self.variant.clone())),
         }
     }
 
@@ -416,7 +462,7 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
     {
         match self.variant {
             Variant::Blob(blob) => visitor.visit_bytes(blob.into()),
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a blob", self.variant.clone())),
         }
     }
 
@@ -426,7 +472,7 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
     {
         match self.variant {
             Variant::Blob(blob) => visitor.visit_bytes(blob.into()),
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a blob", self.variant.clone())),
         }
     }
 
@@ -446,7 +492,7 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
     {
         match self.variant {
             Variant::Null(_) => visitor.visit_unit(),
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not null", self.variant.clone())),
         }
     }
 
@@ -478,7 +524,7 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
     {
         match self.variant {
             Variant::List(list) => Ok(visitor.visit_seq(SeqDeserializer::new(list))?),
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a list", self.variant.clone())),
         }
     }
 
@@ -508,7 +554,7 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
         match self.variant {
             Variant::Map(map) => Ok(visitor.visit_map(MapDeserializer::new(map))?),
             Variant::List(list) => Ok(visitor.visit_map(MapAsListDeserializer::new(list))?),
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a map or a list", self.variant.clone())),
         }
     }
 
@@ -535,7 +581,7 @@ impl<'de, 'own, AnnotatedT> de::Deserializer<'de> for &'own mut Deserializer<'de
     {
         match self.variant {
             Variant::Map(map) => Ok(visitor.visit_enum(EnumDeserializer::new(map)?)?),
-            _ => Err(self.incompatible_type_error()),
+            _ => Err(incompatible_deserialization_problem("not a map", self.variant.clone())),
         }
     }
 

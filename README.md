@@ -1,7 +1,7 @@
 *Pre-release: ready for general use but the APIs are still in flux*
 
 [![crates.io](https://img.shields.io/crates/v/compris?color=%23227700)](https://crates.io/crates/compris)
-[![docs.rs](https://img.shields.io/badge/docs.rs-latest?color=grey)](https://docs.rs/compris/latest/compris/)
+[![docs.rs](https://img.shields.io/badge/docs.rs-latest?color=grey)](https://docs.rs/compris)
 
 Compris
 =======
@@ -20,19 +20,19 @@ See [here](https://github.com/tliron/compris/blob/main/CPS.md) for a full descri
 
 Compris is pronounced "com-PREE". The name comes from shortening CompositePrimitiveSchema to ComPriS.
 
-Get started with the [API documentation](https://docs.rs/compris/latest/compris/) and the [examples](https://github.com/tliron/compris/tree/main/library/examples).
+Get started with the [API documentation](https://docs.rs/compris) and the [examples](https://github.com/tliron/compris/tree/main/library/examples).
 
 J'ai compris!
 
 Supported Representation Formats
 --------------------------------
 
-* [YAML](https://yaml.org/)
-* [JSON](https://www.json.org/), including an "XJSON" convention for JSON to support all
+* [YAML](https://yaml.org)
+* [JSON](https://www.json.org), including an "XJSON" convention for JSON to support all
   CPS types
-* [XML](https://www.w3.org/XML/) via a conventional schema (*work in progress*)
-* [CBOR](https://cbor.io/)
-* [MessagePack](https://msgpack.org/)
+* [XML](https://www.w3.org/XML) via a conventional schema (*work in progress*)
+* [CBOR](https://cbor.io)
+* [MessagePack](https://msgpack.org)
 
 All formats are enabled by default but can be turned on selectively using
 [`default-features = false`](https://doc.rust-lang.org/cargo/reference/features.html#dependency-features).
@@ -71,7 +71,7 @@ The API is simple but extensible, making use of a `#[derive(Resolve)]` procedura
 Serde Serialization
 -------------------
 
-Compris provides a common serializer API for [Serde](https://serde.rs/) (with the `serde` feature), which allows the format to be selected at runtime. For the textual formats, Compris also supports pretty printing for human readability, including colorization for terminals. For the binary formats, Compris supports optional Base64 encoding.
+Compris provides a common serializer API for [Serde](https://serde.rs) (with the `serde` feature), which allows the format to be selected at runtime. For the textual formats, Compris also supports pretty printing for human readability, including colorization for terminals. For the binary formats, Compris supports optional Base64 encoding.
 
 This API additionally supports ["serialization modes"](https://docs.rs/compris/latest/compris/ser/struct.SerializationMode.html) that allow some control over serialization behavior. For example, `FloatSerializationMode::AsI64IfWhole` will try to convert floats to integers if they are whole numbers. This would happen *only* for serialization, on-the-fly, and does not modify your in-memory data.
 

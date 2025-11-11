@@ -1,8 +1,7 @@
 use super::super::{
-    super::{annotate::*, kv::*, path::*},
+    super::{annotate::*, depict::*, kv::*, path::*},
     blob::*,
     boolean::*,
-    depict::*,
     float::*,
     integer::*,
     iterator::*,
@@ -188,10 +187,10 @@ impl<AnnotatedT> Variant<AnnotatedT> {
     ///
     /// Use the [traverse!](crate::traverse) macro instead if you can. It will generally
     /// be more efficient because it doesn't require an allocated iterator.
-    pub fn traverse<'own, IteratorT>(&self, keys: IteratorT) -> Option<&Self>
+    pub fn traverse<'this, IteratorT>(&self, keys: IteratorT) -> Option<&Self>
     where
-        AnnotatedT: 'own,
-        IteratorT: Iterator<Item = &'own Self>,
+        AnnotatedT: 'this,
+        IteratorT: Iterator<Item = &'this Self>,
     {
         let mut found = self;
         for key in keys {
@@ -206,10 +205,10 @@ impl<AnnotatedT> Variant<AnnotatedT> {
     ///
     /// Use the [traverse_mut!](crate::traverse_mut) macro instead if you can. It will generally
     /// be more efficient because it doesn't require an allocated iterator.
-    pub fn traverse_mut<'own, IteratorT>(&mut self, keys: IteratorT) -> Option<&mut Self>
+    pub fn traverse_mut<'this, IteratorT>(&mut self, keys: IteratorT) -> Option<&mut Self>
     where
-        AnnotatedT: 'own,
-        IteratorT: Iterator<Item = &'own Self>,
+        AnnotatedT: 'this,
+        IteratorT: Iterator<Item = &'this Self>,
     {
         let mut found = self;
         for key in keys {
@@ -270,9 +269,9 @@ impl<AnnotatedT> Variant<AnnotatedT> {
     /// pairs ([List] of length 2) with unique keys.
     ///
     /// Note that the iterator is a `dyn` in order to support different underlying implementations.
-    pub fn into_key_value_iterator<'own>(self) -> Option<Box<dyn IntoKeyValuePairIterator<AnnotatedT> + 'own>>
+    pub fn into_key_value_iterator<'this>(self) -> Option<Box<dyn IntoKeyValuePairIterator<AnnotatedT> + 'this>>
     where
-        AnnotatedT: 'own + Clone + Default,
+        AnnotatedT: 'this + Clone + Default,
     {
         match self {
             Self::Map(map) => Some(Box::new(IntoKeyValuePairIteratorForBTreeMap::new_for(map.inner))),
@@ -287,7 +286,7 @@ impl<AnnotatedT> Variant<AnnotatedT> {
     /// pairs ([List] of length 2) with unique keys.
     ///
     /// Note that the iterator is a `dyn` in order to support different underlying implementations.
-    pub fn key_value_iterator<'own>(&'own self) -> Option<Box<dyn KeyValuePairIterator<AnnotatedT> + 'own>>
+    pub fn key_value_iterator<'this>(&'this self) -> Option<Box<dyn KeyValuePairIterator<AnnotatedT> + 'this>>
     where
         AnnotatedT: Default,
     {
@@ -360,7 +359,7 @@ impl<AnnotatedT> Variant<AnnotatedT> {
     }
 
     /// [Depict](depiction::Depict) with [Annotations].
-    pub fn annotated_depict(&self) -> AnnotatedDepictVariant<'_, AnnotatedT> {
-        AnnotatedDepictVariant::new(self, AnnotatedDepictionMode::Inline)
+    pub fn annotated_depict(&self) -> AnnotatedVariantDepiction<'_, AnnotatedT> {
+        AnnotatedVariantDepiction::new(self)
     }
 }

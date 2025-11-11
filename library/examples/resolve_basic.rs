@@ -2,8 +2,9 @@ mod utils;
 
 use {
     anstream::println,
-    compris::{annotate::*, parse::*, resolve::*, *},
+    compris::{depict::*, parse::*, resolve::*, *},
     depiction::*,
+    problemo::*,
 };
 
 // Note that #[derive(Resolve)] requires an implementation of the Default trait,
@@ -42,8 +43,12 @@ struct User {
 pub fn main() {
     // See examples/literal.rs
 
-    let variant =
-        without_annotations!(normal_map![("name", "Tal"), ("credit", 800), ("enabled", true), ("group", "moderators")]);
+    let variant = without_annotations!(normal_map![
+        ("name", "Faramir"),
+        ("credit", 800),
+        ("enabled", true),
+        ("group", "moderators")
+    ]);
 
     // Simplest! Resolve the variant into our struct
     // ("fail fast" means that we will fail on the first error and return it)
@@ -57,7 +62,7 @@ pub fn main() {
     // We can resolve for just the field tagged as "single" (in this case it's the `name` field)
     // (a.k.a. "short notation")
 
-    let variant = without_annotations!(normal!("Tal"));
+    let variant = without_annotations!(normal!("Faramir"));
 
     let user: User = variant.resolve().expect("resolve");
 
@@ -70,12 +75,13 @@ pub fn main() {
     // We'll also parse JSON first in order to demonstrate annotations for the error message
     // (there's are no annotations for the literal values above)
 
-    let json = r#"[{
-    "name": "Tal",
+    let json = r#"
+[{
+    "name": "Faramir",
     "credit": "wrong type",
     "group": null
 }, {
-    "name": "Shiri",
+    "name": "Boromir",
     "credit": 123,
     "enabled": true,
     "mystery key 1!": 456,
@@ -92,20 +98,20 @@ pub fn main() {
     utils::heading("fail-fast error", false);
     result.err().expect("error").annotated_depiction().print_default_depiction();
 
-    // Instead of failing fast, we can call "resolve_with_errors" to accumulate all the errors *without* failing
+    // Instead of failing fast, we can call "resolve_with_problems" to accumulate all the errors *without* failing
     // Note that we might still get a partially-resolved result even when there are accumulated errors,
     // but that behavior depends on the resolver implementations
 
-    let mut errors = ResolveErrors::default();
+    let mut problems = Problems::default();
     let users: Vec<User> =
-        variant.resolve_with_errors(&mut errors).expect("errors should be accumulated").expect("some");
+        variant.resolve_with_problems(&mut problems).expect("problems should be accumulated").expect("some");
 
     utils::heading("partially resolved", false);
     println!("{:#?}", users);
 
-    if !errors.is_empty() {
+    if !problems.is_empty() {
         println!();
-        errors.annotated_depictions(Some("accumulated errors".into())).print_default_depiction();
+        problems.annotated_depiction().with_heading("accumulated problems".into()).print_default_depiction();
     }
 
     // Continue to examples/resolve_advanced.rs to learn more

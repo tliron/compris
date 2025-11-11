@@ -8,21 +8,18 @@ use super::super::{
     iterate::*,
 };
 
-use {kutil::std::error::*, std::collections::*};
+use {problemo::*, std::collections::*};
 
 // Uses push_back
 
-impl<ItemT, AnnotatedT> Resolve<LinkedList<ItemT>, AnnotatedT> for Variant<AnnotatedT>
+impl<ItemT, AnnotatedT> Resolve<LinkedList<ItemT>> for Variant<AnnotatedT>
 where
-    Variant<AnnotatedT>: Resolve<ItemT, AnnotatedT>,
+    Variant<AnnotatedT>: Resolve<ItemT>,
     AnnotatedT: Annotated + Clone + Default,
 {
-    fn resolve_with_errors<ErrorReceiverT>(
-        self,
-        errors: &mut ErrorReceiverT,
-    ) -> ResolveResult<LinkedList<ItemT>, AnnotatedT>
+    fn resolve_with_problems<ProblemReceiverT>(self, errors: &mut ProblemReceiverT) -> ResolveResult<LinkedList<ItemT>>
     where
-        ErrorReceiverT: ErrorReceiver<ResolveError<AnnotatedT>>,
+        ProblemReceiverT: ProblemReceiver,
     {
         let mut resolved = LinkedList::default();
 

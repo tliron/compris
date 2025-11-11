@@ -1,0 +1,28 @@
+use super::super::traits::*;
+
+use {problemo::*, std::marker::*};
+
+/// An [ErrorReceiver] wrapper that calls [IntoAnnotated::into_annotated] on all errors.
+#[derive(Debug)]
+pub struct IntoAnnotatedErrorReceiver<'this, InnerT, ErrorT> {
+    /// Inner.
+    pub inner: &'this mut InnerT,
+
+    error: PhantomData<ErrorT>,
+}
+
+impl<'this, InnerT, ErrorT> ProblemReceiver for IntoAnnotatedErrorReceiver<'this, InnerT, ErrorT>
+where
+    InnerT: ProblemReceiver,
+    ErrorT: IntoAnnotated<Problem>,
+{
+    fn give(&mut self, error: NewErrorT) -> Result<(), Problem> {
+        self.inner.give(error.into_annotated()).map_err(|error| error.into_annotated())
+    }
+}
+
+impl<'this, InnerT, ErrorT> IntoAnnotated<IntoAnnotatedErrorReceiver<'this, InnerT, ErrorT>> for &'this mut InnerT {
+    fn into_annotated(self) -> IntoAnnotatedErrorReceiver<'this, InnerT, ErrorT> {
+        IntoAnnotatedErrorReceiver { inner: self, error: PhantomData }
+    }
+}

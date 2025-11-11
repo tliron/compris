@@ -1,7 +1,6 @@
 mod deserializer;
-mod errors;
 mod reader;
 mod variant;
 
 #[allow(unused_imports)]
-pub use {deserializer::*, errors::*, reader::*, variant::*};
+pub use {deserializer::*, reader::*, variant::*};
